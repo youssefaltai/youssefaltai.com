@@ -23,11 +23,10 @@ FROM node:20-alpine AS builder
 RUN corepack enable && corepack prepare pnpm@latest --activate
 WORKDIR /app
 
-# Copy dependencies
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/pnpm-lock.yaml ./pnpm-lock.yaml
+# Copy entire workspace from deps (includes all node_modules and PNPM structure)
+COPY --from=deps /app ./
 
-# Copy source files
+# Copy source files (override package.json copies with actual source)
 COPY . .
 
 # Build the app using Turborepo
