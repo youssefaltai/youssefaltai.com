@@ -1,0 +1,99 @@
+services:
+  # Traefik reverse proxy and load balancer
+  traefik:
+    image: traefik:v3.0
+    container_name: traefik
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      # Uncomment for Let's Encrypt in production
+      # - "--certificatesresolvers.letsencrypt.acme.email=your@email.com"
+      # - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+      # - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"  # Traefik dashboard
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # - ./letsencrypt:/letsencrypt  # Uncomment for SSL certificates
+    networks:
+      - web
+    restart: unless-stopped
+
+  # Finance App (finance.youssef.dev)
+  finance:
+    build:
+      context: .
+      dockerfile: apps/finance/Dockerfile
+    container_name: finance-app
+    environment:
+      - NODE_ENV=production
+      - JWT_SECRET=${JWT_SECRET}
+      - DATABASE_URL=${DATABASE_URL:-}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.finance.rule=Host(`finance.youssefaltai.com`) || Host(`finance.localhost`)"
+      - "traefik.http.routers.finance.entrypoints=websecure,web"
+      - "traefik.http.routers.finance.tls=true"
+      # - "traefik.http.routers.finance.tls.certresolver=letsencrypt"  # Uncomment for Let's Encrypt
+      - "traefik.http.services.finance.loadbalancer.server.port=3000"
+    networks:
+      - web
+    restart: unless-stopped
+    depends_on:
+      - traefik
+
+  # Fitness App (fitness.youssef.dev)
+  fitness:
+    build:
+      context: .
+      dockerfile: apps/fitness/Dockerfile
+    container_name: fitness-app
+    environment:
+      - NODE_ENV=production
+      - JWT_SECRET=${JWT_SECRET}
+      - DATABASE_URL=${DATABASE_URL:-}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.fitness.rule=Host(`fitness.youssefaltai.com`) || Host(`fitness.localhost`)"
+      - "traefik.http.routers.fitness.entrypoints=websecure,web"
+      - "traefik.http.routers.fitness.tls=true"
+      # - "traefik.http.routers.fitness.tls.certresolver=letsencrypt"  # Uncomment for Let's Encrypt
+      - "traefik.http.services.fitness.loadbalancer.server.port=3000"
+    networks:
+      - web
+    restart: unless-stopped
+    depends_on:
+      - traefik
+
+  # Dashboard App (dashboard.youssef.dev)
+  dashboard:
+    build:
+      context: .
+      dockerfile: apps/dashboard/Dockerfile
+    container_name: dashboard-app
+    environment:
+      - NODE_ENV=production
+      - JWT_SECRET=${JWT_SECRET}
+      - DATABASE_URL=${DATABASE_URL:-}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=Host(`dashboard.youssefaltai.com`) || Host(`dashboard.localhost`)"
+      - "traefik.http.routers.dashboard.entrypoints=websecure,web"
+      - "traefik.http.routers.dashboard.tls=true"
+      # - "traefik.http.routers.dashboard.tls.certresolver=letsencrypt"  # Uncomment for Let's Encrypt
+      - "traefik.http.services.dashboard.loadbalancer.server.port=3000"
+    networks:
+      - web
+    restart: unless-stopped
+    depends_on:
+      - traefik
+
+networks:
+  web:
+    driver: bridge
+

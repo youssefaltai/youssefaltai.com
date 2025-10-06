@@ -1,0 +1,24 @@
+{
+  "name": "@repo/auth",
+  "version": "0.0.0",
+  "description": "Shared authentication with JWT and middleware",
+  "main": "./src/index.ts",
+  "packageManager": "pnpm@10.17.1",
+  "private": "true",
+  "types": "./src/index.ts",
+  "dependencies": {
+    "jose": "^6.1.0"
+  },
+  "devDependencies": {
+    "@repo/tsconfig": "workspace:*",
+    "@typescript-eslint/eslint-plugin": "^8.46.0",
+    "@typescript-eslint/parser": "^8.46.0",
+    "eslint": "^9.37.0",
+    "next": "15.5.4",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "type-check": "tsc --noEmit"
+  }
+}

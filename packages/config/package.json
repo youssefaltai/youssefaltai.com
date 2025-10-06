@@ -1,0 +1,7 @@
+{
+  "name": "@repo/config",
+  "version": "0.0.0",
+  "description": "Shared configuration (ESLint, Prettier) for the monorepo",
+  "packageManager": "pnpm@10.17.1",
+  "private": "true"
+}

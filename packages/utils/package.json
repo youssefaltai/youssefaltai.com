@@ -1,0 +1,23 @@
+{
+  "name": "@repo/utils",
+  "version": "0.0.0",
+  "description": "Shared utilities and hooks for the monorepo",
+  "main": "./src/index.ts",
+  "packageManager": "pnpm@10.17.1",
+  "private": "true",
+  "types": "./src/index.ts",
+  "exports": [
+    "./ ./src/index.ts"
+  ],
+  "devDependencies": {
+    "@repo/tsconfig": "workspace:*",
+    "@typescript-eslint/eslint-plugin": "^8.46.0",
+    "@typescript-eslint/parser": "^8.46.0",
+    "eslint": "^9.37.0",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "type-check": "tsc --noEmit"
+  }
+}
