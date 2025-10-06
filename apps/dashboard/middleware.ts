@@ -14,10 +14,12 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
+     * - manifest.webmanifest (PWA manifest)
+     * - icon-*.png (PWA icons)
      * - public folder
      * - login/register pages
      */
-    '/((?!_next/static|_next/image|favicon.ico|login|register|api/auth).*)',
+    '/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|icon-.*\\.png|login|register|api/auth).*)',
   ],
 }
 
