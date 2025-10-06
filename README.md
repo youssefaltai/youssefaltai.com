@@ -5,9 +5,9 @@ A production-ready Turborepo monorepo containing multiple Next.js applications w
 ## 📋 Architecture
 
 ### Apps
-- **finance** (`finance.youssef.dev`) - Personal finance management
-- **fitness** (`fitness.youssef.dev`) - Fitness tracking application
-- **dashboard** (`dashboard.youssef.dev`) - Unified dashboard
+- **finance** (`finance.youssefaltai.com`) - Personal finance management
+- **fitness** (`fitness.youssefaltai.com`) - Fitness tracking application
+- **dashboard** (`dashboard.youssefaltai.com`) - Unified dashboard
 
 ### Shared Packages
 - **@repo/ui** - Shared UI components and design system
@@ -94,9 +94,9 @@ docker-compose up finance
 
 2. **Update DNS records:**
    Point your subdomains to your server's IP:
-   - finance.youssef.dev → YOUR_SERVER_IP
-   - fitness.youssef.dev → YOUR_SERVER_IP
-   - dashboard.youssef.dev → YOUR_SERVER_IP
+   - finance.youssefaltai.com → YOUR_SERVER_IP
+   - fitness.youssefaltai.com → YOUR_SERVER_IP
+   - dashboard.youssefaltai.com → YOUR_SERVER_IP
 
 3. **Enable SSL (Let's Encrypt):**
    Uncomment the Let's Encrypt lines in `docker-compose.yml`:

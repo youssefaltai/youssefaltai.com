@@ -24,7 +24,7 @@ services:
       - web
     restart: unless-stopped
 
-  # Finance App (finance.youssef.dev)
+  # Finance App (finance.youssefaltai.com)
   finance:
     build:
       context: .
@@ -47,7 +47,7 @@ services:
     depends_on:
       - traefik
 
-  # Fitness App (fitness.youssef.dev)
+  # Fitness App (fitness.youssefaltai.com)
   fitness:
     build:
       context: .
@@ -70,7 +70,7 @@ services:
     depends_on:
       - traefik
 
-  # Dashboard App (dashboard.youssef.dev)
+  # Dashboard App (dashboard.youssefaltai.com)
   dashboard:
     build:
       context: .

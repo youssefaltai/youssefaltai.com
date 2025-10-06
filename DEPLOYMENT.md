@@ -14,9 +14,9 @@ Complete guide to deploy your Turborepo monorepo to a VPS with Docker and Traefi
 
 **DNS Records (Point to your VPS IP):**
 ```
-A     finance.youssef.dev    → YOUR_VPS_IP
-A     fitness.youssef.dev    → YOUR_VPS_IP
-A     dashboard.youssef.dev  → YOUR_VPS_IP
+A     finance.youssefaltai.com    → YOUR_VPS_IP
+A     fitness.youssefaltai.com    → YOUR_VPS_IP
+A     dashboard.youssefaltai.com  → YOUR_VPS_IP
 ```
 
 ---
@@ -177,9 +177,9 @@ docker compose logs dashboard
 
 **Test endpoints:**
 ```bash
-curl -I https://finance.youssef.dev
-curl -I https://fitness.youssef.dev
-curl -I https://dashboard.youssef.dev
+curl -I https://finance.youssefaltai.com
+curl -I https://fitness.youssefaltai.com
+curl -I https://dashboard.youssefaltai.com
 ```
 
 ---
@@ -355,7 +355,7 @@ docker compose logs finance
 docker compose logs traefik
 
 # Verify DNS
-nslookup finance.youssef.dev
+nslookup finance.youssefaltai.com
 ```
 
 ### SSL Certificate Issues
@@ -480,7 +480,7 @@ docker compose up -d
 **🎉 Your monorepo is now deployed!**
 
 Visit your apps:
-- https://finance.youssef.dev
-- https://fitness.youssef.dev
-- https://dashboard.youssef.dev
+- https://finance.youssefaltai.com
+- https://fitness.youssefaltai.com
+- https://dashboard.youssefaltai.com
 
