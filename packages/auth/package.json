@@ -6,6 +6,9 @@
   "packageManager": "pnpm@10.17.1",
   "private": "true",
   "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "dependencies": {
     "jose": "^6.1.0"
   },

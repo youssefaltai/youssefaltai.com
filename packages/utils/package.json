@@ -6,9 +6,9 @@
   "packageManager": "pnpm@10.17.1",
   "private": "true",
   "types": "./src/index.ts",
-  "exports": [
-    "./ ./src/index.ts"
-  ],
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "devDependencies": {
     "@repo/tsconfig": "workspace:*",
     "@typescript-eslint/eslint-plugin": "^8.46.0",

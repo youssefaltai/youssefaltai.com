@@ -6,9 +6,10 @@
   "packageManager": "pnpm@10.17.1",
   "private": "true",
   "types": "./src/index.ts",
-  "exports": [
-    "./ ./src/index.ts"
-  ],
+  "exports": {
+    ".": "./src/index.ts",
+    "./styles/globals.css": "./styles/globals.css"
+  },
   "devDependencies": {
     "@repo/tsconfig": "workspace:*",
     "@types/react": "^19.2.0",
