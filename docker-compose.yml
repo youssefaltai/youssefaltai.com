@@ -9,6 +9,9 @@ services:
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
+      # Global HTTP to HTTPS redirect
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
       # Uncomment for Let's Encrypt in production
       # - "--certificatesresolvers.letsencrypt.acme.email=your@email.com"
       # - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
