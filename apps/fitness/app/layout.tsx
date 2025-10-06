@@ -16,17 +16,18 @@ export const metadata: Metadata = {
   title: "Fitness App",
   description: "Personal fitness tracking application",
   manifest: "/manifest.webmanifest",
-  themeColor: "#10b981",
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 1,
-  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
     title: "Fitness",
   },
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  themeColor: "#10b981",
 };
 
 export default function RootLayout({

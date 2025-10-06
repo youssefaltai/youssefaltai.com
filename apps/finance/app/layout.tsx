@@ -16,17 +16,18 @@ export const metadata: Metadata = {
   title: "Finance App",
   description: "Personal finance management application",
   manifest: "/manifest.webmanifest",
-  themeColor: "#2563eb",
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 1,
-  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
     title: "Finance",
   },
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  themeColor: "#2563eb",
 };
 
 export default function RootLayout({

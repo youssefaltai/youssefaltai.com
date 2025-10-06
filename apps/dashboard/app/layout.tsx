@@ -16,17 +16,18 @@ export const metadata: Metadata = {
   title: "Dashboard",
   description: "Unified dashboard for all applications",
   manifest: "/manifest.webmanifest",
-  themeColor: "#8b5cf6",
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 1,
-  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
     title: "Dashboard",
   },
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  themeColor: "#8b5cf6",
 };
 
 export default function RootLayout({
