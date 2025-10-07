@@ -25,5 +25,8 @@
   "scripts": {
     "lint": "eslint .",
     "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@simplewebauthn/browser": "^13.2.2"
   }
 }

@@ -6,7 +6,8 @@
       "@repo/ui": ["../../packages/ui/src"],
       "@repo/utils": ["../../packages/utils/src"],
       "@repo/auth": ["../../packages/auth/src"],
-      "@repo/auth/api-handlers": ["../../packages/auth/src/api-handlers.ts"]
+      "@repo/auth/api-handlers": ["../../packages/auth/src/api-handlers.ts"],
+      "@repo/auth/webauthn-handlers": ["../../packages/auth/src/webauthn-handlers.ts"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],

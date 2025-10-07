@@ -8,15 +8,19 @@
   "types": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts",
-    "./api-handlers": "./src/api-handlers.ts"
+    "./api-handlers": "./src/api-handlers.ts",
+    "./webauthn-handlers": "./src/webauthn-handlers.ts"
   },
   "dependencies": {
     "@repo/db": "workspace:*",
+    "@simplewebauthn/server": "^13.2.2",
     "bcryptjs": "^3.0.2",
+    "ioredis": "^5.8.1",
     "jose": "^6.1.0"
   },
   "devDependencies": {
     "@repo/tsconfig": "workspace:*",
+    "@simplewebauthn/types": "^12.0.0",
     "@types/bcryptjs": "^3.0.0",
     "@typescript-eslint/eslint-plugin": "^8.46.0",
     "@typescript-eslint/parser": "^8.46.0",

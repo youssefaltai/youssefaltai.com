@@ -1,6 +1,6 @@
-import { LoginForm } from '@repo/ui'
+import { BiometricLoginForm } from '@repo/ui'
 
 export default function LoginPage() {
-  return <LoginForm appName="Finance App" />
+  return <BiometricLoginForm appName="Finance App" />
 }
 

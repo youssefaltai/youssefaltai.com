@@ -20,6 +20,21 @@ services:
       timeout: 5s
       retries: 5
 
+  # Redis for session/challenge storage
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"  # Expose for local development
+    networks:
+      - web
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   # Traefik reverse proxy and load balancer
   traefik:
     image: traefik:v3.0
@@ -71,6 +86,7 @@ services:
     depends_on:
       - traefik
       - postgres
+      - redis
 
   # Fitness App (fitness.youssefaltai.com)
   fitness:
@@ -95,6 +111,7 @@ services:
     depends_on:
       - traefik
       - postgres
+      - redis
 
   # Dashboard App (dashboard.youssefaltai.com)
   dashboard:
@@ -119,6 +136,7 @@ services:
     depends_on:
       - traefik
       - postgres
+      - redis
 
 networks:
   web:

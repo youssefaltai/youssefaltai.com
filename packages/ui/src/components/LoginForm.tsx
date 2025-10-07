@@ -68,7 +68,7 @@ export function LoginForm({ appName }: LoginFormProps) {
               type="email"
               required
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => setEmail((e.target as HTMLInputElement).value)}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
@@ -82,7 +82,7 @@ export function LoginForm({ appName }: LoginFormProps) {
               type="password"
               required
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => setPassword((e.target as HTMLInputElement).value)}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
