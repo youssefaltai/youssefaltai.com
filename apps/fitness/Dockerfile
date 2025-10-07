@@ -29,6 +29,9 @@ COPY --from=deps /app ./
 # Copy source files (override package.json copies with actual source)
 COPY . .
 
+# Generate Prisma Client with correct binaries for Alpine
+RUN pnpm --filter @repo/db exec prisma generate
+
 # Build the app using Turborepo
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN pnpm turbo build --filter=fitness
