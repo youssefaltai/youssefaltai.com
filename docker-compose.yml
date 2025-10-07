@@ -1,4 +1,25 @@
 services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres-db
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - POSTGRES_DB=${POSTGRES_DB:-youssefaltai}
+    ports:
+      - "5432:5432"  # Expose for local development
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - web
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   # Traefik reverse proxy and load balancer
   traefik:
     image: traefik:v3.0
@@ -49,6 +70,7 @@ services:
     restart: unless-stopped
     depends_on:
       - traefik
+      - postgres
 
   # Fitness App (fitness.youssefaltai.com)
   fitness:
@@ -72,6 +94,7 @@ services:
     restart: unless-stopped
     depends_on:
       - traefik
+      - postgres
 
   # Dashboard App (dashboard.youssefaltai.com)
   dashboard:
@@ -95,8 +118,12 @@ services:
     restart: unless-stopped
     depends_on:
       - traefik
+      - postgres
 
 networks:
   web:
     driver: bridge
+
+volumes:
+  postgres_data:
 

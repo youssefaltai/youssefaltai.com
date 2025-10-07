@@ -7,13 +7,17 @@
   "private": "true",
   "types": "./src/index.ts",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./api-handlers": "./src/api-handlers.ts"
   },
   "dependencies": {
+    "@repo/db": "workspace:*",
+    "bcryptjs": "^3.0.2",
     "jose": "^6.1.0"
   },
   "devDependencies": {
     "@repo/tsconfig": "workspace:*",
+    "@types/bcryptjs": "^3.0.0",
     "@typescript-eslint/eslint-plugin": "^8.46.0",
     "@typescript-eslint/parser": "^8.46.0",
     "eslint": "^9.37.0",

@@ -1,0 +1,6 @@
+{
+  "extends": "@repo/tsconfig/base.json",
+  "include": ["src/**/*.ts", "generated/**/*.ts"],
+  "exclude": ["node_modules"]
+}
+
