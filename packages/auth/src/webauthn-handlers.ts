@@ -80,9 +80,13 @@ export async function registrationOptionsHandler(request: NextRequest) {
     await storeChallenge(user.id, options.challenge)
 
     return NextResponse.json({ options, userId: user.id })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Registration options error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    console.error('Error stack:', error?.stack)
+    return NextResponse.json({ 
+      error: 'Internal server error',
+      details: process.env.NODE_ENV === 'development' ? error?.message : undefined
+    }, { status: 500 })
   }
 }
 
@@ -151,9 +155,14 @@ export async function registrationVerificationHandler(request: NextRequest) {
         name: user.name,
       },
     })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Registration verification error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    console.error('Error stack:', error?.stack)
+    console.error('Error message:', error?.message)
+    return NextResponse.json({ 
+      error: 'Internal server error',
+      details: process.env.NODE_ENV === 'development' ? error?.message : undefined 
+    }, { status: 500 })
   }
 }
 
@@ -195,9 +204,13 @@ export async function authenticationOptionsHandler(request: NextRequest) {
     await storeChallenge(user.id, options.challenge)
 
     return NextResponse.json({ options, userId: user.id })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Authentication options error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    console.error('Error stack:', error?.stack)
+    return NextResponse.json({ 
+      error: 'Internal server error',
+      details: process.env.NODE_ENV === 'development' ? error?.message : undefined
+    }, { status: 500 })
   }
 }
 
@@ -277,9 +290,13 @@ export async function authenticationVerificationHandler(request: NextRequest) {
         name: user.name,
       },
     })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Authentication verification error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    console.error('Error stack:', error?.stack)
+    return NextResponse.json({ 
+      error: 'Internal server error',
+      details: process.env.NODE_ENV === 'development' ? error?.message : undefined
+    }, { status: 500 })
   }
 }
 
