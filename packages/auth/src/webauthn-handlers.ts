@@ -20,10 +20,23 @@ import { storeChallenge, consumeChallenge } from './lib/challenge-store'
 
 // WebAuthn configuration
 const RP_NAME = 'Youssef Altai'
-const RP_ID = process.env.NODE_ENV === 'production' ? 'youssefaltai.com' : 'localhost'
-const ORIGIN = process.env.NODE_ENV === 'production' 
-  ? 'https://youssefaltai.com' 
-  : 'http://localhost:3000'
+
+// Get RP ID from request origin
+function getRPID(origin: string): string {
+  const url = new URL(origin)
+  // For production: use root domain (youssefaltai.com)
+  // For localhost: use 'localhost'
+  return url.hostname === 'localhost' ? 'localhost' : 'youssefaltai.com'
+}
+
+// Get origin from request
+function getOrigin(request: NextRequest): string {
+  const origin = request.headers.get('origin')
+  if (!origin) {
+    throw new Error('Origin header is required')
+  }
+  return origin
+}
 
 // Helper to convert Buffer to base64url
 function bufferToBase64url(buffer: Buffer): string {
@@ -40,6 +53,9 @@ export async function registrationOptionsHandler(request: NextRequest) {
     if (!email) {
       return NextResponse.json({ error: 'Email required' }, { status: 400 })
     }
+
+    const origin = getOrigin(request)
+    const rpID = getRPID(origin)
 
     // Find or create user
     let user = await prisma.user.findUnique({ where: { email } })
@@ -61,7 +77,7 @@ export async function registrationOptionsHandler(request: NextRequest) {
 
     const options = await generateRegistrationOptions({
       rpName: RP_NAME,
-      rpID: RP_ID,
+      rpID: rpID,
       userName: email,
       userDisplayName: name || email,
       attestationType: 'none',
@@ -101,6 +117,9 @@ export async function registrationVerificationHandler(request: NextRequest) {
       deviceName?: string
     }
 
+    const origin = getOrigin(request)
+    const rpID = getRPID(origin)
+
     const user = await prisma.user.findUnique({ where: { id: userId } })
     
     if (!user) {
@@ -116,8 +135,8 @@ export async function registrationVerificationHandler(request: NextRequest) {
     const verification = await verifyRegistrationResponse({
       response: credential,
       expectedChallenge: challenge,
-      expectedOrigin: ORIGIN,
-      expectedRPID: RP_ID,
+      expectedOrigin: origin,
+      expectedRPID: rpID,
     })
 
     if (!verification.verified || !verification.registrationInfo) {
@@ -177,6 +196,9 @@ export async function authenticationOptionsHandler(request: NextRequest) {
       return NextResponse.json({ error: 'Email required' }, { status: 400 })
     }
 
+    const origin = getOrigin(request)
+    const rpID = getRPID(origin)
+
     const user = await prisma.user.findUnique({
       where: { email },
       include: { credentials: true },
@@ -192,7 +214,7 @@ export async function authenticationOptionsHandler(request: NextRequest) {
     )
 
     const options = await generateAuthenticationOptions({
-      rpID: RP_ID,
+      rpID: rpID,
       allowCredentials: platformCredentials.map((cred) => ({
         id: bufferToBase64url(cred.credentialId as Buffer),
         transports: ['internal'] as any[],  // Force internal only (no QR codes)
@@ -224,6 +246,9 @@ export async function authenticationVerificationHandler(request: NextRequest) {
       credential: AuthenticationResponseJSON
     }
 
+    const origin = getOrigin(request)
+    const rpID = getRPID(origin)
+
     const user = await prisma.user.findUnique({
       where: { id: userId },
       include: { credentials: true },
@@ -251,8 +276,8 @@ export async function authenticationVerificationHandler(request: NextRequest) {
     const verification = await verifyAuthenticationResponse({
       response: credential,
       expectedChallenge: challenge,
-      expectedOrigin: ORIGIN,
-      expectedRPID: RP_ID,
+      expectedOrigin: origin,
+      expectedRPID: rpID,
       credential: {
         id: bufferToBase64url(dbCredential.credentialId as Buffer),
         publicKey: new Uint8Array(dbCredential.publicKey),
