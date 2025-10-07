@@ -13,6 +13,7 @@ COPY packages/config/package.json ./packages/config/
 COPY packages/utils/package.json ./packages/utils/
 COPY packages/ui/package.json ./packages/ui/
 COPY packages/auth/package.json ./packages/auth/
+COPY packages/db/package.json ./packages/db/
 COPY apps/fitness/package.json ./apps/fitness/
 
 # Install dependencies
