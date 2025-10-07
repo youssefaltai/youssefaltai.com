@@ -101,7 +101,8 @@ export async function registrationOptionsHandler(request: NextRequest) {
     console.error('Error stack:', error?.stack)
     return NextResponse.json({ 
       error: 'Internal server error',
-      details: process.env.NODE_ENV === 'development' ? error?.message : undefined
+      message: error?.message,
+      stack: error?.stack
     }, { status: 500 })
   }
 }
@@ -179,8 +180,9 @@ export async function registrationVerificationHandler(request: NextRequest) {
     console.error('Error stack:', error?.stack)
     console.error('Error message:', error?.message)
     return NextResponse.json({ 
-      error: 'Internal server error',
-      details: process.env.NODE_ENV === 'development' ? error?.message : undefined 
+      error: 'Registration failed',
+      message: error?.message,
+      stack: error?.stack?.split('\n').slice(0, 5).join('\n')
     }, { status: 500 })
   }
 }
@@ -231,7 +233,8 @@ export async function authenticationOptionsHandler(request: NextRequest) {
     console.error('Error stack:', error?.stack)
     return NextResponse.json({ 
       error: 'Internal server error',
-      details: process.env.NODE_ENV === 'development' ? error?.message : undefined
+      message: error?.message,
+      stack: error?.stack
     }, { status: 500 })
   }
 }
@@ -319,8 +322,9 @@ export async function authenticationVerificationHandler(request: NextRequest) {
     console.error('Authentication verification error:', error)
     console.error('Error stack:', error?.stack)
     return NextResponse.json({ 
-      error: 'Internal server error',
-      details: process.env.NODE_ENV === 'development' ? error?.message : undefined
+      error: 'Authentication failed',
+      message: error?.message,
+      stack: error?.stack?.split('\n').slice(0, 5).join('\n')
     }, { status: 500 })
   }
 }
