@@ -30,7 +30,9 @@ COPY --from=deps /app ./
 COPY . .
 
 # Generate Prisma Client with correct binaries for Alpine
-RUN pnpm --filter @repo/db db:generate
+WORKDIR /app/packages/db
+RUN pnpm prisma generate
+WORKDIR /app
 
 # Build the app using Turborepo
 ENV NEXT_TELEMETRY_DISABLED=1
