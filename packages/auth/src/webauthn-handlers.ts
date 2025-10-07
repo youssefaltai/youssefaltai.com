@@ -177,13 +177,18 @@ export async function authenticationOptionsHandler(request: NextRequest) {
       return NextResponse.json({ error: 'No credentials found' }, { status: 404 })
     }
 
+    // Filter to only platform authenticators (Face ID/Touch ID)
+    const platformCredentials = user.credentials.filter(cred => 
+      cred.transports.includes('internal')
+    )
+
     const options = await generateAuthenticationOptions({
       rpID: RP_ID,
-      allowCredentials: user.credentials.map((cred) => ({
+      allowCredentials: platformCredentials.map((cred) => ({
         id: bufferToBase64url(cred.credentialId as Buffer),
-        transports: cred.transports as any[],
+        transports: ['internal'] as any[],  // Force internal only (no QR codes)
       })),
-      userVerification: 'preferred',
+      userVerification: 'required',  // Require biometric verification
     })
 
     // Store challenge in Redis with automatic expiration
