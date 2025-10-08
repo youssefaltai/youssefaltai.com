@@ -123,7 +123,7 @@ export async function POST(request: NextRequest) {
       userSettings = await prisma.userSettings.create({
         data: {
           userId,
-          baseCurrency: 'EUR', // Default to EUR
+          baseCurrency: 'EGP', // Default to EGP
         },
       })
     }

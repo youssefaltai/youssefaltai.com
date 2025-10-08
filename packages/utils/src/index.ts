@@ -37,6 +37,7 @@ export {
   fetchExchangeRates,
   getExchangeRate,
   convertCurrency,
+  fetchGoldPrice,
   isValidCurrencyCode,
   getCurrencySymbol,
   formatCurrency,
