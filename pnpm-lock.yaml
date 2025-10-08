@@ -266,6 +266,9 @@ importers:
 
   packages/ui:
     dependencies:
+      '@repo/utils':
+        specifier: workspace:*
+        version: link:../utils
       '@simplewebauthn/browser':
         specifier: ^13.2.2
         version: 13.2.2

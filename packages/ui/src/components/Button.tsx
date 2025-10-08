@@ -1,33 +1,53 @@
-import { ButtonHTMLAttributes, FC } from 'react'
+/**
+ * Button Component
+ * Follows Apple Human Interface Guidelines
+ */
+import { cn } from '@repo/utils'
 
-export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'outline'
+interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: 'primary' | 'secondary' | 'destructive' | 'plain'
+  size?: 'sm' | 'md' | 'lg'
+  children: React.ReactNode
 }
 
-/**
- * Shared Button component for the design system
- */
-export const Button: FC<ButtonProps> = ({
-  children,
+export function Button({
   variant = 'primary',
-  className = '',
+  size = 'md',
+  className,
+  children,
+  disabled,
   ...props
-}) => {
-  const baseStyles = 'px-4 py-2 rounded-lg font-medium transition-colors'
-  
-  const variantStyles = {
-    primary: 'bg-blue-600 text-white hover:bg-blue-700',
-    secondary: 'bg-gray-600 text-white hover:bg-gray-700',
-    outline: 'border-2 border-blue-600 text-blue-600 hover:bg-blue-50',
+}: ButtonProps) {
+  const variants = {
+    primary: 'bg-ios-blue text-white hover:bg-ios-blue/90',
+    secondary: 'bg-ios-blue/10 text-ios-blue hover:bg-ios-blue/15',
+    destructive: 'bg-ios-red text-white hover:bg-ios-red/90',
+    plain: 'bg-transparent text-ios-blue hover:bg-ios-gray-6',
+  }
+
+  const sizes = {
+    sm: 'px-4 py-2 text-ios-callout',
+    md: 'px-6 py-3 text-ios-body',
+    lg: 'px-8 py-4 text-ios-headline',
   }
 
   return (
     <button
-      className={`${baseStyles} ${variantStyles[variant]} ${className}`}
+      className={cn(
+        // Base styles
+        'rounded-ios font-semibold',
+        'active:scale-95 transition-all duration-ios',
+        'disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100',
+        // Variant
+        variants[variant],
+        // Size
+        sizes[size],
+        className
+      )}
+      disabled={disabled}
       {...props}
     >
       {children}
     </button>
   )
 }
-
