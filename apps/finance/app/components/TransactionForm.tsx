@@ -104,7 +104,7 @@ export function TransactionForm({ onSuccess }: TransactionFormProps) {
 
       {/* Type Selection */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Type</label>
+        <label className="block text-ios-footnote font-medium text-ios-gray-1 mb-2">Type</label>
         <div className="flex gap-4">
           <button
             type="button"
@@ -112,7 +112,7 @@ export function TransactionForm({ onSuccess }: TransactionFormProps) {
             className={`flex-1 py-3 px-4 rounded-lg border-2 font-medium transition ${
               type === 'income'
                 ? 'border-green-600 bg-green-50 text-green-700'
-                : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
+                : 'bg-ios-gray-6 text-ios-label-primary border border-ios-gray-3 hover:border-ios-gray-2'
             }`}
           >
             Income
@@ -123,7 +123,7 @@ export function TransactionForm({ onSuccess }: TransactionFormProps) {
             className={`flex-1 py-3 px-4 rounded-lg border-2 font-medium transition ${
               type === 'expense'
                 ? 'border-red-600 bg-red-50 text-red-700'
-                : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
+                : 'bg-ios-gray-6 text-ios-label-primary border border-ios-gray-3 hover:border-ios-gray-2'
             }`}
           >
             Expense
@@ -134,7 +134,7 @@ export function TransactionForm({ onSuccess }: TransactionFormProps) {
       {/* Amount and Currency */}
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="amount" className="block text-ios-footnote font-medium text-ios-gray-1 mb-2">
             Amount *
           </label>
           <input
@@ -145,12 +145,12 @@ export function TransactionForm({ onSuccess }: TransactionFormProps) {
             required
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full min-h-[44px] px-4 py-3 bg-ios-gray-6 border border-ios-gray-3 rounded-ios-sm text-ios-body focus:outline-none focus:ring-2 focus:ring-ios-blue focus:border-transparent"
             placeholder="0.00"
           />
         </div>
         <div>
-          <label htmlFor="currency" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="currency" className="block text-ios-footnote font-medium text-ios-gray-1 mb-2">
             Currency *
           </label>
           <select
@@ -158,7 +158,7 @@ export function TransactionForm({ onSuccess }: TransactionFormProps) {
             required
             value={currency}
             onChange={(e) => setCurrency(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full min-h-[44px] px-4 py-3 bg-ios-gray-6 border border-ios-gray-3 rounded-ios-sm text-ios-body focus:outline-none focus:ring-2 focus:ring-ios-blue focus:border-transparent"
           >
             {COMMON_CURRENCIES.map((c) => (
               <option key={c.code} value={c.code}>
@@ -190,7 +190,7 @@ export function TransactionForm({ onSuccess }: TransactionFormProps) {
             min="0"
             value={exchangeRate}
             onChange={(e) => setExchangeRate(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full min-h-[44px] px-4 py-3 bg-ios-gray-6 border border-ios-gray-3 rounded-ios-sm text-ios-body focus:outline-none focus:ring-2 focus:ring-ios-blue focus:border-transparent"
             placeholder="Exchange rate (e.g., 0.92)"
           />
         )}
@@ -198,7 +198,7 @@ export function TransactionForm({ onSuccess }: TransactionFormProps) {
 
       {/* Category */}
       <div>
-        <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor="category" className="block text-ios-footnote font-medium text-ios-gray-1 mb-2">
           Category *
         </label>
         {categories.length > 0 ? (
@@ -207,7 +207,7 @@ export function TransactionForm({ onSuccess }: TransactionFormProps) {
             required
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full min-h-[44px] px-4 py-3 bg-ios-gray-6 border border-ios-gray-3 rounded-ios-sm text-ios-body focus:outline-none focus:ring-2 focus:ring-ios-blue focus:border-transparent"
           >
             {categories.map((c) => (
               <option key={c.id} value={c.name}>
@@ -226,7 +226,7 @@ export function TransactionForm({ onSuccess }: TransactionFormProps) {
 
       {/* Description */}
       <div>
-        <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor="description" className="block text-ios-footnote font-medium text-ios-gray-1 mb-2">
           Description (Optional)
         </label>
         <textarea
@@ -234,7 +234,7 @@ export function TransactionForm({ onSuccess }: TransactionFormProps) {
           rows={3}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full min-h-[44px] px-4 py-3 bg-ios-gray-6 border border-ios-gray-3 rounded-ios-sm text-ios-body focus:outline-none focus:ring-2 focus:ring-ios-blue focus:border-transparent"
           placeholder="Add notes about this transaction..."
         />
       </div>
@@ -259,7 +259,7 @@ export function TransactionForm({ onSuccess }: TransactionFormProps) {
             }
             setDate(newDate)
           }}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full min-h-[44px] px-4 py-3 bg-ios-gray-6 border border-ios-gray-3 rounded-ios-sm text-ios-body focus:outline-none focus:ring-2 focus:ring-ios-blue focus:border-transparent"
         />
         
         {/* Time Toggle */}
@@ -287,7 +287,7 @@ export function TransactionForm({ onSuccess }: TransactionFormProps) {
               newDate.setHours(parseInt(hours || '0'), parseInt(minutes || '0'))
               setDate(newDate)
             }}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full min-h-[44px] px-4 py-3 bg-ios-gray-6 border border-ios-gray-3 rounded-ios-sm text-ios-body focus:outline-none focus:ring-2 focus:ring-ios-blue focus:border-transparent"
           />
         )}
       </div>
