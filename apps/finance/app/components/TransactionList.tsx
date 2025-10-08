@@ -52,12 +52,12 @@ export function TransactionList({ transactions, onTransactionDeleted }: Transact
 
   if (transactions.length === 0) {
     return (
-      <div className="p-12 text-center text-gray-500">
-        <svg className="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div className="p-12 text-center text-ios-gray-2">
+        <svg className="w-16 h-16 mx-auto text-ios-gray-3 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
         </svg>
-        <p className="text-lg font-medium">No transactions yet</p>
-        <p className="text-sm mt-1">Start by adding your first transaction</p>
+        <p className="text-ios-body font-medium text-ios-label-primary">No transactions yet</p>
+        <p className="text-ios-footnote mt-1">Start by adding your first transaction</p>
       </div>
     )
   }
@@ -65,59 +65,59 @@ export function TransactionList({ transactions, onTransactionDeleted }: Transact
   return (
     <div className="overflow-x-auto">
       <table className="w-full">
-        <thead className="bg-gray-50">
+        <thead className="bg-ios-gray-6">
           <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-left text-ios-footnote font-medium text-ios-gray-1 uppercase tracking-wider">
               Date
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-left text-ios-footnote font-medium text-ios-gray-1 uppercase tracking-wider">
               Category
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-left text-ios-footnote font-medium text-ios-gray-1 uppercase tracking-wider">
               Description
             </th>
-            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-right text-ios-footnote font-medium text-ios-gray-1 uppercase tracking-wider">
               Original Amount
             </th>
-            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-right text-ios-footnote font-medium text-ios-gray-1 uppercase tracking-wider">
               Base Amount
             </th>
-            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-center text-ios-footnote font-medium text-ios-gray-1 uppercase tracking-wider">
               Actions
             </th>
           </tr>
         </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
+        <tbody className="bg-white divide-y divide-ios-gray-5">
           {transactions.map((transaction) => (
-            <tr key={transaction.id} className="hover:bg-gray-50 transition">
-              <td className="px-6 py-4 whitespace-nowrap text-sm">
-                <div className="text-gray-900">{formatDateShort(transaction.date)}</div>
-                <div className="text-xs text-gray-500" title={formatDateTime(transaction.date)}>
+            <tr key={transaction.id} className="hover:bg-ios-gray-6 transition">
+              <td className="px-6 py-4 whitespace-nowrap text-ios-callout">
+                <div className="text-ios-label-primary">{formatDateShort(transaction.date)}</div>
+                <div className="text-ios-caption text-ios-gray-1" title={formatDateTime(transaction.date)}>
                   {formatRelative(transaction.date)}
                 </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-ios-caption font-medium bg-ios-blue/10 text-ios-blue">
                   {transaction.category}
                 </span>
               </td>
-              <td className="px-6 py-4 text-sm text-gray-600">
+              <td className="px-6 py-4 text-ios-callout text-ios-gray-1">
                 {transaction.description || '-'}
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-right">
-                <span className={`font-medium ${transaction.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
+              <td className="px-6 py-4 whitespace-nowrap text-ios-callout text-right">
+                <span className={`font-medium ${transaction.type === 'income' ? 'text-ios-green' : 'text-ios-red'}`}>
                   {transaction.type === 'income' ? '+' : '-'}
                   {formatCurrency(transaction.amount, transaction.currency)}
                 </span>
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-900">
+              <td className="px-6 py-4 whitespace-nowrap text-ios-callout text-right text-ios-label-primary">
                 {formatCurrency(transaction.baseAmount, transaction.baseCurrency)}
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-center text-sm">
+              <td className="px-6 py-4 whitespace-nowrap text-center text-ios-callout">
                 <button
                   onClick={() => handleDelete(transaction.id)}
                   disabled={deleting === transaction.id}
-                  className="text-red-600 hover:text-red-900 disabled:text-gray-400 transition"
+                  className="text-ios-red hover:text-ios-red/80 disabled:text-ios-gray-3 transition p-2 -m-2"
                   title="Delete transaction"
                 >
                   {deleting === transaction.id ? (

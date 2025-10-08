@@ -125,15 +125,13 @@ export function BiometricLoginForm({ appName }: BiometricLoginFormProps) {
 
   if (!isWebAuthnSupported) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow">
-          <div>
-            <h2 className="text-3xl font-bold text-center">{appName}</h2>
-            <p className="mt-2 text-center text-red-600">
-              Your browser doesn't support Face ID / Touch ID authentication.
-              Please use a modern browser like Chrome, Safari, or Edge.
-            </p>
-          </div>
+      <div className="min-h-screen flex items-center justify-center bg-ios-gray-6 px-4">
+        <div className="max-w-md w-full text-center">
+          <h2 className="text-ios-title-1 font-bold text-ios-label-primary mb-2">{appName}</h2>
+          <p className="text-ios-body text-ios-red">
+            Your browser doesn't support Face ID / Touch ID authentication.
+            Please use a modern browser like Chrome, Safari, or Edge.
+          </p>
         </div>
       </div>
     )
@@ -142,37 +140,35 @@ export function BiometricLoginForm({ appName }: BiometricLoginFormProps) {
   // Prevent hydration mismatch - don't render until mounted
   if (!mounted) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow">
-          <div>
-            <h2 className="text-3xl font-bold text-center">{appName}</h2>
-            <p className="mt-2 text-center text-gray-600">Loading...</p>
-          </div>
+      <div className="min-h-screen flex items-center justify-center bg-ios-gray-6 px-4">
+        <div className="max-w-md w-full text-center">
+          <h2 className="text-ios-title-1 font-bold text-ios-label-primary mb-2">{appName}</h2>
+          <p className="text-ios-body text-ios-gray-1">Loading...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow">
-        <div>
-          <h2 className="text-3xl font-bold text-center">{appName}</h2>
-          <p className="mt-2 text-center text-gray-600">
+    <div className="min-h-screen flex items-center justify-center bg-ios-gray-6 px-4">
+      <div className="max-w-md w-full">
+        <div className="text-center mb-8">
+          <h2 className="text-ios-title-1 font-bold text-ios-label-primary">{appName}</h2>
+          <p className="mt-2 text-ios-body text-ios-gray-1">
             {isNewUser ? 'Register with Face ID / Touch ID' : 'Sign in with Face ID / Touch ID'}
           </p>
         </div>
 
-        <form className="space-y-6" onSubmit={isNewUser ? handleRegister : handleLogin}>
+        <form className="space-y-4" onSubmit={isNewUser ? handleRegister : handleLogin}>
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="email" className="block text-ios-footnote text-ios-gray-1 font-medium mb-1">
               Email
             </label>
             <input
               id="email"
               type="email"
               required
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+              className="w-full min-h-[44px] px-4 py-3 bg-ios-gray-6 border border-ios-gray-3 rounded-ios-sm text-ios-body focus:outline-none focus:ring-2 focus:ring-ios-blue focus:border-transparent"
               value={email}
               onChange={(e) => setEmail((e.target as HTMLInputElement).value)}
               disabled={loading}
@@ -181,13 +177,13 @@ export function BiometricLoginForm({ appName }: BiometricLoginFormProps) {
 
           {isNewUser && (
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="name" className="block text-ios-footnote text-ios-gray-1 font-medium mb-1">
                 Name (optional)
               </label>
               <input
                 id="name"
                 type="text"
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                className="w-full min-h-[44px] px-4 py-3 bg-ios-gray-6 border border-ios-gray-3 rounded-ios-sm text-ios-body focus:outline-none focus:ring-2 focus:ring-ios-blue focus:border-transparent"
                 value={name}
                 onChange={(e) => setName((e.target as HTMLInputElement).value)}
                 disabled={loading}
@@ -195,7 +191,11 @@ export function BiometricLoginForm({ appName }: BiometricLoginFormProps) {
             </div>
           )}
 
-          {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+          {error && (
+            <div className="bg-ios-red/10 border border-ios-red text-ios-red px-4 py-3 rounded-ios text-ios-callout">
+              {error}
+            </div>
+          )}
 
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? '...' : isNewUser ? '🔒 Register with Face ID / Touch ID' : '🔒 Sign in with Face ID / Touch ID'}
@@ -204,7 +204,7 @@ export function BiometricLoginForm({ appName }: BiometricLoginFormProps) {
           {!isNewUser && (
             <button
               type="button"
-              className="w-full text-sm text-blue-600 hover:underline"
+              className="w-full text-ios-callout text-ios-blue hover:text-ios-blue/80"
               onClick={() => setIsNewUser(true)}
             >
               New user? Register with Face ID / Touch ID
@@ -214,7 +214,7 @@ export function BiometricLoginForm({ appName }: BiometricLoginFormProps) {
           {isNewUser && (
             <button
               type="button"
-              className="w-full text-sm text-blue-600 hover:underline"
+              className="w-full text-ios-callout text-ios-blue hover:text-ios-blue/80"
               onClick={() => {
                 setIsNewUser(false)
                 setError(null)
@@ -225,7 +225,7 @@ export function BiometricLoginForm({ appName }: BiometricLoginFormProps) {
           )}
         </form>
 
-        <p className="text-xs text-center text-gray-500 mt-4">
+        <p className="text-ios-caption text-ios-gray-1 text-center mt-6">
           This app uses your device's Face ID or Touch ID for secure, password-free authentication.
         </p>
       </div>

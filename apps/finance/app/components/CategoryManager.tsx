@@ -110,8 +110,8 @@ export function CategoryManager() {
   if (loading) {
     return (
       <div className="text-center py-12">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-        <p className="mt-4 text-gray-600">Loading categories...</p>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ios-blue mx-auto"></div>
+        <p className="mt-4 text-ios-body text-ios-gray-1">Loading categories...</p>
       </div>
     )
   }
@@ -120,35 +120,37 @@ export function CategoryManager() {
     <div className="space-y-6">
       {/* Add Category Button */}
       {!showForm && (
-        <button
+        <Button
+          variant="secondary"
           onClick={() => setShowForm(true)}
-          className="w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-blue-500 hover:text-blue-600 transition"
+          className="w-full"
         >
           + Add New Category
-        </button>
+        </Button>
       )}
 
       {/* Add Category Form */}
       {showForm && (
-        <form onSubmit={handleSubmit} className="bg-gray-50 p-6 rounded-lg space-y-4">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">New Category</h3>
-          
-          {error && (
-            <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4" role="alert">
-              <p>{error}</p>
-            </div>
-          )}
+        <Card>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <h3 className="text-ios-headline font-semibold text-ios-label-primary">New Category</h3>
+            
+            {error && (
+              <div className="bg-ios-red/10 border-l-4 border-ios-red text-ios-red p-4 rounded-ios-sm text-ios-callout" role="alert">
+                <p>{error}</p>
+              </div>
+            )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Type</label>
-            <div className="flex gap-4">
+            <label className="block text-ios-footnote font-medium text-ios-gray-1 mb-2">Type</label>
+            <div className="flex gap-3">
               <button
                 type="button"
                 onClick={() => setFormData({ ...formData, type: 'income' })}
-                className={`flex-1 py-2 px-4 rounded-lg border font-medium transition ${
+                className={`flex-1 py-3 px-4 rounded-ios font-semibold transition-all ${
                   formData.type === 'income'
-                    ? 'border-green-600 bg-green-50 text-green-700'
-                    : 'border-gray-300 bg-white text-gray-700'
+                    ? 'bg-ios-green text-white'
+                    : 'bg-ios-gray-6 text-ios-label-primary border border-ios-gray-3'
                 }`}
               >
                 Income
@@ -156,10 +158,10 @@ export function CategoryManager() {
               <button
                 type="button"
                 onClick={() => setFormData({ ...formData, type: 'expense' })}
-                className={`flex-1 py-2 px-4 rounded-lg border font-medium transition ${
+                className={`flex-1 py-3 px-4 rounded-ios font-semibold transition-all ${
                   formData.type === 'expense'
-                    ? 'border-red-600 bg-red-50 text-red-700'
-                    : 'border-gray-300 bg-white text-gray-700'
+                    ? 'bg-ios-red text-white'
+                    : 'bg-ios-gray-6 text-ios-label-primary border border-ios-gray-3'
                 }`}
               >
                 Expense
@@ -167,23 +169,18 @@ export function CategoryManager() {
             </div>
           </div>
 
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-              Name *
-            </label>
-            <input
-              type="text"
-              id="name"
-              required
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="e.g., Groceries, Salary, etc."
-            />
-          </div>
+          <Input
+            label="Name *"
+            type="text"
+            id="name"
+            required
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            placeholder="e.g., Groceries, Salary, etc."
+          />
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Color</label>
+            <label className="block text-ios-footnote font-medium text-ios-gray-1 mb-2">Color</label>
             <div className="flex gap-2">
               {COLORS.map((color) => (
                 <button
@@ -199,57 +196,61 @@ export function CategoryManager() {
             </div>
           </div>
 
-          <div className="flex gap-3">
-            <button
-              type="button"
-              onClick={() => {
-                setShowForm(false)
-                setError('')
-              }}
-              className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={submitting}
-              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition"
-            >
-              {submitting ? 'Creating...' : 'Create Category'}
-            </button>
-          </div>
-        </form>
+            <div className="flex gap-3">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => {
+                  setShowForm(false)
+                  setError('')
+                }}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                variant="primary"
+                disabled={submitting}
+                className="flex-1"
+              >
+                {submitting ? 'Creating...' : 'Create Category'}
+              </Button>
+            </div>
+          </form>
+        </Card>
       )}
 
       {/* Income Categories */}
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-3">Income Categories</h3>
+        <h3 className="text-ios-headline font-semibold text-ios-label-primary mb-3">Income Categories</h3>
         {incomeCategories.length === 0 ? (
-          <p className="text-gray-500 text-sm">No income categories yet</p>
+          <p className="text-ios-gray-2 text-ios-callout">No income categories yet</p>
         ) : (
           <div className="grid grid-cols-2 gap-3">
             {incomeCategories.map((category) => (
-              <div
+              <Card
                 key={category.id}
-                className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg"
+                padding="sm"
+                className="flex items-center justify-between"
               >
                 <div className="flex items-center gap-3">
                   <div
                     className="w-3 h-3 rounded-full"
-                    style={{ backgroundColor: category.color || '#3B82F6' }}
+                    style={{ backgroundColor: category.color || '#007AFF' }}
                   />
-                  <span className="text-sm font-medium text-gray-900">{category.name}</span>
+                  <span className="text-ios-callout font-medium text-ios-label-primary">{category.name}</span>
                 </div>
                 <button
                   onClick={() => handleDelete(category.id)}
-                  className="text-red-600 hover:text-red-900 transition"
+                  className="text-ios-red hover:text-ios-red/80 transition p-1 -m-1"
                   title="Delete category"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                   </svg>
                 </button>
-              </div>
+              </Card>
             ))}
           </div>
         )}
@@ -257,33 +258,34 @@ export function CategoryManager() {
 
       {/* Expense Categories */}
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-3">Expense Categories</h3>
+        <h3 className="text-ios-headline font-semibold text-ios-label-primary mb-3">Expense Categories</h3>
         {expenseCategories.length === 0 ? (
-          <p className="text-gray-500 text-sm">No expense categories yet</p>
+          <p className="text-ios-gray-2 text-ios-callout">No expense categories yet</p>
         ) : (
           <div className="grid grid-cols-2 gap-3">
             {expenseCategories.map((category) => (
-              <div
+              <Card
                 key={category.id}
-                className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg"
+                padding="sm"
+                className="flex items-center justify-between"
               >
                 <div className="flex items-center gap-3">
                   <div
                     className="w-3 h-3 rounded-full"
-                    style={{ backgroundColor: category.color || '#3B82F6' }}
+                    style={{ backgroundColor: category.color || '#007AFF' }}
                   />
-                  <span className="text-sm font-medium text-gray-900">{category.name}</span>
+                  <span className="text-ios-callout font-medium text-ios-label-primary">{category.name}</span>
                 </div>
                 <button
                   onClick={() => handleDelete(category.id)}
-                  className="text-red-600 hover:text-red-900 transition"
+                  className="text-ios-red hover:text-ios-red/80 transition p-1 -m-1"
                   title="Delete category"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                   </svg>
                 </button>
-              </div>
+              </Card>
             ))}
           </div>
         )}
