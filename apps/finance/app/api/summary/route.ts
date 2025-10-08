@@ -3,10 +3,9 @@
  * Provides financial overview and statistics
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@repo/db'
+import { prisma, Prisma } from '@repo/db'
 import { verifyToken } from '@repo/auth'
 import { currentMonthRange } from '@repo/utils'
-import { Prisma } from '@repo/db/generated/prisma'
 
 /**
  * GET /api/summary

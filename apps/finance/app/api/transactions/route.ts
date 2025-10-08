@@ -3,14 +3,13 @@
  * Handles CRUD operations for financial transactions
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@repo/db'
+import { prisma, Prisma } from '@repo/db'
 import { verifyToken } from '@repo/auth'
 import {
   CreateTransactionSchema,
   TransactionFiltersSchema,
   convertCurrency,
 } from '@repo/utils'
-import type { Prisma } from '@repo/db/generated/prisma'
 
 /**
  * GET /api/transactions
