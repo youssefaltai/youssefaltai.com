@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { COMMON_CURRENCIES } from '@repo/utils'
+import { COMMON_CURRENCIES, toDateInputValue, toDateTimeInputValue, fromDateInputValue } from '@repo/utils'
 
 interface Category {
   id: string
@@ -19,7 +19,8 @@ export function TransactionForm({ onSuccess }: TransactionFormProps) {
   const [currency, setCurrency] = useState('EUR')
   const [category, setCategory] = useState('')
   const [description, setDescription] = useState('')
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0])
+  const [date, setDate] = useState(new Date())
+  const [includeTime, setIncludeTime] = useState(false)
   const [exchangeRate, setExchangeRate] = useState('')
   const [useManualRate, setUseManualRate] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -60,7 +61,7 @@ export function TransactionForm({ onSuccess }: TransactionFormProps) {
         currency,
         category,
         description: description || undefined,
-        date: new Date(date).toISOString(),
+        date: date.toISOString(),
         ...(useManualRate && exchangeRate && { exchangeRate: parseFloat(exchangeRate) }),
       }
 
@@ -80,7 +81,8 @@ export function TransactionForm({ onSuccess }: TransactionFormProps) {
       // Reset form
       setAmount('')
       setDescription('')
-      setDate(new Date().toISOString().split('T')[0])
+      setDate(new Date())
+      setIncludeTime(false)
       setExchangeRate('')
       setUseManualRate(false)
     } catch (err) {
@@ -237,19 +239,57 @@ export function TransactionForm({ onSuccess }: TransactionFormProps) {
         />
       </div>
 
-      {/* Date */}
-      <div>
-        <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-2">
-          Date *
+      {/* Date & Time */}
+      <div className="space-y-3">
+        <label htmlFor="date" className="block text-sm font-medium text-gray-700">
+          Date & Time *
         </label>
+        
+        {/* Date Input */}
         <input
           type="date"
           id="date"
           required
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
+          value={toDateInputValue(date)}
+          onChange={(e) => {
+            const newDate = fromDateInputValue(e.target.value)
+            // Preserve time if includeTime is true
+            if (includeTime) {
+              newDate.setHours(date.getHours(), date.getMinutes())
+            }
+            setDate(newDate)
+          }}
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         />
+        
+        {/* Time Toggle */}
+        <div className="flex items-center">
+          <input
+            type="checkbox"
+            id="includeTime"
+            checked={includeTime}
+            onChange={(e) => setIncludeTime(e.target.checked)}
+            className="mr-2"
+          />
+          <label htmlFor="includeTime" className="text-sm text-gray-700">
+            Include specific time
+          </label>
+        </div>
+        
+        {/* Time Input (only if enabled) */}
+        {includeTime && (
+          <input
+            type="time"
+            value={toDateTimeInputValue(date).split('T')[1]}
+            onChange={(e) => {
+              const [hours, minutes] = e.target.value.split(':')
+              const newDate = new Date(date)
+              newDate.setHours(parseInt(hours || '0'), parseInt(minutes || '0'))
+              setDate(newDate)
+            }}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+        )}
       </div>
 
       {/* Submit Button */}

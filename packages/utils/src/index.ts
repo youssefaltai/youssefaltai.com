@@ -1,6 +1,36 @@
 // Shared utilities and helper functions
 export { cn } from './lib/cn'
-export { formatDate } from './lib/date'
+
+// Date utilities (using date-fns)
+export {
+  parseDate,
+  formatDate,
+  formatDateTime,
+  formatDateShort,
+  formatTime,
+  formatRelative,
+  now,
+  todayStart,
+  todayEnd,
+  currentMonthRange,
+  toDateInputValue,
+  toDateTimeInputValue,
+  fromDateInputValue,
+  fromDateTimeInputValue,
+  addDays,
+  addMonths,
+  subDays,
+  subMonths,
+  startOfMonth,
+  endOfMonth,
+  startOfDay,
+  endOfDay,
+  isSameDay,
+  isBefore,
+  isAfter,
+  isToday,
+  isYesterday,
+} from './lib/date'
 
 // Exchange rate utilities
 export {

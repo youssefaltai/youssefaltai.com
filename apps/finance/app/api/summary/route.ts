@@ -5,6 +5,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@repo/db'
 import { verifyToken } from '@repo/auth'
+import { currentMonthRange } from '@repo/utils'
 import { Prisma } from '@repo/db/generated/prisma'
 
 /**
@@ -29,13 +30,15 @@ export async function GET(request: NextRequest) {
 
     // Parse date range (default to current month)
     const searchParams = request.nextUrl.searchParams
+    const monthRange = currentMonthRange()
+    
     const dateFrom = searchParams.get('dateFrom')
       ? new Date(searchParams.get('dateFrom')!)
-      : new Date(new Date().getFullYear(), new Date().getMonth(), 1) // First day of current month
+      : monthRange.start
 
     const dateTo = searchParams.get('dateTo')
       ? new Date(searchParams.get('dateTo')!)
-      : new Date() // Today
+      : monthRange.end
 
     // Build query condition
     const where: Prisma.TransactionWhereInput = {

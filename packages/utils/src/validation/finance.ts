@@ -13,6 +13,9 @@ export const CurrencyCodeSchema = z.string().regex(/^[A-Z]{3}$/, 'Invalid curren
 // Rate source validation
 export const RateSourceSchema = z.enum(['api', 'manual', 'market'])
 
+// Date validation schema
+export const DateTimeSchema = z.iso.datetime('Invalid datetime format')
+
 // Create transaction schema
 export const CreateTransactionSchema = z.object({
   amount: z.number().positive('Amount must be positive'),
@@ -21,7 +24,7 @@ export const CreateTransactionSchema = z.object({
   type: TransactionTypeSchema,
   category: z.string().min(1, 'Category is required'),
   description: z.string().optional(),
-  date: z.string().datetime().or(z.date()),
+  date: DateTimeSchema,
 })
 
 // Update transaction schema (all fields optional except id)
@@ -32,7 +35,7 @@ export const UpdateTransactionSchema = z.object({
   type: TransactionTypeSchema.optional(),
   category: z.string().min(1, 'Category is required').optional(),
   description: z.string().optional(),
-  date: z.string().datetime().or(z.date()).optional(),
+  date: DateTimeSchema.optional(),
 })
 
 // Transaction filters schema
@@ -40,8 +43,8 @@ export const TransactionFiltersSchema = z.object({
   type: TransactionTypeSchema.optional(),
   category: z.string().optional(),
   currency: CurrencyCodeSchema.optional(),
-  dateFrom: z.string().datetime().or(z.date()).optional(),
-  dateTo: z.string().datetime().or(z.date()).optional(),
+  dateFrom: DateTimeSchema.optional(),
+  dateTo: DateTimeSchema.optional(),
   page: z.number().int().positive().default(1).optional(),
   limit: z.number().int().positive().max(100).default(50).optional(),
 })

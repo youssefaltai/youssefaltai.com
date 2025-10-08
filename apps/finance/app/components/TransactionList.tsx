@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { formatCurrency } from '@repo/utils'
+import { formatCurrency, formatDateShort, formatDateTime, formatRelative } from '@repo/utils'
 
 interface Transaction {
   id: string
@@ -48,14 +48,7 @@ export function TransactionList({ transactions, onTransactionDeleted }: Transact
     }
   }
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return new Intl.DateTimeFormat('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    }).format(date)
-  }
+  // Removed - using imported formatDateShort instead
 
   if (transactions.length === 0) {
     return (
@@ -97,8 +90,11 @@ export function TransactionList({ transactions, onTransactionDeleted }: Transact
         <tbody className="bg-white divide-y divide-gray-200">
           {transactions.map((transaction) => (
             <tr key={transaction.id} className="hover:bg-gray-50 transition">
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                {formatDate(transaction.date)}
+              <td className="px-6 py-4 whitespace-nowrap text-sm">
+                <div className="text-gray-900">{formatDateShort(transaction.date)}</div>
+                <div className="text-xs text-gray-500" title={formatDateTime(transaction.date)}>
+                  {formatRelative(transaction.date)}
+                </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
