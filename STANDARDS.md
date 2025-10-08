@@ -70,6 +70,12 @@ Strict mode. No any. Type public APIs. Prefer unions over enums.
 ### **20 - Financial Calculations**
 Decimal for money. Store historical exchange rates. 6 decimal precision for rates.
 
+### **21 - Date & Time Handling**
+Store full timestamps (not just dates). Use date-fns for operations. Flexible display options.
+
+### **22 - Mobile-First PWA**
+Design mobile-first (320px+). All apps installable PWAs. Touch-friendly UI (44px+ targets).
+
 ---
 
 ## 🚀 **Quick Reference**
