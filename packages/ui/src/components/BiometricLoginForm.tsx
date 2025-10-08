@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { startRegistration, startAuthentication } from '@simplewebauthn/browser'
 import { Button } from './Button'
@@ -14,10 +14,16 @@ export function BiometricLoginForm({ appName }: BiometricLoginFormProps) {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [isNewUser, setIsNewUser] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const router = useRouter()
 
-  // Check if WebAuthn is supported
-  const isWebAuthnSupported = typeof globalThis !== 'undefined' && 
+  // Prevent hydration mismatch
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  // Check if WebAuthn is supported (only on client)
+  const isWebAuthnSupported = mounted && typeof globalThis !== 'undefined' &&
     'PublicKeyCredential' in globalThis
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -127,6 +133,20 @@ export function BiometricLoginForm({ appName }: BiometricLoginFormProps) {
               Your browser doesn't support Face ID / Touch ID authentication.
               Please use a modern browser like Chrome, Safari, or Edge.
             </p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Prevent hydration mismatch - don't render until mounted
+  if (!mounted) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow">
+          <div>
+            <h2 className="text-3xl font-bold text-center">{appName}</h2>
+            <p className="mt-2 text-center text-gray-600">Loading...</p>
           </div>
         </div>
       </div>
