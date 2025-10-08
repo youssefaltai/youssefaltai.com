@@ -23,8 +23,11 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // WebAuthn credentials
-  credentials Credential[]
+  // Relations
+  credentials  Credential[]
+  transactions Transaction[]
+  categories   Category[]
+  settings     UserSettings?
 
   @@map("users")
 }
@@ -44,4 +47,67 @@ model Credential {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("credentials")
+}
+
+// Transaction model with multi-currency support
+model Transaction {
+  id          String   @id @default(cuid())
+  userId      String
+  
+  // Original transaction details
+  amount      Decimal  @db.Decimal(12, 2)  // Original amount paid
+  currency    String   @db.VarChar(3)      // ISO 4217 currency code (USD, EUR, etc.)
+  
+  // Exchange rate tracking (for historical accuracy)
+  exchangeRate    Decimal  @db.Decimal(12, 6)  // Rate used at transaction time
+  baseAmount      Decimal  @db.Decimal(12, 2)  // Converted to user's base currency
+  baseCurrency    String   @db.VarChar(3)      // User's base currency at transaction time
+  rateSource      String   @default("api")     // "api", "manual", or "market"
+  
+  // Transaction details
+  type        String      // "income" or "expense"
+  category    String      // Category name
+  description String?     // Optional notes
+  date        DateTime    // Transaction date
+  
+  // Metadata
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId, date(sort: Desc)])
+  @@index([userId, category])
+  @@index([userId, type])
+  @@map("transactions")
+}
+
+// User-defined categories
+model Category {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  type        String   // "income" or "expense"
+  color       String?  // Hex color for UI
+  icon        String?  // Icon name/emoji
+  createdAt   DateTime @default(now())
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, name])
+  @@index([userId, type])
+  @@map("categories")
+}
+
+// User settings for finance preferences
+model UserSettings {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  baseCurrency    String   @default("EUR") @db.VarChar(3)  // User's primary currency
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("user_settings")
 }
