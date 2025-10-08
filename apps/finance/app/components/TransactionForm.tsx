@@ -16,7 +16,7 @@ interface TransactionFormProps {
 export function TransactionForm({ onSuccess }: TransactionFormProps) {
   const [type, setType] = useState<'income' | 'expense'>('expense')
   const [amount, setAmount] = useState('')
-  const [currency, setCurrency] = useState('EUR')
+  const [currency, setCurrency] = useState('EGP')
   const [category, setCategory] = useState('')
   const [description, setDescription] = useState('')
   const [date, setDate] = useState(new Date())

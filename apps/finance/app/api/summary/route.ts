@@ -99,7 +99,7 @@ export async function GET(request: NextRequest) {
       summary: {
         dateFrom,
         dateTo,
-        baseCurrency: userSettings?.baseCurrency || 'EUR',
+        baseCurrency: userSettings?.baseCurrency || 'EGP',
         income,
         expenses,
         balance,
