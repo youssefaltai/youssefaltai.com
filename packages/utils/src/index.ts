@@ -41,6 +41,7 @@ export {
   isValidCurrencyCode,
   getCurrencySymbol,
   formatCurrency,
+  formatCurrencyCompact,
   COMMON_CURRENCIES,
   type ExchangeRates,
   type ConversionResult,

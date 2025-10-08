@@ -208,45 +208,83 @@ export function getCurrencySymbol(code: string): string {
 }
 
 /**
- * Format amount with currency
- * Special handling for gold (shows grams with 3 decimal places)
+ * Format amount with currency using Intl.NumberFormat
+ * Provides proper thousands separators and locale-aware formatting
  * 
  * @param amount - Amount to format (number, string, or Prisma Decimal)
  * @param currency - Currency code (EGP, USD, GOLD_G)
- * @returns Formatted string (e.g., "$100.00", "E£50.00", "125.500g")
+ * @param options - Optional formatting options
+ * @returns Formatted string with thousands separators
+ * 
+ * @example
+ * formatCurrency(5000, 'EGP') → "E£5,000.00"
+ * formatCurrency(114750.50, 'EGP') → "E£114,750.50"
+ * formatCurrency(100, 'USD') → "$100.00"
+ * formatCurrency(25.5, 'GOLD_G') → "25.500g"
+ * formatCurrency(1234.567, 'GOLD_G') → "1,234.567g"
  */
-export function formatCurrency(amount: number | string, currency: string): string {
-  const symbol = getCurrencySymbol(currency)
+export function formatCurrency(
+  amount: number | string,
+  currency: string,
+  options?: {
+    compact?: boolean  // e.g., "E£5K" instead of "E£5,000"
+    hideSymbol?: boolean
+  }
+): string {
+  // Parse amount (handle Prisma Decimal strings)
+  const numericAmount = typeof amount === 'string' ? Number(amount) : amount
+  if (isNaN(numericAmount)) {
+    throw new Error(`Invalid amount: ${amount}`)
+  }
   
-  // Handle Prisma Decimal (serialized as string) or number
-  let numericAmount: number
-  if (typeof amount === 'string') {
-    numericAmount = Number(amount)
-    if (isNaN(numericAmount)) {
-      throw new Error(`Invalid amount: ${amount}`)
+  // Special handling for gold (grams)
+  if (currency === 'GOLD_G') {
+    const formatted = new Intl.NumberFormat('en-US', {
+      minimumFractionDigits: 3,
+      maximumFractionDigits: 3,
+      useGrouping: true, // Thousands separators
+      ...(options?.compact && { notation: 'compact', compactDisplay: 'short' })
+    }).format(numericAmount)
+    
+    return options?.hideSymbol ? formatted : `${formatted}g`
+  }
+  
+  // Format real currencies with Intl.NumberFormat
+  try {
+    let formatted = new Intl.NumberFormat('en-EG', {
+      style: 'currency',
+      currency: currency,
+      currencyDisplay: 'symbol', // Show symbol, not code
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+      ...(options?.compact && { notation: 'compact', compactDisplay: 'short' })
+    }).format(numericAmount)
+    
+    // Fallback: Some browsers show "EGP" instead of "E£"
+    // Replace currency code with proper symbol if needed
+    if (currency === 'EGP' && formatted.includes('EGP')) {
+      formatted = formatted.replace(/EGP\s?/, 'E£')
     }
-  } else {
-    numericAmount = amount
-  }
-  
-  // Determine decimal places based on currency
-  let decimalPlaces = 2
-  if (currency === 'GOLD_G') {
-    decimalPlaces = 3 // Gold measured in grams needs more precision
-  }
-  
-  const formatted = numericAmount.toFixed(decimalPlaces)
-  
-  // Special formatting for gold
-  if (currency === 'GOLD_G') {
-    return `${formatted}g`
-  }
-  
-  // For currencies with symbol before amount
-  if (['$', '£', '€', 'E£', 'CHF', 'C$', 'A$'].includes(symbol)) {
+    
+    return formatted
+  } catch (error) {
+    // Fallback for unknown currencies
+    console.warn(`Unknown currency: ${currency}, using fallback formatting`)
+    const symbol = getCurrencySymbol(currency)
+    const formatted = new Intl.NumberFormat('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+      useGrouping: true
+    }).format(numericAmount)
     return `${symbol}${formatted}`
   }
-  
-  // For currencies with symbol after amount
-  return `${formatted} ${symbol}`
+}
+
+/**
+ * Format currency in compact notation for large numbers
+ * @example formatCurrencyCompact(5000, 'EGP') → "E£5K"
+ * @example formatCurrencyCompact(1500000, 'EGP') → "E£1.5M"
+ */
+export function formatCurrencyCompact(amount: number | string, currency: string): string {
+  return formatCurrency(amount, currency, { compact: true })
 }
