@@ -8,9 +8,7 @@ import { z } from 'zod'
 export const TransactionTypeSchema = z.enum(['income', 'expense'])
 
 // Currency code validation (EGP, USD, GOLD_G)
-export const CurrencyCodeSchema = z.enum(['EGP', 'USD', 'GOLD_G'], {
-  errorMap: () => ({ message: 'Currency must be EGP, USD, or GOLD_G' })
-})
+export const CurrencyCodeSchema = z.enum(['EGP', 'USD', 'GOLD_G'])
 
 // Rate source validation
 export const RateSourceSchema = z.enum(['api', 'manual', 'market'])
