@@ -1,0 +1,137 @@
+# GitLab CI/CD Pipeline (Template)
+# To activate: rename to .gitlab-ci.yml and push
+#
+# Requirements:
+# - GitLab Runner installed on VPS (see CICD_SETUP.md)
+# - Runner has Docker access
+# - Runner has access to project directory
+# - .env file configured on VPS
+
+image: node:20-alpine
+
+stages:
+  - validate    # Type checking, linting
+  - build       # Build Docker images
+  - deploy      # Deploy to production
+
+variables:
+  DOCKER_DRIVER: overlay2
+  PNPM_HOME: "/root/.local/share/pnpm"
+
+# Cache for faster builds
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - node_modules/
+    - .pnpm-store/
+    - apps/*/node_modules/
+    - packages/*/node_modules/
+
+before_script:
+  - corepack enable
+  - corepack prepare pnpm@latest --activate
+  - export PATH="$PNPM_HOME:$PATH"
+
+# ===== VALIDATE STAGE =====
+
+type-check:
+  stage: validate
+  tags:
+    - production
+  script:
+    - pnpm install --frozen-lockfile
+    - pnpm type-check
+  only:
+    - main
+
+lint:
+  stage: validate
+  tags:
+    - production
+  script:
+    - pnpm install --frozen-lockfile
+    - pnpm lint
+  only:
+    - main
+
+# ===== BUILD STAGE =====
+
+build-images:
+  stage: build
+  tags:
+    - production
+  script:
+    - pnpm install --frozen-lockfile
+    - pnpm db:generate
+    - docker compose build --parallel
+  only:
+    - main
+  artifacts:
+    expire_in: 1 hour
+    paths:
+      - packages/db/generated/
+
+# ===== DEPLOY STAGE =====
+
+deploy-production:
+  stage: deploy
+  tags:
+    - production
+  script:
+    # Deploy new containers
+    - docker compose up -d
+    
+    # Wait for containers to be ready
+    - sleep 15
+    
+    # Run database migrations
+    - pnpm db:push || echo "Warning: DB migration failed or no changes"
+    
+    # Health check
+    - docker compose ps
+    - docker compose logs finance --tail=20
+    - docker compose logs fitness --tail=20
+    - docker compose logs dashboard --tail=20
+    
+    # Verify services are responding
+    - curl -f https://finance.youssefaltai.com || exit 1
+    - curl -f https://fitness.youssefaltai.com || exit 1
+    - curl -f https://dashboard.youssefaltai.com || exit 1
+    
+    - echo "✅ All services deployed successfully!"
+  only:
+    - main
+  environment:
+    name: production
+    url: https://finance.youssefaltai.com
+  when: manual  # Remove this line for automatic deploys
+
+# ===== OPTIONAL: ROLLBACK JOB =====
+
+rollback:
+  stage: deploy
+  tags:
+    - production
+  script:
+    - echo "⚠️ Rolling back to previous version..."
+    - git checkout HEAD~1
+    - docker compose up -d --build
+    - sleep 10
+    - docker compose ps
+    - echo "✅ Rolled back to previous commit"
+  when: manual
+  only:
+    - main
+
+# ===== OPTIONAL: CLEANUP OLD IMAGES =====
+
+cleanup:
+  stage: deploy
+  tags:
+    - production
+  script:
+    - docker system prune -af --volumes --filter "until=24h"
+    - echo "✅ Cleaned up old Docker images"
+  when: manual
+  only:
+    - main
