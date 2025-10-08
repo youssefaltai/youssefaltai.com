@@ -297,7 +297,7 @@ export function TransactionForm({ onSuccess }: TransactionFormProps) {
         <button
           type="submit"
           disabled={loading || categories.length === 0}
-          className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition font-medium"
+          className="px-6 py-3 bg-ios-blue text-white rounded-ios font-semibold hover:bg-ios-blue/90 disabled:opacity-40 disabled:cursor-not-allowed transition-all active:scale-95"
         >
           {loading ? 'Creating...' : 'Create Transaction'}
         </button>
