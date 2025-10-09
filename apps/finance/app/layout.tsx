@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { BottomNav } from "./components/BottomNav";
+import { Providers } from "./providers";
 
 export const metadata: Metadata = {
   title: "Finance App",
@@ -31,8 +32,10 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.webmanifest" />
       </head>
       <body className="bg-ios-gray-6 antialiased">
-        <main className="pb-16 min-h-screen">{children}</main>
-        <BottomNav />
+        <Providers>
+          <main className="pb-16 min-h-screen">{children}</main>
+          <BottomNav />
+        </Providers>
       </body>
     </html>
   );
