@@ -26,7 +26,7 @@
 |------|--------|--------|--------|------|---------|
 | **1. Middleware** | Extract matcher config to `@repo/auth/middleware-config` | HIGH | 15min | LOW | `@repo/auth` |
 | **2. PWA Manifests** | Create `createManifest()` factory in `@repo/utils` | HIGH | 20min | LOW | `@repo/utils` |
-| **3. Login Pages** | Delete 3 login pages, use shared `/login` route | HIGH | 10min | LOW | All apps |
+| **3. Login Pages** | Simplify to 3 lines using shared BiometricLoginForm | HIGH | 5min | LOW | All apps |
 | **4. Auth API Routes** | Delete 12 files (4 per app), already exported from `@repo/auth` | MEDIUM | 10min | NONE | All apps |
 | **5. App Layouts** | Create `createAppLayout()` factory or shared component | MEDIUM | 30min | LOW | `@repo/ui` |
 | **6. Type Definitions** | Consolidate to `@repo/utils/types/finance.ts` | MEDIUM | 20min | LOW | `@repo/utils` |
@@ -99,7 +99,18 @@ export default function manifest() {
 
 ---
 
-### 3. **Delete Duplicate Auth API Routes** (10 minutes)
+### 3. **Simplify Login Pages** (5 minutes)
+```typescript
+// apps/finance/app/login/page.tsx (3 lines!)
+import { BiometricLoginForm } from '@repo/ui'
+
+export default function LoginPage() {
+  return <BiometricLoginForm appName="Finance" />
+}
+```
+**Impact:** Each app needs `/login` route, but now minimal (3 lines vs 100+ lines if inline)
+
+### 4. **Delete Duplicate Auth API Routes** (10 minutes)
 - Delete `apps/*/app/api/auth/**` (12 files total, 4 per app)
 - These just re-export from `@repo/auth/webauthn-handlers`
 - Already redundant, zero functionality
