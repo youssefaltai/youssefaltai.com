@@ -1,1 +1,1 @@
-export { registrationVerifyHandler as POST } from '@repo/auth/webauthn-handlers'
+export { registrationVerificationHandler as POST } from '@repo/auth/webauthn-handlers'
