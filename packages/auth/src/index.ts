@@ -3,9 +3,10 @@
 export { generateToken, verifyToken } from './lib/jwt'
 export { authMiddleware } from './middleware'
 export { setAuthCookie, clearAuthCookie, getAuthCookie } from './lib/cookies'
-export type { JWTPayload, AuthUser } from './types'
 
-// Re-export API handlers separately to avoid importing Prisma in middleware
-// Use: import { loginHandler } from '@repo/auth/api-handlers'
+// Re-export types from @repo/types for convenience
+export type { JWTPayload, AuthUser } from '@repo/types'
+
+// Password utilities (kept for backwards compatibility, but not used with WebAuthn)
 export { hashPassword, verifyPassword } from './lib/password'
 

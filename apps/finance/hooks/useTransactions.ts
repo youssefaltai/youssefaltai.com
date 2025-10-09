@@ -1,23 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-
-interface Transaction {
-  id: string
-  amount: number
-  currency: string
-  baseAmount: number
-  baseCurrency: string
-  type: 'income' | 'expense'
-  category: string
-  description?: string
-  date: string
-  createdAt: string
-}
-
-interface TransactionFilters {
-  type?: 'income' | 'expense'
-  limit?: number
-  category?: string
-}
+import type { Transaction, TransactionFilters } from '@repo/utils'
 
 /**
  * Fetch transactions with optional filters

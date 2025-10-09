@@ -1,8 +1,7 @@
 'use client'
 
 import { useMemo } from 'react'
-import { Card } from '@repo/ui'
-import { FloatingActionButton } from '../components/FloatingActionButton'
+import { Card, FloatingActionButton, Modal } from '@repo/ui'
 import { TransactionForm } from '../components/TransactionForm'
 import { formatCurrency, formatDateShort } from '@repo/utils'
 import { useTransactions } from '../../hooks/useTransactions'
@@ -123,24 +122,13 @@ export default function TransactionsPage() {
         <FloatingActionButton onClick={openAddTransaction} />
 
         {/* Add Transaction Modal */}
-        {showAddTransaction && (
-          <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center p-4 z-50">
-            <Card className="max-w-2xl w-full max-h-[90vh] overflow-y-auto" padding="lg">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-ios-title-2 font-bold text-ios-label-primary">Add Transaction</h2>
-                <button
-                  onClick={closeAddTransaction}
-                  className="text-ios-gray-1 hover:text-ios-label-primary p-2 -mr-2"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-              <TransactionForm onSuccess={handleTransactionAdded} />
-            </Card>
-          </div>
-        )}
+        <Modal
+          isOpen={showAddTransaction}
+          onClose={closeAddTransaction}
+          title="Add Transaction"
+        >
+          <TransactionForm onSuccess={handleTransactionAdded} />
+        </Modal>
       </div>
     </div>
   )

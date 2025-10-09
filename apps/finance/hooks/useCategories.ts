@@ -1,18 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-
-interface Category {
-  id: string
-  name: string
-  type: 'income' | 'expense'
-  color?: string
-  icon?: string
-  userId: string
-  createdAt: string
-}
-
-interface CategoryFilters {
-  type?: 'income' | 'expense'
-}
+import type { Category, CategoryFilters } from '@repo/utils'
 
 /**
  * Fetch categories with optional type filter

@@ -1,28 +1,11 @@
-import { MetadataRoute } from 'next'
+import { createManifest } from '@repo/utils'
 
-export default function manifest(): MetadataRoute.Manifest {
-  return {
+export default function manifest() {
+  return createManifest({
     name: 'Dashboard App',
-    short_name: 'Dashboard',
+    shortName: 'Dashboard',
     description: 'Unified dashboard for all applications',
-    start_url: '/',
-    display: 'standalone',
-    background_color: '#ffffff',
-    theme_color: '#0B66C2',
-    icons: [
-      {
-        src: '/icon-192.png',
-        sizes: '192x192',
-        type: 'image/png',
-        purpose: 'any',
-      },
-      {
-        src: '/icon-512.png',
-        sizes: '512x512',
-        type: 'image/png',
-        purpose: 'any',
-      },
-    ],
-  }
+    themeColor: '#007AFF',
+  })
 }
 

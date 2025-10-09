@@ -1,18 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-
-interface Summary {
-  dateFrom: string
-  dateTo: string
-  baseCurrency: string
-  income: number
-  expenses: number
-  balance: number
-}
-
-interface SummaryFilters {
-  dateFrom?: string
-  dateTo?: string
-}
+import type { Summary, SummaryFilters } from '@repo/utils'
 
 /**
  * Fetch financial summary (income, expenses, balance)

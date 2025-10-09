@@ -1,14 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-
-interface CreateTransactionInput {
-  type: 'income' | 'expense'
-  amount: number
-  currency: string
-  exchangeRate?: number
-  categoryId: string
-  description?: string
-  date: string
-}
+import type { CreateTransactionInput } from '@repo/utils'
 
 /**
  * Create a new transaction

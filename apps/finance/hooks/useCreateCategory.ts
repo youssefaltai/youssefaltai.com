@@ -1,11 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-
-interface CreateCategoryInput {
-  name: string
-  type: 'income' | 'expense'
-  color?: string
-  icon?: string
-}
+import type { CreateCategoryInput } from '@repo/utils'
 
 /**
  * Create a new category

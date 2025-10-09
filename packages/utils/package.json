@@ -22,6 +22,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@repo/types": "workspace:*",
     "date-fns": "^4.1.0",
     "zod": "^4.1.12"
   }

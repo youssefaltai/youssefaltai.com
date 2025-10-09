@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@repo/db": "workspace:*",
+    "@repo/types": "workspace:*",
     "@simplewebauthn/server": "^13.2.2",
     "bcryptjs": "^3.0.2",
     "ioredis": "^5.8.1",
