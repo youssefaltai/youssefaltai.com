@@ -1,16 +1,6 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import { BottomNav } from "./components/BottomNav";
 
 export const metadata: Metadata = {
   title: "Finance App",
@@ -27,7 +17,7 @@ export const viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
-  themeColor: "#0B66C2",
+  themeColor: "#007AFF",
 };
 
 export default function RootLayout({
@@ -40,10 +30,9 @@ export default function RootLayout({
       <head>
         <link rel="manifest" href="/manifest.webmanifest" />
       </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
+      <body className="bg-ios-gray-6 antialiased">
+        <main className="pb-16 min-h-screen">{children}</main>
+        <BottomNav />
       </body>
     </html>
   );
