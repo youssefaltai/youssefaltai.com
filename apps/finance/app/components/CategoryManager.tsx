@@ -188,7 +188,7 @@ export function CategoryManager() {
                   type="button"
                   onClick={() => setFormData({ ...formData, color })}
                   className={`w-10 h-10 rounded-full border-2 transition ${
-                    formData.color === color ? 'border-gray-900 scale-110' : 'border-gray-300'
+                    formData.color === color ? 'border-ios-label-primary scale-110' : 'border-ios-gray-3'
                   }`}
                   style={{ backgroundColor: color }}
                 />
