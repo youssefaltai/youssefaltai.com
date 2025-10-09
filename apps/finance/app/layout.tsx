@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { BottomNav } from "./components/BottomNav";
 import { Providers } from "./providers";
 
 export const metadata: Metadata = {
-  title: "Finance App",
+  title: "Finance",
   description: "Personal finance management application",
   manifest: "/manifest.webmanifest",
   appleWebApp: {
@@ -33,8 +32,7 @@ export default function RootLayout({
       </head>
       <body className="bg-ios-gray-6 antialiased">
         <Providers>
-          <main className="pb-16 min-h-screen">{children}</main>
-          <BottomNav />
+          <main className="min-h-screen">{children}</main>
         </Providers>
       </body>
     </html>

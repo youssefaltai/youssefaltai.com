@@ -1,19 +1,8 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
 export const metadata: Metadata = {
-  title: "Fitness App",
+  title: "Fitness",
   description: "Personal fitness tracking application",
   manifest: "/manifest.webmanifest",
   appleWebApp: {
@@ -27,7 +16,7 @@ export const viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
-  themeColor: "#0B66C2",
+  themeColor: "#34C759",
 };
 
 export default function RootLayout({
@@ -40,9 +29,7 @@ export default function RootLayout({
       <head>
         <link rel="manifest" href="/manifest.webmanifest" />
       </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className="bg-ios-gray-6 antialiased">
         {children}
       </body>
     </html>
