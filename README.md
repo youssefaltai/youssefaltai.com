@@ -12,9 +12,25 @@ A production-ready Turborepo monorepo containing multiple Next.js applications w
 ### Shared Packages
 - **@repo/ui** - Shared UI components and design system
 - **@repo/auth** - JWT authentication with shared middleware
+- **@repo/db** - Prisma database client and schemas
 - **@repo/utils** - Utility functions and helpers
 - **@repo/config** - Shared ESLint and Prettier configurations
 - **@repo/tsconfig** - Base TypeScript configurations
+
+## 📚 Documentation
+
+Comprehensive documentation is available in the [`docs/`](./docs) directory:
+
+- 📖 [Documentation Index](./docs/README.md) - Complete documentation navigation
+- 🏗️ [Architecture & Design Decisions](./docs/architecture) - System architecture and monorepo structure
+- 🔬 [Research Documents](./docs/research) - Feature research and implementation decisions
+- 🚀 [Deployment Guides](./docs/deployment) - VPS deployment and CI/CD setup
+- 📋 [Development Standards](./docs/development/standards.md) - Coding standards and best practices
+
+**Quick Links:**
+- [VPS Deployment Guide](./docs/deployment/vps-deployment.md)
+- [Development Standards](./docs/development/standards.md)
+- [Monorepo Architecture](./docs/architecture/monorepo-architecture.md)
 
 ## 🚀 Quick Start
 
@@ -332,19 +348,35 @@ pnpm type-check --filter finance
 
 ## 📚 Resources
 
+### Project Documentation
+- [Documentation Index](./docs/README.md) - Complete documentation overview
+- [Architecture Decisions](./docs/architecture/monorepo-architecture.md) - Why we chose each technology
+- [Development Standards](./docs/development/standards.md) - Coding guidelines and rules
+- [Deployment Guide](./docs/deployment/vps-deployment.md) - Production deployment steps
+
+### External Resources
 - [Turborepo Documentation](https://turbo.build/repo/docs)
-- [Next.js Documentation](https://nextjs.org/docs)
+- [Next.js 15 Documentation](https://nextjs.org/docs)
 - [PNPM Documentation](https://pnpm.io)
+- [Prisma Documentation](https://www.prisma.io/docs)
 - [Traefik Documentation](https://doc.traefik.io/traefik/)
 - [Docker Best Practices](https://docs.docker.com/develop/dev-best-practices/)
 
 ## 🤝 Contributing
 
-1. Create a feature branch
-2. Make your changes
-3. Run `pnpm lint` and `pnpm type-check`
-4. Test your changes locally
-5. Submit a pull request
+1. Review [Development Standards](./docs/development/standards.md) for coding guidelines
+2. Create a feature branch from `main`
+3. Follow the research-first approach for new features (see [docs/research/](./docs/research))
+4. Write clean, tested code following our standards
+5. Run quality checks: `pnpm lint && pnpm type-check && pnpm build`
+6. Test your changes locally (both direct and Docker)
+7. Submit a pull request with:
+   - Clear description of changes
+   - Link to research document (for new features)
+   - Testing instructions
+   - Any breaking changes noted
+
+See [Development Standards](./docs/development/standards.md) for detailed contribution guidelines.
 
 ## 📄 License
 
