@@ -1,15 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import { Button, Card, Input } from '@repo/ui'
-
-interface Category {
-  id: string
-  name: string
-  type: 'income' | 'expense'
-  color?: string
-  icon?: string
-}
+import { useCategories } from '../../hooks/useCategories'
+import { useCreateCategory } from '../../hooks/useCreateCategory'
+import { useDeleteCategory } from '../../hooks/useDeleteCategory'
 
 const COLORS = [
   '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6',
@@ -17,8 +12,6 @@ const COLORS = [
 ]
 
 export function CategoryManager() {
-  const [categories, setCategories] = useState<Category[]>([])
-  const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
@@ -26,86 +19,49 @@ export function CategoryManager() {
     color: COLORS[0],
     icon: '📁',
   })
-  const [error, setError] = useState('')
-  const [submitting, setSubmitting] = useState(false)
 
-  useEffect(() => {
-    fetchCategories()
-  }, [])
-
-  const fetchCategories = async () => {
-    try {
-      setLoading(true)
-      const res = await fetch('/api/categories')
-      if (res.ok) {
-        const data = await res.json()
-        setCategories(data.categories)
-      }
-    } catch (err) {
-      console.error('Failed to fetch categories:', err)
-    } finally {
-      setLoading(false)
-    }
-  }
+  // Server state from TanStack Query
+  const { data: categories = [], isLoading: loading } = useCategories()
+  const createCategory = useCreateCategory()
+  const deleteCategory = useDeleteCategory()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError('')
-    setSubmitting(true)
 
-    try {
-      const res = await fetch('/api/categories', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      })
-
-      if (!res.ok) {
-        const errorData = await res.json()
-        throw new Error(errorData.message || 'Failed to create category')
-      }
-
-      // Reset form and refresh categories
-      setFormData({
-        name: '',
-        type: 'expense',
-        color: COLORS[0],
-        icon: '📁',
-      })
-      setShowForm(false)
-      fetchCategories()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create category')
-    } finally {
-      setSubmitting(false)
-    }
+    createCategory.mutate(formData, {
+      onSuccess: () => {
+        // Reset form
+        setFormData({
+          name: '',
+          type: 'expense',
+          color: COLORS[0],
+          icon: '📁',
+        })
+        setShowForm(false)
+      },
+    })
   }
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = (id: string) => {
     if (!confirm('Are you sure you want to delete this category?')) {
       return
     }
 
-    try {
-      const res = await fetch(`/api/categories/${id}`, {
-        method: 'DELETE',
-      })
-
-      if (!res.ok) {
-        const errorData = await res.json()
-        alert(errorData.message || 'Failed to delete category')
-        return
-      }
-
-      fetchCategories()
-    } catch (err) {
-      console.error('Error deleting category:', err)
-      alert('Failed to delete category')
-    }
+    deleteCategory.mutate(id, {
+      onError: (error) => {
+        alert(error.message || 'Failed to delete category')
+      },
+    })
   }
 
-  const incomeCategories = categories.filter((c) => c.type === 'income')
-  const expenseCategories = categories.filter((c) => c.type === 'expense')
+  const incomeCategories = useMemo(
+    () => categories.filter((c) => c.type === 'income'),
+    [categories]
+  )
+  const expenseCategories = useMemo(
+    () => categories.filter((c) => c.type === 'expense'),
+    [categories]
+  )
 
   if (loading) {
     return (
@@ -135,9 +91,9 @@ export function CategoryManager() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <h3 className="text-ios-headline font-semibold text-ios-label-primary">New Category</h3>
             
-            {error && (
+            {createCategory.error && (
               <div className="bg-ios-red/10 border-l-4 border-ios-red text-ios-red p-4 rounded-ios-sm text-ios-callout" role="alert">
-                <p>{error}</p>
+                <p>{createCategory.error.message}</p>
               </div>
             )}
 
@@ -202,7 +158,7 @@ export function CategoryManager() {
                 variant="secondary"
                 onClick={() => {
                   setShowForm(false)
-                  setError('')
+                  createCategory.reset()
                 }}
                 className="flex-1"
               >
@@ -211,10 +167,10 @@ export function CategoryManager() {
               <Button
                 type="submit"
                 variant="primary"
-                disabled={submitting}
+                disabled={createCategory.isPending}
                 className="flex-1"
               >
-                {submitting ? 'Creating...' : 'Create Category'}
+                {createCategory.isPending ? 'Creating...' : 'Create Category'}
               </Button>
             </div>
           </form>

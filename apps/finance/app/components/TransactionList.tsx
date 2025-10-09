@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
 import { formatCurrency, formatDateShort, formatDateTime, formatRelative } from '@repo/utils'
+import { useDeleteTransaction } from '../../hooks/useDeleteTransaction'
 
 interface Transaction {
   id: string
@@ -18,34 +18,21 @@ interface Transaction {
 
 interface TransactionListProps {
   transactions: Transaction[]
-  onTransactionDeleted: () => void
 }
 
-export function TransactionList({ transactions, onTransactionDeleted }: TransactionListProps) {
-  const [deleting, setDeleting] = useState<string | null>(null)
+export function TransactionList({ transactions }: TransactionListProps) {
+  const deleteTransaction = useDeleteTransaction()
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = (id: string) => {
     if (!confirm('Are you sure you want to delete this transaction?')) {
       return
     }
 
-    setDeleting(id)
-    try {
-      const res = await fetch(`/api/transactions/${id}`, {
-        method: 'DELETE',
-      })
-
-      if (!res.ok) {
-        throw new Error('Failed to delete transaction')
-      }
-
-      onTransactionDeleted()
-    } catch (error) {
-      console.error('Error deleting transaction:', error)
-      alert('Failed to delete transaction')
-    } finally {
-      setDeleting(null)
-    }
+    deleteTransaction.mutate(id, {
+      onError: (error) => {
+        alert(error.message || 'Failed to delete transaction')
+      },
+    })
   }
 
   // Removed - using imported formatDateShort instead
@@ -116,11 +103,11 @@ export function TransactionList({ transactions, onTransactionDeleted }: Transact
               <td className="px-6 py-4 whitespace-nowrap text-center text-ios-callout">
                 <button
                   onClick={() => handleDelete(transaction.id)}
-                  disabled={deleting === transaction.id}
+                  disabled={deleteTransaction.isPending}
                   className="text-ios-red hover:text-ios-red/80 disabled:text-ios-gray-3 transition p-2 -m-2"
                   title="Delete transaction"
                 >
-                  {deleting === transaction.id ? (
+                  {deleteTransaction.isPending ? (
                     <svg className="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                     </svg>

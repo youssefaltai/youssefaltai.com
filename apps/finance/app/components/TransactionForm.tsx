@@ -2,12 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { COMMON_CURRENCIES, toDateInputValue, toDateTimeInputValue, fromDateInputValue } from '@repo/utils'
-
-interface Category {
-  id: string
-  name: string
-  type: 'income' | 'expense'
-}
+import { useCategories } from '../../hooks/useCategories'
+import { useCreateTransaction } from '../../hooks/useCreateTransaction'
 
 interface TransactionFormProps {
   onSuccess: () => void
@@ -23,82 +19,59 @@ export function TransactionForm({ onSuccess }: TransactionFormProps) {
   const [includeTime, setIncludeTime] = useState(false)
   const [exchangeRate, setExchangeRate] = useState('')
   const [useManualRate, setUseManualRate] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
-  const [categories, setCategories] = useState<Category[]>([])
 
-  // Fetch categories
+  // Server state from TanStack Query
+  const { data: categories = [] } = useCategories({ type })
+  const createTransaction = useCreateTransaction()
+
+  // Set first category as default when type changes or categories load
   useEffect(() => {
-    async function fetchCategories() {
-      try {
-        const res = await fetch(`/api/categories?type=${type}`)
-        if (res.ok) {
-          const data = await res.json()
-          setCategories(data.categories)
-          // Always set first category as default when type changes
-          if (data.categories.length > 0) {
-            setCategory(data.categories[0].name)
-          } else {
-            setCategory('')
-          }
-        }
-      } catch (err) {
-        console.error('Failed to fetch categories:', err)
-      }
+    if (categories.length > 0 && categories[0]) {
+      setCategory(categories[0].name)
+    } else {
+      setCategory('')
     }
-    fetchCategories()
-  }, [type])
+  }, [categories])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError('')
-    setLoading(true)
 
-    try {
-      const data = {
-        type,
-        amount: parseFloat(amount),
-        currency,
-        category,
-        description: description || undefined,
-        date: date.toISOString(),
-        ...(useManualRate && exchangeRate && { exchangeRate: parseFloat(exchangeRate) }),
-      }
-
-      const res = await fetch('/api/transactions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      })
-
-      if (!res.ok) {
-        const errorData = await res.json()
-        throw new Error(errorData.message || 'Failed to create transaction')
-      }
-
-      onSuccess()
-      
-      // Reset form
-      setAmount('')
-      setDescription('')
-      setDate(new Date())
-      setIncludeTime(false)
-      setExchangeRate('')
-      setUseManualRate(false)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create transaction')
-    } finally {
-      setLoading(false)
+    const categoryId = categories.find((c) => c.name === category)?.id
+    if (!categoryId) {
+      return
     }
+
+    const transactionData = {
+      type,
+      amount: parseFloat(amount),
+      currency,
+      categoryId,
+      description: description || undefined,
+      date: date.toISOString(),
+      ...(useManualRate && exchangeRate && { exchangeRate: parseFloat(exchangeRate) }),
+    }
+
+    createTransaction.mutate(transactionData, {
+      onSuccess: () => {
+        onSuccess()
+        // Reset form
+        setAmount('')
+        setDescription('')
+        setDate(new Date())
+        setExchangeRate('')
+        setUseManualRate(false)
+        setIncludeTime(false)
+      },
+    })
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Error Message */}
-      {error && (
+      {createTransaction.error && (
         <div className="bg-ios-red/10 border-l-4 border-ios-red text-ios-red p-4 rounded-ios-sm" role="alert">
           <p className="font-bold">Error</p>
-          <p>{error}</p>
+          <p>{createTransaction.error.message}</p>
         </div>
       )}
 
@@ -296,10 +269,10 @@ export function TransactionForm({ onSuccess }: TransactionFormProps) {
       <div className="flex justify-end gap-3 pt-4">
         <button
           type="submit"
-          disabled={loading || categories.length === 0}
+          disabled={createTransaction.isPending || categories.length === 0}
           className="px-6 py-3 bg-ios-blue text-white rounded-ios font-semibold hover:bg-ios-blue/90 disabled:opacity-40 disabled:cursor-not-allowed transition-all active:scale-95"
         >
-          {loading ? 'Creating...' : 'Create Transaction'}
+          {createTransaction.isPending ? 'Creating...' : 'Create Transaction'}
         </button>
       </div>
     </form>

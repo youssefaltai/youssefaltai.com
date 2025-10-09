@@ -1,56 +1,38 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useMemo } from 'react'
 import { Card } from '@repo/ui'
 import { FloatingActionButton } from '../components/FloatingActionButton'
 import { TransactionForm } from '../components/TransactionForm'
 import { formatCurrency, formatDateShort } from '@repo/utils'
-
-interface Transaction {
-  id: string
-  amount: number
-  currency: string
-  baseAmount: number
-  baseCurrency: string
-  type: 'income' | 'expense'
-  category: string
-  description?: string
-  date: string
-}
+import { useTransactions } from '../../hooks/useTransactions'
+import { useModalStore } from '../../stores/useModalStore'
+import { useFilterStore } from '../../stores/useFilterStore'
 
 export default function TransactionsPage() {
-  const [transactions, setTransactions] = useState<Transaction[]>([])
-  const [filter, setFilter] = useState<'all' | 'income' | 'expense'>('all')
-  const [searchQuery, setSearchQuery] = useState('')
-  const [showAddTransaction, setShowAddTransaction] = useState(false)
+  // UI state from Zustand
+  const { showAddTransaction, openAddTransaction, closeAddTransaction } = useModalStore()
+  const { transactionType, searchQuery, setTransactionType, setSearchQuery } = useFilterStore()
 
-  useEffect(() => {
-    fetchTransactions()
-  }, [filter])
-
-  const fetchTransactions = async () => {
-    try {
-      const params = new URLSearchParams()
-      if (filter !== 'all') params.append('type', filter)
-      
-      const res = await fetch(`/api/transactions?${params}`)
-      if (res.ok) {
-        const data = await res.json()
-        setTransactions(data.data)
-      }
-    } catch (error) {
-      console.error('Error fetching transactions:', error)
-    }
-  }
+  // Server state from TanStack Query
+  const { data: allTransactions = [] } = useTransactions({
+    type: transactionType === 'all' ? undefined : transactionType,
+  })
 
   const handleTransactionAdded = () => {
-    setShowAddTransaction(false)
-    fetchTransactions()
+    closeAddTransaction()
+    // TanStack Query auto-refetches!
   }
 
-  const filteredTransactions = transactions.filter((transaction) =>
-    transaction.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    transaction.description?.toLowerCase().includes(searchQuery.toLowerCase())
+  // Client-side filtering for search
+  const filteredTransactions = useMemo(
+    () =>
+      allTransactions.filter(
+        (transaction) =>
+          transaction.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          transaction.description?.toLowerCase().includes(searchQuery.toLowerCase())
+      ),
+    [allTransactions, searchQuery]
   )
 
   return (
@@ -75,12 +57,12 @@ export default function TransactionsPage() {
 
         {/* Filter Chips */}
         <div className="px-4 mb-6 flex gap-2">
-          {['all', 'income', 'expense'].map((filterOption) => (
+          {(['all', 'income', 'expense'] as const).map((filterOption) => (
             <button
               key={filterOption}
-              onClick={() => setFilter(filterOption as typeof filter)}
+              onClick={() => setTransactionType(filterOption)}
               className={`px-4 py-2 rounded-full text-ios-callout font-medium transition-all ${
-                filter === filterOption
+                transactionType === filterOption
                   ? 'bg-ios-blue text-white'
                   : 'bg-white text-ios-gray-1 border border-ios-gray-5'
               }`}
@@ -138,7 +120,7 @@ export default function TransactionsPage() {
         </div>
 
         {/* Floating Action Button */}
-        <FloatingActionButton onClick={() => setShowAddTransaction(true)} />
+        <FloatingActionButton onClick={openAddTransaction} />
 
         {/* Add Transaction Modal */}
         {showAddTransaction && (
@@ -147,7 +129,7 @@ export default function TransactionsPage() {
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-ios-title-2 font-bold text-ios-label-primary">Add Transaction</h2>
                 <button
-                  onClick={() => setShowAddTransaction(false)}
+                  onClick={closeAddTransaction}
                   className="text-ios-gray-1 hover:text-ios-label-primary p-2 -mr-2"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
