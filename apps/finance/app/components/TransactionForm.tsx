@@ -96,7 +96,7 @@ export function TransactionForm({ onSuccess }: TransactionFormProps) {
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Error Message */}
       {error && (
-        <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4" role="alert">
+        <div className="bg-ios-red/10 border-l-4 border-ios-red text-ios-red p-4 rounded-ios-sm" role="alert">
           <p className="font-bold">Error</p>
           <p>{error}</p>
         </div>
@@ -109,9 +109,9 @@ export function TransactionForm({ onSuccess }: TransactionFormProps) {
           <button
             type="button"
             onClick={() => setType('income')}
-            className={`flex-1 py-3 px-4 rounded-lg border-2 font-medium transition ${
+            className={`flex-1 py-3 px-4 rounded-ios font-semibold transition-all ${
               type === 'income'
-                ? 'border-green-600 bg-green-50 text-green-700'
+                ? 'bg-ios-green text-white'
                 : 'bg-ios-gray-6 text-ios-label-primary border border-ios-gray-3 hover:border-ios-gray-2'
             }`}
           >
@@ -120,9 +120,9 @@ export function TransactionForm({ onSuccess }: TransactionFormProps) {
           <button
             type="button"
             onClick={() => setType('expense')}
-            className={`flex-1 py-3 px-4 rounded-lg border-2 font-medium transition ${
+            className={`flex-1 py-3 px-4 rounded-ios font-semibold transition-all ${
               type === 'expense'
-                ? 'border-red-600 bg-red-50 text-red-700'
+                ? 'bg-ios-red text-white'
                 : 'bg-ios-gray-6 text-ios-label-primary border border-ios-gray-3 hover:border-ios-gray-2'
             }`}
           >
