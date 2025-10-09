@@ -20,7 +20,7 @@ interface SummaryFilters {
  */
 export function useSummary(filters?: SummaryFilters) {
   return useQuery({
-    queryKey: ['summary', filters],
+    queryKey: ['summary', filters ?? null],
     queryFn: async () => {
       const params = new URLSearchParams()
       if (filters?.dateFrom) params.append('dateFrom', filters.dateFrom)
@@ -31,7 +31,8 @@ export function useSummary(filters?: SummaryFilters) {
         throw new Error('Failed to fetch summary')
       }
       const data = await res.json()
-      return data.data as Summary | null
+      // TanStack Query requires non-undefined return
+      return (data.data || null) as Summary | null
     },
     staleTime: 1000 * 60 * 5, // 5 minutes
   })

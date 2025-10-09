@@ -25,7 +25,7 @@ interface TransactionFilters {
  */
 export function useTransactions(filters?: TransactionFilters) {
   return useQuery({
-    queryKey: ['transactions', filters],
+    queryKey: ['transactions', filters ?? null],
     queryFn: async () => {
       const params = new URLSearchParams()
       if (filters?.type) params.append('type', filters.type)
@@ -37,7 +37,8 @@ export function useTransactions(filters?: TransactionFilters) {
         throw new Error('Failed to fetch transactions')
       }
       const data = await res.json()
-      return (data.data || []) as Transaction[]
+      // TanStack Query requires non-undefined return, use [] as fallback
+      return (data.data ?? []) as Transaction[]
     },
     staleTime: 1000 * 60 * 5, // 5 minutes
   })

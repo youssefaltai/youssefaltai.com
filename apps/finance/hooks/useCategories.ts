@@ -20,7 +20,7 @@ interface CategoryFilters {
  */
 export function useCategories(filters?: CategoryFilters) {
   return useQuery({
-    queryKey: ['categories', filters],
+    queryKey: ['categories', filters ?? null],
     queryFn: async () => {
       const params = new URLSearchParams()
       if (filters?.type) params.append('type', filters.type)
@@ -30,7 +30,8 @@ export function useCategories(filters?: CategoryFilters) {
         throw new Error('Failed to fetch categories')
       }
       const data = await res.json()
-      return (data.categories || []) as Category[]
+      // TanStack Query requires non-undefined return, use [] as fallback
+      return (data.categories ?? []) as Category[]
     },
     staleTime: 1000 * 60 * 10, // 10 minutes
   })
