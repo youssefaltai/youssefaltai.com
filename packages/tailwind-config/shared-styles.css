@@ -9,7 +9,7 @@
   --color-ios-red: #FF3B30;
   --color-ios-orange: #FF9500;
   --color-ios-yellow: #FFCC00;
-  
+
   /* iOS Grays */
   --color-ios-gray-1: #8E8E93;
   --color-ios-gray-2: #AEAEB2;
@@ -17,21 +17,21 @@
   --color-ios-gray-4: #D1D1D6;
   --color-ios-gray-5: #E5E5EA;
   --color-ios-gray-6: #F2F2F7;
-  
+
   /* SF Pro Font Stack (system fonts) */
   --font-family-sf-pro: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, sans-serif;
-  
+
   /* iOS Border Radius */
   --radius-ios-sm: 8px;
   --radius-ios: 12px;
   --radius-ios-lg: 16px;
   --radius-ios-xl: 20px;
-  
+
   /* iOS Shadows (Subtle) */
   --shadow-ios-sm: 0 1px 3px rgba(0, 0, 0, 0.12);
   --shadow-ios: 0 2px 8px rgba(0, 0, 0, 0.1);
   --shadow-ios-lg: 0 4px 16px rgba(0, 0, 0, 0.15);
-  
+
   /* 8pt Grid Spacing */
   --spacing-ios-0\.5: 4px;
   --spacing-ios-1: 8px;
@@ -41,7 +41,7 @@
   --spacing-ios-4: 32px;
   --spacing-ios-6: 48px;
   --spacing-ios-8: 64px;
-  
+
   /* iOS Typography Scale */
   --font-size-ios-title-1: 34px;
   --font-size-ios-title-2: 28px;
@@ -52,7 +52,7 @@
   --font-size-ios-subhead: 15px;
   --font-size-ios-footnote: 13px;
   --font-size-ios-caption: 12px;
-  
+
   /* Line Heights */
   --line-height-ios-title-1: 41px;
   --line-height-ios-title-2: 34px;
@@ -60,7 +60,7 @@
   --line-height-ios-body: 22px;
   --line-height-ios-footnote: 18px;
   --line-height-ios-caption: 16px;
-  
+
   /* Label Colors */
   --color-ios-label-primary: #000000;
   --color-ios-label-secondary: #3C3C43;
@@ -69,15 +69,4 @@
 /* Apply SF Pro as default font */
 body {
   font-family: var(--font-family-sf-pro);
-}
-
-/* iOS Safe Area Support */
-@supports (padding: env(safe-area-inset-bottom)) {
-  .pb-safe {
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-  
-  .safe-area-inset-bottom {
-    padding-bottom: env(safe-area-inset-bottom);
-  }
 }
