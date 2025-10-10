@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { startRegistration, startAuthentication } from '@simplewebauthn/browser'
 import { Button } from './Button'
+import { Input } from './Input'
 
 interface BiometricLoginFormProps {
   appName: string
@@ -160,35 +161,25 @@ export function BiometricLoginForm({ appName }: BiometricLoginFormProps) {
         </div>
 
         <form className="space-y-4" onSubmit={isNewUser ? handleRegister : handleLogin}>
-          <div>
-            <label htmlFor="email" className="block text-ios-footnote text-ios-gray-1 font-medium mb-1">
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              required
-              className="w-full min-h-[44px] px-4 py-3 bg-ios-gray-6 border border-ios-gray-3 rounded-ios-sm text-ios-body focus:outline-none focus:ring-2 focus:ring-ios-blue focus:border-transparent"
-              value={email}
-              onChange={(e) => setEmail((e.target as HTMLInputElement).value)}
-              disabled={loading}
-            />
-          </div>
+          <Input
+            id="email"
+            type="email"
+            label="Email"
+            required
+            value={email}
+            onChange={(e) => setEmail((e.target as HTMLInputElement).value)}
+            disabled={loading}
+          />
 
           {isNewUser && (
-            <div>
-              <label htmlFor="name" className="block text-ios-footnote text-ios-gray-1 font-medium mb-1">
-                Name (optional)
-              </label>
-              <input
-                id="name"
-                type="text"
-                className="w-full min-h-[44px] px-4 py-3 bg-ios-gray-6 border border-ios-gray-3 rounded-ios-sm text-ios-body focus:outline-none focus:ring-2 focus:ring-ios-blue focus:border-transparent"
-                value={name}
-                onChange={(e) => setName((e.target as HTMLInputElement).value)}
-                disabled={loading}
-              />
-            </div>
+            <Input
+              id="name"
+              type="text"
+              label="Name (optional)"
+              value={name}
+              onChange={(e) => setName((e.target as HTMLInputElement).value)}
+              disabled={loading}
+            />
           )}
 
           {error && (

@@ -1,7 +1,7 @@
 /**
  * ESLint configuration for internal library packages
  */
-module.exports = {
+const config = {
   env: {
     node: true,
     es2022: true,
@@ -26,3 +26,4 @@ module.exports = {
   },
 }
 
+export default config;

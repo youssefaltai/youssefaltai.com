@@ -28,6 +28,7 @@
   },
   "dependencies": {
     "@repo/utils": "workspace:*",
-    "@simplewebauthn/browser": "^13.2.2"
+    "@simplewebauthn/browser": "^13.2.2",
+    "lucide-react": "^0.545.0"
   }
 }

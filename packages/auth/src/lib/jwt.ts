@@ -1,5 +1,5 @@
 import { SignJWT, jwtVerify } from 'jose'
-import type { AuthUser, JWTPayload } from '../types'
+import type { AuthUser, JWTPayload } from '@repo/types'
 
 /**
  * Get JWT secret from environment

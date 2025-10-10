@@ -1,3 +1,5 @@
+import { cn } from '@repo/utils'
+
 interface ProgressBarProps {
   percentage: number
   color?: 'blue' | 'green' | 'orange' | 'red'
@@ -13,7 +15,7 @@ export function ProgressBar({
   percentage,
   color = 'blue',
   height = 'sm',
-  className = '',
+  className,
 }: ProgressBarProps) {
   const colors = {
     blue: 'bg-ios-blue',
@@ -31,9 +33,9 @@ export function ProgressBar({
   const clampedPercentage = Math.min(Math.max(percentage, 0), 100)
 
   return (
-    <div className={`w-full ${heights[height]} bg-ios-gray-5 rounded-full overflow-hidden ${className}`}>
+    <div className={cn('w-full bg-ios-gray-5 rounded-full overflow-hidden', heights[height], className)}>
       <div
-        className={`h-full ${colors[color]} transition-all duration-300`}
+        className={cn('h-full transition-all duration-300', colors[color])}
         style={{ width: `${clampedPercentage}%` }}
         role="progressbar"
         aria-valuenow={clampedPercentage}

@@ -2,7 +2,7 @@
  * Shared Prettier configuration
  * Consistent formatting across the monorepo
  */
-module.exports = {
+const config = {
   semi: false,
   singleQuote: true,
   tabWidth: 2,
@@ -11,3 +11,4 @@ module.exports = {
   arrowParens: 'always',
 }
 
+export default config;

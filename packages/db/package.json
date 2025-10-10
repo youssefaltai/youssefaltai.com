@@ -12,18 +12,19 @@
   },
   "devDependencies": {
     "@repo/tsconfig": "workspace:*",
-    "@types/bcryptjs": "^3.0.0",
     "@types/node": "^20.19.19",
-    "bcryptjs": "^3.0.2",
-    "tsx": "^4.20.6",
+    "@typescript-eslint/eslint-plugin": "^8.46.0",
+    "@typescript-eslint/parser": "^8.46.0",
+    "eslint": "^9.37.0",
     "typescript": "^5.9.3"
   },
   "scripts": {
+    "lint": "eslint .",
+    "type-check": "tsc --noEmit",
     "db:generate": "dotenv -e ../../.env -- prisma generate",
     "db:push": "dotenv -e ../../.env -- prisma db push",
     "db:migrate": "dotenv -e ../../.env -- prisma migrate dev",
-    "db:studio": "dotenv -e ../../.env -- prisma studio",
-    "db:seed": "dotenv -e ../../.env -- tsx prisma/seed.ts"
+    "db:studio": "dotenv -e ../../.env -- prisma studio"
   },
   "exports": {
     ".": "./src/index.ts"

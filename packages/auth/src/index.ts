@@ -6,7 +6,3 @@ export { setAuthCookie, clearAuthCookie, getAuthCookie } from './lib/cookies'
 
 // Re-export types from @repo/types for convenience
 export type { JWTPayload, AuthUser } from '@repo/types'
-
-// Password utilities (kept for backwards compatibility, but not used with WebAuthn)
-export { hashPassword, verifyPassword } from './lib/password'
-

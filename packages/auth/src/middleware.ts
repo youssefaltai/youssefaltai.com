@@ -28,8 +28,7 @@ export async function authMiddleware(request: NextRequest): Promise<NextResponse
 
   // Redirect to login if no token
   if (!token) {
-    const loginUrl = new URL('/login', request.url)
-    loginUrl.searchParams.set('redirect', request.nextUrl.pathname)
+    const loginUrl = getLoginUrl(request)
     return NextResponse.redirect(loginUrl)
   }
 
@@ -45,9 +44,13 @@ export async function authMiddleware(request: NextRequest): Promise<NextResponse
     return response
   } catch {
     // Invalid token - redirect to login
-    const loginUrl = new URL('/login', request.url)
-    loginUrl.searchParams.set('redirect', request.nextUrl.pathname)
+    const loginUrl = getLoginUrl(request)
     return NextResponse.redirect(loginUrl)
   }
 }
 
+function getLoginUrl(request: NextRequest): URL {
+  const loginUrl = new URL('/login', request.url)
+  loginUrl.searchParams.set('redirect', request.nextUrl.pathname)
+  return loginUrl
+}

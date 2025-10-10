@@ -3,6 +3,7 @@
  * Grouped list style with subtle borders and shadows
  */
 import { cn } from '@repo/utils'
+import { ChevronRight } from 'lucide-react'
 
 interface CardProps {
   children: React.ReactNode
@@ -86,9 +87,7 @@ export function ListItem({ label, value, onClick, chevron = false }: ListItemPro
           <span className="text-ios-body text-ios-gray-1">{value}</span>
         )}
         {chevron && (
-          <svg className="w-4 h-4 text-ios-gray-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
+          <ChevronRight className="w-4 h-4 text-ios-gray-2" strokeWidth={2} />
         )}
       </div>
     </button>

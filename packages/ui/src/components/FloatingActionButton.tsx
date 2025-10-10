@@ -1,23 +1,71 @@
 'use client'
 
+import { type LucideIcon } from 'lucide-react'
+import { cn } from '@repo/utils'
+
 interface FloatingActionButtonProps {
+  /**
+   * Icon component to display
+   */
+  icon: LucideIcon
+  /**
+   * Click handler
+   */
   onClick: () => void
+  /**
+   * Accessible label for screen readers
+   */
+  label: string
+  /**
+   * Optional additional classes
+   */
+  className?: string
 }
 
 /**
- * iOS-style floating action button for quick actions
+ * Floating Action Button (FAB)
+ * 
+ * iOS-style circular floating button for primary actions.
+ * Positioned fixed at bottom center by default.
+ * 
+ * @example
+ * ```tsx
+ * import { Plus } from '@repo/ui'
+ * 
+ * <FloatingActionButton
+ *   icon={Plus}
+ *   onClick={handleAdd}
+ *   label="Add transaction"
+ * />
+ * ```
  */
-export function FloatingActionButton({ onClick }: FloatingActionButtonProps) {
+export function FloatingActionButton({
+  icon: Icon,
+  onClick,
+  label,
+  className,
+}: FloatingActionButtonProps) {
+
   return (
     <button
       onClick={onClick}
-      className="fixed bottom-20 right-4 w-14 h-14 bg-ios-blue text-white rounded-full shadow-ios-lg hover:bg-ios-blue/90 active:scale-95 transition-all z-40 flex items-center justify-center"
-      aria-label="Add transaction"
+      aria-label={label}
+      className={cn(
+        // Size & Shape
+        'rounded-full',
+        'p-4',
+        'flex items-center justify-center',
+        // Colors
+        'bg-ios-blue hover:bg-ios-blue/90 text-white',
+        // Effects
+        'shadow-ios-lg',
+        'transition-all duration-200 ease-out',
+        'active:scale-95',
+        // Custom overrides
+        className
+      )}
     >
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 4v16m8-8H4" />
-      </svg>
+      <Icon className="w-6 h-6" strokeWidth={2.5} />
     </button>
   )
 }
-

@@ -2,7 +2,7 @@
  * ESLint configuration for Next.js apps
  * Extends next/core-web-vitals for optimal Next.js linting
  */
-module.exports = {
+const config = {
   extends: ['next/core-web-vitals', 'next/typescript'],
   rules: {
     '@typescript-eslint/no-unused-vars': [
@@ -16,3 +16,5 @@ module.exports = {
   },
 }
 
+
+export default config;
