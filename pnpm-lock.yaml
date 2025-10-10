@@ -315,6 +315,10 @@ importers:
         version: 5.9.3
 
   packages/tailwind-config:
+    dependencies:
+      tailwindcss-safe-area:
+        specifier: ^1.1.0
+        version: 1.1.0(tailwindcss@4.1.14)
     devDependencies:
       postcss:
         specifier: ^8.5.3
@@ -2481,6 +2485,12 @@ packages:
 
   tailwind-merge@3.3.1:
     resolution: {integrity: sha512-gBXpgUm/3rp1lMZZrM/w7D8GKqshif0zAymAhbCyIt8KMe+0v9DQ7cdYLR4FHH/cKpdTXb+A/tKKU3eolfsI+g==}
+
+  tailwindcss-safe-area@1.1.0:
+    resolution: {integrity: sha512-wuPUeW5BhWNv9yr3OzaGgpqImQG9FBM4mQIQh2C6yjHmOOZsJ3gh5RfNHt+TM16TMtpQs/8k2TWx8yQTFG7Fcw==}
+    engines: {node: '>=22'}
+    peerDependencies:
+      tailwindcss: ^4.0.0
 
   tailwindcss@4.1.14:
     resolution: {integrity: sha512-b7pCxjGO98LnxVkKjaZSDeNuljC4ueKUddjENJOADtubtdo8llTaJy7HwBMeLNSSo2N5QIAgklslK1+Ir8r6CA==}
@@ -4903,6 +4913,10 @@ snapshots:
   supports-preserve-symlinks-flag@1.0.0: {}
 
   tailwind-merge@3.3.1: {}
+
+  tailwindcss-safe-area@1.1.0(tailwindcss@4.1.14):
+    dependencies:
+      tailwindcss: 4.1.14
 
   tailwindcss@4.1.14: {}
 

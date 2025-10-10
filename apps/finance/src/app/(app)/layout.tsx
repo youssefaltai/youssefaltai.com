@@ -11,7 +11,7 @@ export default function AppLayout({
 }) {
   return (
     <>
-      <div className="pb-16">
+      <div className="pb-safe-offset-16">
         {children}
       </div>
       <AppBottomNav />

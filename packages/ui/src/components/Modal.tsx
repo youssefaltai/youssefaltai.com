@@ -334,7 +334,8 @@ export function Modal({
           'relative w-full bg-white shadow-ios-lg ease-out',
           variantClasses[variant],
           sizeClasses[size],
-          !isDragging && 'transition-all duration-300'
+          !isDragging && 'transition-all duration-300',
+          variant !== 'alert' && 'pb-safe'
         )}
         style={{
           transform: isAlert
