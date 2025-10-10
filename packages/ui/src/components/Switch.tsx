@@ -35,4 +35,3 @@ export function Switch({ checked, onChange, disabled = false, className }: Switc
     </button>
   )
 }
-

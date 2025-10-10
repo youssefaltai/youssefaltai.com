@@ -3,7 +3,6 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { type LucideIcon } from 'lucide-react'
-import { cn } from '@repo/utils'
 
 export interface NavItem {
   name: string
@@ -15,41 +14,26 @@ interface BottomNavProps {
   items: NavItem[]
 }
 
-/**
- * iOS-style bottom navigation bar
- * Mobile-first design with tab bar pattern
- * 
- * @example
- * ```tsx
- * <BottomNav items={[
- *   { name: 'Home', href: '/', icon: Home },
- *   { name: 'Profile', href: '/profile', icon: User }
- * ]} />
- * ```
- */
 export function BottomNav({ items }: BottomNavProps) {
   const pathname = usePathname()
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-ios-gray-5 safe-area-inset-bottom z-30">
-      <div className="flex justify-around items-center h-20 max-w-lg mx-auto px-2 pb-safe">
+    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-ios-gray-5 h-16 pb-safe">
+      <div className="flex h-full">
         {items.map((item) => {
           const isActive = pathname === item.href
           const Icon = item.icon
+          
           return (
             <Link
               key={item.href}
               href={item.href}
-              className={cn(
-                'flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-lg transition-colors',
+              className={`flex flex-col items-center justify-center flex-1 h-full ${
                 isActive ? 'text-ios-blue' : 'text-ios-gray-1'
-              )}
+              }`}
             >
-              <Icon className="w-6 h-6" strokeWidth={isActive ? 2 : 1.5} />
-              <span className={cn(
-                'text-ios-caption',
-                isActive ? 'font-medium' : 'font-normal'
-              )}>
+              <Icon className="w-6 h-6 mb-1" />
+              <span className="text-[12px] font-medium leading-[16px]">
                 {item.name}
               </span>
             </Link>

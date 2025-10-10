@@ -35,20 +35,24 @@ Welcome to the youssefaltai.com monorepo documentation! This directory contains 
 docs/
 ├── README.md                          # This file
 ├── architecture/                      # System architecture and design
+│   ├── monorepo-status.md            # Current state, metrics, health
+│   ├── finance-architecture.md       # Finance app structure
 │   ├── monorepo-architecture.md      # Turborepo structure and decisions
 │   └── project-summary.md            # Project status and overview
 ├── research/                          # Feature research and decisions
+│   ├── state-management.md           # TanStack Query + Zustand
 │   ├── finance-multi-currency.md     # Multi-currency implementation
 │   ├── date-time-handling.md         # Date/time storage and formatting
 │   ├── apple-design-system.md        # iOS design patterns
-│   ├── money-formatting.md           # Currency formatting approach
-│   └── state-management.md           # State management strategy
+│   └── money-formatting.md           # Currency formatting approach
 ├── deployment/                        # Deployment and operations
 │   ├── vps-deployment.md             # Full deployment guide
 │   ├── vps-checklist.md              # Quick reference checklist
 │   ├── environment-variables.md      # Environment configuration
 │   └── ci-cd-setup.md                # CI/CD pipeline setup
 └── development/                       # Development guides
+    ├── local-setup.md                # Local database and Redis setup
+    ├── contributing.md               # Contribution workflow
     └── standards.md                   # Coding standards and rules
 ```
 
