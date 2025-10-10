@@ -6,14 +6,19 @@ FROM node:20-alpine AS deps
 RUN corepack enable && corepack prepare pnpm@latest --activate
 WORKDIR /app
 
-# Copy workspace files
+# Copy workspace configuration
 COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
+
+# Copy all package.json files (explicit for better layer caching)
 COPY packages/tsconfig/package.json ./packages/tsconfig/
 COPY packages/config/package.json ./packages/config/
 COPY packages/utils/package.json ./packages/utils/
+COPY packages/types/package.json ./packages/types/
+COPY packages/tailwind-config/package.json ./packages/tailwind-config/
 COPY packages/ui/package.json ./packages/ui/
 COPY packages/auth/package.json ./packages/auth/
 COPY packages/db/package.json ./packages/db/
+COPY packages/providers/package.json ./packages/providers/
 COPY apps/dashboard/package.json ./apps/dashboard/
 
 # Install dependencies
