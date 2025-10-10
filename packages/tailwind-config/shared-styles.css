@@ -3,6 +3,10 @@
  * Based on Apple's Human Interface Guidelines (HIG)
  */
 @theme {
+  /* Base Colors */
+  --color-white: #ffffff;
+  --color-black: #000000;
+  
   /* iOS System Colors */
   --color-ios-blue: #007AFF;
   --color-ios-green: #34C759;
@@ -43,23 +47,29 @@
   --spacing-ios-8: 64px;
 
   /* iOS Typography Scale */
-  --font-size-ios-title-1: 34px;
-  --font-size-ios-title-2: 28px;
-  --font-size-ios-title-3: 22px;
-  --font-size-ios-headline: 17px;
-  --font-size-ios-body: 17px;
-  --font-size-ios-callout: 16px;
-  --font-size-ios-subhead: 15px;
-  --font-size-ios-footnote: 13px;
-  --font-size-ios-caption: 12px;
-
-  /* Line Heights */
-  --line-height-ios-title-1: 41px;
-  --line-height-ios-title-2: 34px;
-  --line-height-ios-title-3: 28px;
-  --line-height-ios-body: 22px;
-  --line-height-ios-footnote: 18px;
-  --line-height-ios-caption: 16px;
+  --text-ios-title-1: 34px;
+  --text-ios-title-1--line-height: 41px;
+  
+  --text-ios-title-2: 28px;
+  --text-ios-title-2--line-height: 34px;
+  
+  --text-ios-title-3: 22px;
+  --text-ios-title-3--line-height: 28px;
+  
+  --text-ios-headline: 17px;
+  
+  --text-ios-body: 17px;
+  --text-ios-body--line-height: 22px;
+  
+  --text-ios-callout: 16px;
+  
+  --text-ios-subhead: 15px;
+  
+  --text-ios-footnote: 13px;
+  --text-ios-footnote--line-height: 18px;
+  
+  --text-ios-caption: 12px;
+  --text-ios-caption--line-height: 16px;
 
   /* Label Colors */
   --color-ios-label-primary: #000000;

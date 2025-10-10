@@ -38,10 +38,10 @@ export function Button({
         'rounded-ios font-semibold',
         'active:scale-95 transition-all duration-ios',
         'disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100',
-        // Variant
-        variants[variant],
         // Size
         sizes[size],
+        // Variant
+        variants[variant],
         className
       )}
       disabled={disabled}

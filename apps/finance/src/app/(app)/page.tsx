@@ -110,7 +110,7 @@ export default function Home() {
           console.log('Add transaction')
         }}
         label="Add transaction"
-        className="fixed bottom-26 right-6 z-40"
+        className="fixed bottom-20 right-6 z-40"
       />
     </>
   )

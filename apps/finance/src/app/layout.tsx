@@ -32,7 +32,7 @@ export default function RootLayout({
       </head>
       <body className="bg-ios-gray-6 antialiased">
         <QueryProvider>
-          <main className="min-h-screen">{children}</main>
+          {children}
         </QueryProvider>
       </body>
     </html>
