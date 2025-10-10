@@ -120,24 +120,10 @@ export default function Home() {
         onClose={() => setIsModalOpen(false)}
         title="Add Transaction"
         size="lg"
-      >
-        <div className="space-y-4">
-          <p className="text-ios-body text-ios-label-secondary">
-            This is where your transaction form will go. For now, here's a demo of the modal!
-          </p>
-          
-          <div className="space-y-2">
-            <h3 className="text-ios-headline font-semibold">Modal Features:</h3>
-            <ul className="text-ios-callout text-ios-label-secondary space-y-1 list-disc list-inside">
-              <li>Smooth slide-up animation</li>
-              <li>iOS-style drag indicator</li>
-              <li>Semi-transparent backdrop</li>
-              <li>Click outside to close</li>
-              <li>Scrollable content area</li>
-            </ul>
-          </div>
-
-          <div className="pt-4 flex gap-3">
+        enableSwipeToDismiss={true}
+        enableBackdropBlur={true}
+        footer={
+          <div className="flex gap-3">
             <Button 
               variant="secondary" 
               className="flex-1"
@@ -155,6 +141,38 @@ export default function Home() {
             >
               Add Transaction
             </Button>
+          </div>
+        }
+      >
+        <div className="space-y-4">
+          <p className="text-ios-body text-ios-label-secondary">
+            This is where your transaction form will go. For now, here's a demo of the enhanced modal!
+          </p>
+          
+          <div className="space-y-2">
+            <h3 className="text-ios-headline font-semibold">✨ New Features:</h3>
+            <ul className="text-ios-callout text-ios-label-secondary space-y-1 list-disc list-inside">
+              <li>Smooth slide-up animation</li>
+              <li>Swipe down to dismiss</li>
+              <li>Press ESC to close</li>
+              <li>Backdrop blur effect</li>
+              <li>Focus trap (try pressing Tab)</li>
+              <li>Haptic feedback (mobile)</li>
+              <li>Prevent overscroll</li>
+              <li>Custom footer support</li>
+              <li>Auto height sizing</li>
+              <li>Accessibility compliant</li>
+            </ul>
+          </div>
+
+          <div className="space-y-2">
+            <h3 className="text-ios-headline font-semibold">🎨 Try These:</h3>
+            <ul className="text-ios-callout text-ios-label-secondary space-y-1">
+              <li>• Swipe the modal down</li>
+              <li>• Press the ESC key</li>
+              <li>• Click the backdrop</li>
+              <li>• Scroll this content area</li>
+            </ul>
           </div>
         </div>
       </Modal>
