@@ -85,16 +85,16 @@ export function Modal({
 
   // Animation and body scroll lock
   useEffect(() => {
-    let raf1: number | null = null
-    let raf2: number | null = null
+    // Use refs to store rAF IDs so cleanup can access them
+    const rafIds = { raf1: null as number | null, raf2: null as number | null }
     
     if (isOpen) {
       setShouldRender(true)
       triggerHaptic()
       
       // Use requestAnimationFrame to ensure DOM is ready before animating
-      raf1 = requestAnimationFrame(() => {
-        raf2 = requestAnimationFrame(() => {
+      rafIds.raf1 = requestAnimationFrame(() => {
+        rafIds.raf2 = requestAnimationFrame(() => {
           setIsAnimating(true)
         })
       })
@@ -104,8 +104,8 @@ export function Modal({
       
       // Cleanup function
       return () => {
-        if (raf1 !== null) cancelAnimationFrame(raf1)
-        if (raf2 !== null) cancelAnimationFrame(raf2)
+        if (rafIds.raf1 !== null) cancelAnimationFrame(rafIds.raf1)
+        if (rafIds.raf2 !== null) cancelAnimationFrame(rafIds.raf2)
       }
     } else {
       setIsAnimating(false)
@@ -289,11 +289,12 @@ export function Modal({
   const HEADER_HEIGHT = 56 // py-3 (12px * 2) + text content (~32px)
   const FOOTER_HEIGHT = 88 // p-4 (16px * 2) + button content (~56px)
 
-  const contentMaxHeight = footer 
-    ? `calc(100% - ${DRAG_INDICATOR_HEIGHT + HEADER_HEIGHT + FOOTER_HEIGHT}px)` 
-    : title || showCloseButton 
-      ? `calc(100% - ${DRAG_INDICATOR_HEIGHT + HEADER_HEIGHT}px)`
-      : `calc(100% - ${DRAG_INDICATOR_HEIGHT}px)`
+  // Calculate content height based on what's actually rendered
+  const dragIndicatorOffset = isAlert ? 0 : DRAG_INDICATOR_HEIGHT
+  const headerOffset = (title || showCloseButton) ? HEADER_HEIGHT : 0
+  const footerOffset = footer ? FOOTER_HEIGHT : 0
+  
+  const contentMaxHeight = `calc(100% - ${dragIndicatorOffset + headerOffset + footerOffset}px)`
 
   const sizeClasses = {
     auto: 'max-h-[90vh]',
