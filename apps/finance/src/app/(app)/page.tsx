@@ -1,11 +1,15 @@
 'use client'
 
-import { Card, BarChart3, FloatingActionButton, Plus, PageHeader, EmptyState } from '@repo/ui'
+import { useState } from 'react'
+import { Card, BarChart3, FloatingActionButton, Plus, PageHeader, EmptyState, Modal, Button } from '@repo/ui'
 import { formatCurrency, formatDateShort, getGreeting, getTransactionColorClass } from '@repo/utils'
 import { useTransactions } from '@/features/transactions/hooks/useTransactions'
 import { useSummary } from '@/features/dashboard/hooks/useSummary'
 
 export default function Home() {
+  // Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  
   // Server state from TanStack Query - automatic caching, loading, and error handling
   const { data: summary } = useSummary()
   const { data: transactions = [] } = useTransactions({ limit: 5 })
@@ -105,13 +109,55 @@ export default function Home() {
       {/* Floating Action Button */}
       <FloatingActionButton
         icon={Plus}
-        onClick={() => {
-          // TODO: Navigate to add transaction page
-          console.log('Add transaction')
-        }}
+        onClick={() => setIsModalOpen(true)}
         label="Add transaction"
         className="fixed bottom-20 right-6 z-40"
       />
+
+      {/* Add Transaction Modal */}
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="Add Transaction"
+        size="lg"
+      >
+        <div className="space-y-4">
+          <p className="text-ios-body text-ios-label-secondary">
+            This is where your transaction form will go. For now, here's a demo of the modal!
+          </p>
+          
+          <div className="space-y-2">
+            <h3 className="text-ios-headline font-semibold">Modal Features:</h3>
+            <ul className="text-ios-callout text-ios-label-secondary space-y-1 list-disc list-inside">
+              <li>Smooth slide-up animation</li>
+              <li>iOS-style drag indicator</li>
+              <li>Semi-transparent backdrop</li>
+              <li>Click outside to close</li>
+              <li>Scrollable content area</li>
+            </ul>
+          </div>
+
+          <div className="pt-4 flex gap-3">
+            <Button 
+              variant="secondary" 
+              className="flex-1"
+              onClick={() => setIsModalOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button 
+              variant="primary" 
+              className="flex-1"
+              onClick={() => {
+                alert('Transaction added! (demo)')
+                setIsModalOpen(false)
+              }}
+            >
+              Add Transaction
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </>
   )
 }

@@ -10,6 +10,7 @@ export { ProgressBar } from './components/ProgressBar'
 export { Switch } from './components/Switch'
 export { BottomNav } from './components/BottomNav'
 export type { NavItem } from './components/BottomNav'
+export { Modal } from './components/Modal'
 
 // Icons (lucide-react) - re-export for convenience
 export * from 'lucide-react'
