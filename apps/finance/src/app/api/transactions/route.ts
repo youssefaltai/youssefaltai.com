@@ -28,7 +28,7 @@ export const GET = withAuth(async (request: NextRequest, userId: string) => {
     // Call feature handler
     const result = await getTransactions(userId, filters)
 
-    return NextResponse.json(result)
+    return NextResponse.json({ data: result.transactions, pagination: result.pagination })
   } catch (error) {
     console.error('Error in GET /api/transactions:', error)
     return errorResponse('Failed to fetch transactions', 500, error)

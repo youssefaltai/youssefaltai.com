@@ -9,16 +9,12 @@ import { TransactionTypeSchema } from '../transactions/validation'
 export const CreateCategorySchema = z.object({
   name: z.string().min(1, 'Category name is required').max(50, 'Category name too long'),
   type: TransactionTypeSchema,
-  color: z.string().regex(/^#[0-9A-F]{6}$/i, 'Invalid color format').optional(),
-  icon: z.string().max(10).optional(),
 })
 
 // Update category schema
 export const UpdateCategorySchema = z.object({
   name: z.string().min(1, 'Category name is required').max(50, 'Category name too long').optional(),
   type: TransactionTypeSchema.optional(),
-  color: z.string().regex(/^#[0-9A-F]{6}$/i, 'Invalid color format').optional(),
-  icon: z.string().max(10).optional(),
 })
 
 // Type exports for TypeScript

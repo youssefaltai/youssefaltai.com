@@ -28,8 +28,6 @@ export async function createCategory(userId: string, data: CreateCategoryInput) 
       userId,
       name: validatedData.name,
       type: validatedData.type,
-      color: validatedData.color,
-      icon: validatedData.icon,
     },
   })
 

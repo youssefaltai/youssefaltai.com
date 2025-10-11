@@ -67,7 +67,7 @@ model Transaction {
   // Transaction details
   type        String      // "income" or "expense"
   category    String      // Category name
-  description String?     // Optional notes
+  description String?     // Optional description/note
   date        DateTime    // Transaction date
   
   // Metadata
@@ -88,8 +88,6 @@ model Category {
   userId      String
   name        String
   type        String   // "income" or "expense"
-  color       String?  // Hex color for UI
-  icon        String?  // Icon name/emoji
   createdAt   DateTime @default(now())
   
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)

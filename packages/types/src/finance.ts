@@ -23,8 +23,6 @@ export interface Category {
   id: string
   name: string
   type: 'income' | 'expense'
-  color?: string
-  icon?: string
   userId: string
   createdAt: string
   updatedAt: string
@@ -77,7 +75,7 @@ export interface CreateTransactionInput {
   amount: number
   currency: string
   exchangeRate?: number
-  categoryId: string
+  category: string
   description?: string
   date: string
 }
@@ -98,8 +96,6 @@ export interface TransactionFilters {
 export interface CreateCategoryInput {
   name: string
   type: 'income' | 'expense'
-  color?: string
-  icon?: string
 }
 
 export interface CategoryFilters {

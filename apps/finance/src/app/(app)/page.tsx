@@ -1,20 +1,34 @@
 'use client'
 
 import { useState } from 'react'
-import { Card, BarChart3, FloatingActionButton, Plus, PageHeader, EmptyState, Modal, Button } from '@repo/ui'
+import { useRouter } from 'next/navigation'
+import { Card, BarChart3, FloatingActionButton, Plus, PageHeader, EmptyState, Modal } from '@repo/ui'
 import { formatCurrency, formatDateShort, getGreeting, getTransactionColorClass } from '@repo/utils'
 import { useTransactions } from '@/features/transactions/hooks/useTransactions'
 import { useSummary } from '@/features/dashboard/hooks/useSummary'
+import { TransactionForm } from '@/features/transactions/components/TransactionForm'
+import type { Transaction } from '@repo/types'
 
 export default function Home() {
-  // Modal state
+  const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null)
   
   // Server state from TanStack Query - automatic caching, loading, and error handling
   const { data: summary } = useSummary()
   const { data: transactions = [] } = useTransactions({ limit: 5 })
 
   const greeting = getGreeting()
+
+  const handleTransactionClick = (transaction: Transaction) => {
+    setEditingTransaction(transaction)
+    setIsModalOpen(true)
+  }
+
+  const handleModalClose = () => {
+    setIsModalOpen(false)
+    setEditingTransaction(null)
+  }
 
   return (
     <>
@@ -63,7 +77,12 @@ export default function Home() {
         <div className="px-4 mb-6">
           <div className="flex justify-between items-center mb-3">
             <h2 className="text-ios-headline font-semibold text-ios-label-primary">Budgets</h2>
-            <button className="text-ios-blue text-ios-callout font-medium">See All</button>
+            <button 
+              onClick={() => router.push('/budgets')}
+              className="text-ios-blue text-ios-callout font-medium hover:opacity-70 transition-opacity"
+            >
+              See All
+            </button>
           </div>
           <EmptyState
             icon={BarChart3}
@@ -76,7 +95,12 @@ export default function Home() {
         <div className="px-4 mb-6">
           <div className="flex justify-between items-center mb-3">
             <h2 className="text-ios-headline font-semibold text-ios-label-primary">Recent Transactions</h2>
-            <button className="text-ios-blue text-ios-callout font-medium">See All</button>
+            <button 
+              onClick={() => router.push('/transactions')}
+              className="text-ios-blue text-ios-callout font-medium hover:opacity-70 transition-opacity"
+            >
+              See All
+            </button>
           </div>
           {transactions.length === 0 ? (
             <EmptyState
@@ -87,10 +111,12 @@ export default function Home() {
           ) : (
             <Card padding="none">
               {transactions.map((transaction, index) => (
-                <div
+                <button
                   key={transaction.id}
-                  className={`flex items-center justify-between p-4 ${index !== transactions.length - 1 ? 'border-b border-ios-gray-5' : ''
-                    }`}
+                  onClick={() => handleTransactionClick(transaction)}
+                  className={`w-full flex items-center justify-between p-4 text-left hover:bg-ios-gray-6 active:bg-ios-gray-5 transition-colors ${
+                    index !== transactions.length - 1 ? 'border-b border-ios-gray-5' : ''
+                  }`}
                 >
                   <div>
                     <p className="text-ios-body font-medium text-ios-label-primary">{transaction.category}</p>
@@ -100,7 +126,7 @@ export default function Home() {
                     {transaction.type === 'income' ? '+' : '-'}
                     {formatCurrency(transaction.baseAmount, transaction.baseCurrency)}
                   </p>
-                </div>
+                </button>
               ))}
             </Card>
           )}
@@ -114,67 +140,20 @@ export default function Home() {
         className="fixed bottom-20 right-6 z-40"
       />
 
-      {/* Add Transaction Modal */}
+      {/* Add/Edit Transaction Modal */}
       <Modal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        title="Add Transaction"
+        onClose={handleModalClose}
+        title={editingTransaction ? 'Edit Transaction' : 'Add Transaction'}
         size="lg"
         enableSwipeToDismiss={true}
         enableBackdropBlur={true}
-        footer={
-          <div className="flex gap-3">
-            <Button 
-              variant="secondary" 
-              className="flex-1"
-              onClick={() => setIsModalOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button 
-              variant="primary" 
-              className="flex-1"
-              onClick={() => {
-                alert('Transaction added! (demo)')
-                setIsModalOpen(false)
-              }}
-            >
-              Add Transaction
-            </Button>
-          </div>
-        }
       >
-        <div className="space-y-4">
-          <p className="text-ios-body text-ios-label-secondary">
-            This is where your transaction form will go. For now, here's a demo of the enhanced modal!
-          </p>
-          
-          <div className="space-y-2">
-            <h3 className="text-ios-headline font-semibold">✨ New Features:</h3>
-            <ul className="text-ios-callout text-ios-label-secondary space-y-1 list-disc list-inside">
-              <li>Smooth slide-up animation</li>
-              <li>Swipe down to dismiss</li>
-              <li>Press ESC to close</li>
-              <li>Backdrop blur effect</li>
-              <li>Focus trap (try pressing Tab)</li>
-              <li>Haptic feedback (mobile)</li>
-              <li>Prevent overscroll</li>
-              <li>Custom footer support</li>
-              <li>Auto height sizing</li>
-              <li>Accessibility compliant</li>
-            </ul>
-          </div>
-
-          <div className="space-y-2">
-            <h3 className="text-ios-headline font-semibold">🎨 Try These:</h3>
-            <ul className="text-ios-callout text-ios-label-secondary space-y-1">
-              <li>• Swipe the modal down</li>
-              <li>• Press the ESC key</li>
-              <li>• Click the backdrop</li>
-              <li>• Scroll this content area</li>
-            </ul>
-          </div>
-        </div>
+        <TransactionForm
+          transaction={editingTransaction || undefined}
+          onSuccess={handleModalClose}
+          onCancel={handleModalClose}
+        />
       </Modal>
     </>
   )

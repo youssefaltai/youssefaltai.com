@@ -53,3 +53,6 @@ export {
 
 // Text utilities
 export { getGreeting, getTransactionColorClass } from './lib/text'
+
+// Emoji utilities
+export { isValidEmoji } from './lib/emoji'

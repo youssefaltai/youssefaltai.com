@@ -25,28 +25,36 @@ export async function createTransaction(userId: string, data: CreateTransactionI
   }
 
   // Convert currency if needed
-  const conversion = await convertCurrency(
-    Number(validatedData.amount),
-    validatedData.currency,
-    userSettings.baseCurrency,
-    validatedData.exchangeRate ? Number(validatedData.exchangeRate) : undefined
-  )
+  let conversion
+  try {
+    conversion = await convertCurrency(
+      Number(validatedData.amount),
+      validatedData.currency,
+      userSettings.baseCurrency,
+      validatedData.exchangeRate ? Number(validatedData.exchangeRate) : undefined
+    )
+  } catch (error) {
+    console.error('Currency conversion failed:', error)
+    throw new Error(`Currency conversion failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+  }
 
   // Create transaction
+  const transactionData = {
+    userId,
+    amount: validatedData.amount,
+    currency: validatedData.currency,
+    exchangeRate: conversion.rate,
+    baseAmount: conversion.convertedAmount,
+    baseCurrency: userSettings.baseCurrency,
+    rateSource: conversion.source,
+    type: validatedData.type,
+    category: validatedData.category,
+    description: validatedData.description,
+    date: new Date(validatedData.date),
+  }
+  
   const transaction = await prisma.transaction.create({
-    data: {
-      userId,
-      amount: validatedData.amount,
-      currency: validatedData.currency,
-      exchangeRate: conversion.rate,
-      baseAmount: conversion.convertedAmount,
-      baseCurrency: userSettings.baseCurrency,
-      rateSource: conversion.source,
-      type: validatedData.type,
-      category: validatedData.category,
-      description: validatedData.description,
-      date: new Date(validatedData.date),
-    },
+    data: transactionData,
   })
 
   return transaction
