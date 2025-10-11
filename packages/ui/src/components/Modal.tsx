@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useRef, useCallback } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { X } from 'lucide-react'
 import { cn } from '@repo/utils'
 
@@ -10,11 +10,8 @@ interface ModalProps {
   title?: string
   children: React.ReactNode
   footer?: React.ReactNode
-  size?: 'auto' | 'sm' | 'md' | 'lg' | 'full'
   variant?: 'sheet' | 'alert' | 'action-sheet'
   showCloseButton?: boolean
-  enableSwipeToDismiss?: boolean
-  enableBackdropBlur?: boolean
 }
 
 /**
@@ -26,23 +23,19 @@ interface ModalProps {
  * - Proper cleanup of all timers and listeners
  * - No stale closures
  * - Efficient re-renders
- * - Handles touch cancel events
  * - Safe state updates (no updates on unmounted components)
  * 
  * Features:
  * - Smooth slide-up animation with proper cleanup
  * - Rounded corners at the top
  * - Drag indicator
- * - Semi-transparent backdrop with optional blur
+ * - Semi-transparent backdrop
  * - Smooth exit animation
- * - Swipe-to-dismiss gesture (native events with refs)
  * - Keyboard support (Escape to close)
  * - Dynamic focus trap for accessibility
- * - Haptic feedback on mobile
- * - Prevent overscroll
  * - Multiple variants (sheet, alert, action-sheet)
  * - Custom footer support
- * - Dynamic height sizing
+ * - Auto height based on content
  */
 export function Modal({
   isOpen,
@@ -50,38 +43,15 @@ export function Modal({
   title,
   children,
   footer,
-  size = 'md',
   variant = 'sheet',
   showCloseButton = true,
-  enableSwipeToDismiss = true,
-  enableBackdropBlur = true,
 }: ModalProps) {
   const [isAnimating, setIsAnimating] = useState(false)
   const [shouldRender, setShouldRender] = useState(isOpen)
-  const [dragY, setDragY] = useState(0)
-  const [isDragging, setIsDragging] = useState(false)
   
   // Refs for DOM elements
   const modalRef = useRef<HTMLDivElement>(null)
-  const contentRef = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<HTMLElement | null>(null)
-  
-  // Refs for touch handling (avoid stale closures)
-  const dragYRef = useRef(0)
-  const isDraggingRef = useRef(false)
-
-  // Trigger haptic feedback (mobile only)
-  const triggerHaptic = useCallback(() => {
-    if ('vibrate' in navigator) {
-      navigator.vibrate(10)
-    }
-  }, [])
-
-  // Sync refs with state
-  useEffect(() => {
-    dragYRef.current = dragY
-    isDraggingRef.current = isDragging
-  }, [dragY, isDragging])
 
   // Animation and body scroll lock
   useEffect(() => {
@@ -90,7 +60,6 @@ export function Modal({
     
     if (isOpen) {
       setShouldRender(true)
-      triggerHaptic()
       
       // Use requestAnimationFrame to ensure DOM is ready before animating
       rafIds.raf1 = requestAnimationFrame(() => {
@@ -109,7 +78,6 @@ export function Modal({
       }
     } else {
       setIsAnimating(false)
-      triggerHaptic()
       
       // Wait for animation to finish before unmounting
       const timer = setTimeout(() => {
@@ -128,7 +96,7 @@ export function Modal({
         document.body.style.overflow = 'unset'
       }
     }
-  }, [isOpen, triggerHaptic])
+  }, [isOpen])
 
   // Focus trap setup (queries DOM dynamically on each Tab press)
   useEffect(() => {
@@ -181,7 +149,6 @@ export function Modal({
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
-        triggerHaptic()
         onClose()
       }
     }
@@ -190,124 +157,16 @@ export function Modal({
       window.addEventListener('keydown', handleEscape)
       return () => window.removeEventListener('keydown', handleEscape)
     }
-  }, [isOpen, onClose, triggerHaptic])
-
-  // Swipe to dismiss with native events (using refs to avoid stale closures)
-  useEffect(() => {
-    if (!enableSwipeToDismiss || !shouldRender || !modalRef.current) return
-
-    const modal = modalRef.current
-    let touchStartY = 0
-
-    const onTouchStart = (e: TouchEvent) => {
-      const touch = e.touches[0]
-      if (touch) {
-        touchStartY = touch.clientY
-        isDraggingRef.current = true
-        setIsDragging(true)
-      }
-    }
-
-    const onTouchMove = (e: TouchEvent) => {
-      if (!isDraggingRef.current) return
-      
-      const touch = e.touches[0]
-      if (!touch) return
-
-      const deltaY = touch.clientY - touchStartY
-      
-      // Only allow dragging down
-      if (deltaY > 0) {
-        const content = contentRef.current
-        // Only drag if content is scrolled to top
-        if (content && content.scrollTop <= 1) {
-          e.preventDefault()
-          setDragY(deltaY)
-          dragYRef.current = deltaY
-        }
-      }
-    }
-
-    const onTouchEnd = () => {
-      if (!isDraggingRef.current) return
-      
-      isDraggingRef.current = false
-      setIsDragging(false)
-      
-      // Use ref to get current value (avoid stale closure)
-      const currentDragY = dragYRef.current
-      
-      // If dragged more than 100px, close the modal
-      if (currentDragY > 100) {
-        triggerHaptic()
-        onClose()
-      }
-      
-      setDragY(0)
-      dragYRef.current = 0
-    }
-
-    const onTouchCancel = () => {
-      // Reset all drag state if touch is canceled (e.g., phone call, notification)
-      if (isDraggingRef.current) {
-        isDraggingRef.current = false
-        setIsDragging(false)
-        setDragY(0)
-        dragYRef.current = 0
-      }
-    }
-
-    // Add non-passive listeners
-    modal.addEventListener('touchstart', onTouchStart, { passive: true })
-    modal.addEventListener('touchmove', onTouchMove, { passive: false })
-    modal.addEventListener('touchend', onTouchEnd, { passive: true })
-    modal.addEventListener('touchcancel', onTouchCancel, { passive: true })
-
-    return () => {
-      modal.removeEventListener('touchstart', onTouchStart)
-      modal.removeEventListener('touchmove', onTouchMove)
-      modal.removeEventListener('touchend', onTouchEnd)
-      modal.removeEventListener('touchcancel', onTouchCancel)
-    }
-  }, [enableSwipeToDismiss, shouldRender, onClose, triggerHaptic])
-
-  // Prevent overscroll
-  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    const target = e.currentTarget
-    // Keep a minimum scroll position to prevent bounce
-    if (target.scrollTop <= 0) {
-      target.scrollTop = 1
-    }
-  }
+  }, [isOpen, onClose])
 
   if (!shouldRender) return null
 
   const isAlert = variant === 'alert'
 
-  // Measured heights for accurate calculations
-  const DRAG_INDICATOR_HEIGHT = 16 // pt-2 (8px) + pb-1 (4px) + h-1 (4px)
-  const HEADER_HEIGHT = 56 // py-3 (12px * 2) + text content (~32px)
-  const FOOTER_HEIGHT = 88 // p-4 (16px * 2) + button content (~56px)
-
-  // Calculate content height based on what's actually rendered
-  const dragIndicatorOffset = isAlert ? 0 : DRAG_INDICATOR_HEIGHT
-  const headerOffset = (title || showCloseButton) ? HEADER_HEIGHT : 0
-  const footerOffset = footer ? FOOTER_HEIGHT : 0
-  
-  const contentMaxHeight = `calc(100% - ${dragIndicatorOffset + headerOffset + footerOffset}px)`
-
-  const sizeClasses = {
-    auto: 'max-h-[90vh]',
-    sm: 'max-h-[40vh]',
-    md: 'max-h-[60vh]',
-    lg: 'max-h-[80vh]',
-    full: 'h-full rounded-t-none',
-  }
-
   const variantClasses = {
-    sheet: 'rounded-t-[20px]',
-    alert: 'rounded-[20px] mx-4 mb-auto mt-auto',
-    'action-sheet': 'rounded-t-[20px]',
+    sheet: 'rounded-t-[20px] max-h-[90vh]',
+    alert: 'rounded-[20px] mx-4 mb-auto mt-auto max-h-[90vh]',
+    'action-sheet': 'rounded-t-[20px] max-h-[90vh]',
   }
 
   return (
@@ -322,7 +181,6 @@ export function Modal({
       <div
         className={cn(
           'absolute inset-0 bg-black transition-opacity duration-300',
-          enableBackdropBlur && 'backdrop-blur-sm',
           isAnimating ? 'opacity-40' : 'opacity-0'
         )}
       />
@@ -331,22 +189,19 @@ export function Modal({
       <div
         ref={modalRef}
         className={cn(
-          'relative w-full bg-white shadow-ios-lg ease-out',
+          'relative w-full bg-white shadow-ios-lg ease-out transition-all duration-300',
           variantClasses[variant],
-          sizeClasses[size],
-          !isDragging && 'transition-all duration-300',
-          variant !== 'alert' && 'pb-safe'
+          variant !== 'alert' && 'pb-safe',
+          'flex flex-col'
         )}
         style={{
           transform: isAlert
             ? isAnimating
               ? 'scale(1)'
               : 'scale(0.95)'
-            : isDragging
-              ? `translateY(${dragY}px)`
-              : isAnimating
-                ? 'translateY(0)'
-                : 'translateY(100%)',
+            : isAnimating
+              ? 'translateY(0)'
+              : 'translateY(100%)',
           opacity: isAlert ? (isAnimating ? 1 : 0) : 1,
         }}
         onClick={(e) => e.stopPropagation()}
@@ -364,7 +219,7 @@ export function Modal({
         {/* Header */}
         {(title || showCloseButton) && (
           <div className={cn(
-            'flex items-center justify-between px-4 py-3',
+            'flex items-center justify-between px-4 py-3 flex-shrink-0',
             variant !== 'action-sheet' && 'border-b border-ios-gray-5'
           )}>
             <h2 
@@ -388,14 +243,11 @@ export function Modal({
 
         {/* Content */}
         <div 
-          ref={contentRef}
           className={cn(
-            'overflow-y-auto',
+            'overflow-y-auto flex-1',
             !footer && 'pb-4',
             variant === 'alert' ? 'p-4 text-center' : 'px-4 pt-4'
           )}
-          style={{ maxHeight: contentMaxHeight }}
-          onScroll={handleScroll}
         >
           {children}
         </div>
@@ -403,7 +255,7 @@ export function Modal({
         {/* Footer */}
         {footer && (
           <div className={cn(
-            'sticky bottom-0 bg-white p-4 border-t border-ios-gray-5',
+            'flex-shrink-0 bg-white p-4 border-t border-ios-gray-5',
             variant === 'alert' && 'border-t-0 pt-0'
           )}>
             {footer}

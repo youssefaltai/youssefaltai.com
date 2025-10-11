@@ -145,9 +145,6 @@ export default function CategoriesPage() {
         isOpen={isModalOpen}
         onClose={handleModalClose}
         title={editingCategory ? 'Edit Category' : 'Create Category'}
-        size="lg"
-        enableSwipeToDismiss={true}
-        enableBackdropBlur={true}
       >
         <CategoryForm
           category={editingCategory || undefined}

@@ -330,9 +330,6 @@ export default function BudgetsPage() {
         isOpen={isModalOpen}
         onClose={handleModalClose}
         title={editingBudget ? 'Edit Budget' : 'Create Budget'}
-        size="lg"
-        enableSwipeToDismiss={true}
-        enableBackdropBlur={true}
       >
         <BudgetForm
           budget={editingBudget || undefined}
@@ -346,9 +343,6 @@ export default function BudgetsPage() {
         isOpen={isActionModalOpen}
         onClose={handleActionModalClose}
         title="Budget Actions"
-        size="sm"
-        enableSwipeToDismiss={true}
-        enableBackdropBlur={true}
       >
         {actionBudget && (
           <div className="space-y-3">

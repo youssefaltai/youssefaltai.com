@@ -145,9 +145,6 @@ export default function Home() {
         isOpen={isModalOpen}
         onClose={handleModalClose}
         title={editingTransaction ? 'Edit Transaction' : 'Add Transaction'}
-        size="lg"
-        enableSwipeToDismiss={true}
-        enableBackdropBlur={true}
       >
         <TransactionForm
           transaction={editingTransaction || undefined}

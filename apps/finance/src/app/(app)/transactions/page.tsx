@@ -290,9 +290,6 @@ export default function TransactionsPage() {
         isOpen={isModalOpen}
         onClose={handleModalClose}
         title={editingTransaction ? 'Edit Transaction' : 'Add Transaction'}
-        size="lg"
-        enableSwipeToDismiss={true}
-        enableBackdropBlur={true}
       >
         <TransactionForm
           transaction={editingTransaction || undefined}
@@ -306,9 +303,6 @@ export default function TransactionsPage() {
         isOpen={isActionModalOpen}
         onClose={handleActionModalClose}
         title="Transaction Actions"
-        size="sm"
-        enableSwipeToDismiss={true}
-        enableBackdropBlur={true}
       >
         {actionTransaction && (
           <div className="space-y-3">
