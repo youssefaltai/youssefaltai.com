@@ -39,12 +39,15 @@ export interface Summary {
 
 export interface Budget {
   id: string
-  category: string
-  limit: number
-  spent: number
-  currency: string
-  period: 'monthly' | 'weekly' | 'yearly'
   userId: string
+  name: string
+  amount: number
+  currency: string
+  categories: string[] // Array of category names
+  startDate: string
+  endDate: string
+  spent?: number // Calculated, not stored
+  remaining?: number // Calculated, not stored
   createdAt: string
   updatedAt: string
 }
@@ -106,4 +109,5 @@ export interface SummaryFilters {
   dateFrom?: string
   dateTo?: string
 }
+
 

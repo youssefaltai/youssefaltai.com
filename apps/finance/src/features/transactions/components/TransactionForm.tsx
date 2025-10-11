@@ -95,14 +95,22 @@ export function TransactionForm({ transaction, onSuccess, onCancel }: Transactio
   }, [transaction, reset])
 
   const onSubmit = (data: CreateTransactionInput | UpdateTransactionInput) => {
+    // Ensure exchangeRate is properly handled (undefined if not shown, not empty string)
+    const mutationData = {
+      ...data,
+      exchangeRate: data.exchangeRate === null || data.exchangeRate === undefined || (typeof data.exchangeRate === 'string' && data.exchangeRate === '') 
+        ? undefined 
+        : data.exchangeRate,
+    }
+
     if (isEditMode) {
-      updateTransaction.mutate(data as UpdateTransactionInput, {
+      updateTransaction.mutate(mutationData as UpdateTransactionInput, {
         onSuccess: () => {
           onSuccess?.()
         },
       })
     } else {
-      createTransaction.mutate(data as CreateTransactionInput, {
+      createTransaction.mutate(mutationData as CreateTransactionInput, {
         onSuccess: () => {
           reset()
           onSuccess?.()

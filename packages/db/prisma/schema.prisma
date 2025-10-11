@@ -27,6 +27,7 @@ model User {
   credentials  Credential[]
   transactions Transaction[]
   categories   Category[]
+  budgets      Budget[]
   settings     UserSettings?
 
   @@map("users")
@@ -95,6 +96,33 @@ model Category {
   @@unique([userId, name])
   @@index([userId, type])
   @@map("categories")
+}
+
+// Budget tracking for categories
+model Budget {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String   // Budget name/label
+  
+  // Budget amount in base currency
+  amount      Decimal  @db.Decimal(12, 3)
+  currency    String   @db.VarChar(10)  // Budget currency (usually base currency)
+  
+  // Categories included in this budget
+  categories  String[] // Array of category names
+  
+  // Date range
+  startDate   DateTime
+  endDate     DateTime
+  
+  // Metadata
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId, startDate, endDate])
+  @@map("budgets")
 }
 
 // User settings for finance preferences
