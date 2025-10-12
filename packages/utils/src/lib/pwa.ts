@@ -42,7 +42,7 @@ export function createManifest(config: PWAManifestConfig): PWAManifest {
     short_name: config.shortName,
     description: config.description,
     start_url: '/',
-    display: 'standalone',
+    display: 'fullscreen',
     background_color: config.backgroundColor || '#ffffff',
     theme_color: config.themeColor || '#007AFF',
     icons: [
