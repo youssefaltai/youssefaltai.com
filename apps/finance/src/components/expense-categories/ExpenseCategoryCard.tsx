@@ -18,7 +18,7 @@ export function ExpenseCategoryCard({ expenseCategory, onClick, isFirst, isLast 
   return (
     <EntityListItem
       icon={TrendingDown}
-      iconColor="red"
+      iconColor="neutral"
       title={expenseCategory.name}
       subtitle={expenseCategory.description || undefined}
       rightContent={null}

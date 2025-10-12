@@ -24,7 +24,7 @@ export function LoanCard({ loan, onClick, isFirst, isLast }: LoanCardProps) {
   return (
     <EntityListItem
       icon={Landmark}
-      iconColor="orange"
+      iconColor="neutral"
       title={loan.name}
       subtitle={loan.description || undefined}
       bottomContent={
@@ -32,7 +32,7 @@ export function LoanCard({ loan, onClick, isFirst, isLast }: LoanCardProps) {
           <p
             className={cn(
               'text-ios-footnote',
-              overdue ? 'text-ios-red font-semibold' : 'text-ios-gray-2'
+              overdue ? 'text-ios-label-primary font-semibold' : 'text-ios-gray-2'
             )}
           >
             {formatDueDateStatus(loan.dueDate)}
@@ -41,7 +41,7 @@ export function LoanCard({ loan, onClick, isFirst, isLast }: LoanCardProps) {
       }
       rightContent={
         <div className="text-right">
-          <p className="text-ios-headline font-semibold text-ios-red">
+          <p className="text-ios-headline font-semibold text-ios-label-primary">
             {formatCurrency(amountOwed, loan.currency)}
           </p>
         </div>

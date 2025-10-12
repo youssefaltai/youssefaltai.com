@@ -49,7 +49,7 @@ export function GoalCard({ goal, onClick, isFirst, isLast }: GoalCardProps) {
             )}
           </div>
           {isCompleted && (
-            <span className="text-ios-green text-ios-caption font-semibold">
+            <span className="text-ios-blue text-ios-caption font-semibold">
               COMPLETED
             </span>
           )}

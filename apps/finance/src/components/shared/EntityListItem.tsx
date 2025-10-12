@@ -5,7 +5,7 @@ import type { LucideIcon } from '@repo/ui'
 
 interface EntityListItemProps {
   icon: LucideIcon
-  iconColor: 'blue' | 'green' | 'red' | 'orange' | 'purple'
+  iconColor?: 'blue' | 'neutral'
   title: string
   subtitle?: string
   rightContent: React.ReactNode
@@ -21,7 +21,7 @@ interface EntityListItemProps {
  */
 export function EntityListItem({
   icon: Icon,
-  iconColor,
+  iconColor = 'neutral',
   title,
   subtitle,
   rightContent,
@@ -32,10 +32,7 @@ export function EntityListItem({
 }: EntityListItemProps) {
   const iconColorClasses = {
     blue: 'bg-ios-blue/10 text-ios-blue',
-    green: 'bg-ios-green/10 text-ios-green',
-    red: 'bg-ios-red/10 text-ios-red',
-    orange: 'bg-ios-orange/10 text-ios-orange',
-    purple: 'bg-purple-500/10 text-purple-500',
+    neutral: 'bg-ios-gray-6 text-ios-gray-1',
   }
 
   return (

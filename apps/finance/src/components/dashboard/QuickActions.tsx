@@ -14,19 +14,18 @@ interface ActionButtonProps {
   icon: React.ComponentType<{ className?: string }>
   label: string
   onClick: () => void
-  color?: 'blue' | 'green' | 'purple'
+  color?: 'blue' | 'neutral'
 }
 
 function ActionButton({
   icon: Icon,
   label,
   onClick,
-  color = 'blue',
+  color = 'neutral',
 }: ActionButtonProps) {
   const colorClasses = {
     blue: 'bg-ios-blue/10 text-ios-blue',
-    green: 'bg-ios-green/10 text-ios-green',
-    purple: 'bg-purple-500/10 text-purple-500',
+    neutral: 'bg-ios-gray-6 text-ios-gray-1',
   }
 
   return (
@@ -75,19 +74,19 @@ export function QuickActions({
           icon={Target}
           label="Add Goal"
           onClick={onAddGoal}
-          color="green"
+          color="blue"
         />
         <ActionButton
           icon={Wallet}
           label="View Assets"
           onClick={onViewAssets}
-          color="purple"
+          color="neutral"
         />
         <ActionButton
           icon={TrendingUp}
           label="View Reports"
           onClick={onViewReports}
-          color="purple"
+          color="neutral"
         />
       </div>
     </div>

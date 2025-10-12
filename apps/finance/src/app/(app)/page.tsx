@@ -33,13 +33,13 @@ export default function HomePage() {
           <div className="grid grid-cols-2 gap-4 pt-4 border-t border-ios-gray-5">
             <div>
               <p className="text-ios-caption text-ios-gray-2 mb-1">Income</p>
-              <p className="text-ios-body font-semibold text-ios-green">
+              <p className="text-ios-body font-semibold text-ios-label-primary">
                 {summary ? `${summary.thisMonthIncome.toLocaleString()}` : '—'}
               </p>
             </div>
             <div>
               <p className="text-ios-caption text-ios-gray-2 mb-1">Expenses</p>
-              <p className="text-ios-body font-semibold text-ios-red">
+              <p className="text-ios-body font-semibold text-ios-label-primary">
                 {summary ? `${summary.thisMonthExpenses.toLocaleString()}` : '—'}
               </p>
             </div>

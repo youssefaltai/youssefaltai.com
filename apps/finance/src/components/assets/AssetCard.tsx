@@ -21,12 +21,12 @@ export function AssetCard({ asset, onClick, isFirst, isLast }: AssetCardProps) {
   return (
     <EntityListItem
       icon={Wallet}
-      iconColor="green"
+      iconColor="neutral"
       title={asset.name}
       subtitle={asset.description || undefined}
       rightContent={
         <div className="text-right">
-          <p className="text-ios-headline font-semibold text-ios-green">
+          <p className="text-ios-headline font-semibold text-ios-label-primary">
             {formatCurrency(balance, asset.currency)}
           </p>
         </div>

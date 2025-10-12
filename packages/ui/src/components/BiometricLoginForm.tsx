@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { startRegistration, startAuthentication } from '@simplewebauthn/browser'
 import { Button } from './Button'
 import { Input } from './Input'
+import { Card } from './Card'
 
 interface BiometricLoginFormProps {
   appName: string
@@ -160,61 +161,63 @@ export function BiometricLoginForm({ appName }: BiometricLoginFormProps) {
           </p>
         </div>
 
-        <form className="space-y-4" onSubmit={isNewUser ? handleRegister : handleLogin}>
-          <Input
-            id="email"
-            type="email"
-            label="Email"
-            required
-            value={email}
-            onChange={(e) => setEmail((e.target as HTMLInputElement).value)}
-            disabled={loading}
-          />
-
-          {isNewUser && (
+        <Card padding='lg'>
+          <form className="space-y-4" onSubmit={isNewUser ? handleRegister : handleLogin}>
             <Input
-              id="name"
-              type="text"
-              label="Name (optional)"
-              value={name}
-              onChange={(e) => setName((e.target as HTMLInputElement).value)}
+              id="email"
+              type="email"
+              label="Email"
+              required
+              value={email}
+              onChange={(e) => setEmail((e.target as HTMLInputElement).value)}
               disabled={loading}
             />
-          )}
 
-          {error && (
-            <div className="bg-ios-red/10 border border-ios-red text-ios-red px-4 py-3 rounded-ios text-ios-callout">
-              {error}
-            </div>
-          )}
+            {isNewUser && (
+              <Input
+                id="name"
+                type="text"
+                label="Name (optional)"
+                value={name}
+                onChange={(e) => setName((e.target as HTMLInputElement).value)}
+                disabled={loading}
+              />
+            )}
 
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? '...' : isNewUser ? '🔒 Register with Face ID / Touch ID' : '🔒 Sign in with Face ID / Touch ID'}
-          </Button>
+            {error && (
+              <div className="bg-ios-red/10 border border-ios-red text-ios-red px-4 py-3 rounded-ios text-ios-callout">
+                {error}
+              </div>
+            )}
 
-          {!isNewUser && (
-            <button
-              type="button"
-              className="w-full text-ios-callout text-ios-blue hover:text-ios-blue/80"
-              onClick={() => setIsNewUser(true)}
-            >
-              New user? Register with Face ID / Touch ID
-            </button>
-          )}
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? '...' : isNewUser ? '🔒 Register with Face ID / Touch ID' : '🔒 Sign in with Face ID / Touch ID'}
+            </Button>
 
-          {isNewUser && (
-            <button
-              type="button"
-              className="w-full text-ios-callout text-ios-blue hover:text-ios-blue/80"
-              onClick={() => {
-                setIsNewUser(false)
-                setError(null)
-              }}
-            >
-              Already have an account? Sign in
-            </button>
-          )}
-        </form>
+            {!isNewUser && (
+              <button
+                type="button"
+                className="w-full text-ios-callout text-ios-blue hover:text-ios-blue/80"
+                onClick={() => setIsNewUser(true)}
+              >
+                New user? Register with Face ID / Touch ID
+              </button>
+            )}
+
+            {isNewUser && (
+              <button
+                type="button"
+                className="w-full text-ios-callout text-ios-blue hover:text-ios-blue/80"
+                onClick={() => {
+                  setIsNewUser(false)
+                  setError(null)
+                }}
+              >
+                Already have an account? Sign in
+              </button>
+            )}
+          </form>
+        </Card>
 
         <p className="text-ios-caption text-ios-gray-1 text-center mt-6">
           This app uses your device's Face ID or Touch ID for secure, password-free authentication.

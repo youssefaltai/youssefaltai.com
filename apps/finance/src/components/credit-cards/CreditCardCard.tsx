@@ -21,7 +21,7 @@ export function CreditCardCard({ creditCard, onClick, isFirst, isLast }: CreditC
   return (
     <EntityListItem
       icon={CreditCard}
-      iconColor="blue"
+      iconColor="neutral"
       title={creditCard.name}
       subtitle={creditCard.description || undefined}
       rightContent={

@@ -12,7 +12,7 @@ interface SummaryCardProps {
     value: number
     isPositive: boolean
   }
-  color?: 'blue' | 'green' | 'red' | 'orange'
+  color?: 'blue' | 'neutral'
 }
 
 /**
@@ -24,13 +24,11 @@ export function SummaryCard({
   value,
   icon: Icon,
   trend,
-  color = 'blue',
+  color = 'neutral',
 }: SummaryCardProps) {
   const colorClasses = {
     blue: 'bg-ios-blue/10 text-ios-blue',
-    green: 'bg-ios-green/10 text-ios-green',
-    red: 'bg-ios-red/10 text-ios-red',
-    orange: 'bg-ios-orange/10 text-ios-orange',
+    neutral: 'bg-ios-gray-6 text-ios-gray-1',
   }
 
   return (
@@ -52,8 +50,8 @@ export function SummaryCard({
             className={cn(
               'text-ios-caption font-semibold px-2 py-1 rounded-full',
               trend.isPositive
-                ? 'bg-ios-green/10 text-ios-green'
-                : 'bg-ios-red/10 text-ios-red'
+                ? 'bg-ios-blue/10 text-ios-blue'
+                : 'bg-ios-gray-6 text-ios-gray-1'
             )}
           >
             {trend.isPositive ? '+' : ''}{trend.value}%

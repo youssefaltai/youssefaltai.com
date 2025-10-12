@@ -18,7 +18,7 @@ export function IncomeSourceCard({ incomeSource, onClick, isFirst, isLast }: Inc
   return (
     <EntityListItem
       icon={TrendingUp}
-      iconColor="green"
+      iconColor="neutral"
       title={incomeSource.name}
       subtitle={incomeSource.description || undefined}
       rightContent={null}
