@@ -72,10 +72,10 @@ export async function getExchangeRate(
 
 /**
  * Convert amount from one currency to another
- * Special handling for gold (GOLD_G = grams of 24K gold)
+ * Special handling for gold (GOLD = grams of 24K gold)
  * 
  * @param amount - Amount to convert
- * @param fromCurrency - Source currency code (EGP, USD, GOLD_G)
+ * @param fromCurrency - Source currency code (EGP, USD, GOLD)
  * @param toCurrency - Target currency code (typically EGP)
  * @param manualRate - Optional manual exchange rate override
  * @returns Conversion result with rate and converted amount
@@ -105,7 +105,7 @@ export async function convertCurrency(
   }
   
   // Special handling for gold
-  if (fromCurrency === 'GOLD_G') {
+  if (fromCurrency === 'GOLD') {
     // Gold → EGP: Fetch gold price per gram in EGP
     if (toCurrency === 'EGP') {
       try {
@@ -125,7 +125,7 @@ export async function convertCurrency(
     throw new Error('Gold conversion to non-EGP currency requires manual rate entry.')
   }
   
-  if (toCurrency === 'GOLD_G') {
+  if (toCurrency === 'GOLD') {
     // Currency → Gold: Not supported, must enter manually
     throw new Error('Converting to gold requires manual rate entry (enter grams per currency unit).')
   }
@@ -151,12 +151,12 @@ export function isValidCurrencyCode(code: string): boolean {
 
 /**
  * Common currency codes for quick selection
- * Custom: GOLD_G = grams of 24 karat gold (not XAU)
+ * Custom: GOLD = grams of 24 karat gold (not XAU)
  */
 export const COMMON_CURRENCIES = [
   { code: 'EGP', name: 'Egyptian Pound', symbol: 'E£' },
   { code: 'USD', name: 'US Dollar', symbol: '$' },
-  { code: 'GOLD_G', name: 'Gold (grams, 24K)', symbol: 'g' },
+  { code: 'GOLD', name: 'Gold (grams, 24K)', symbol: 'g' },
 ] as const
 
 /**
@@ -212,7 +212,7 @@ export function getCurrencySymbol(code: string): string {
  * Provides proper thousands separators and locale-aware formatting
  * 
  * @param amount - Amount to format (number, string, or Prisma Decimal)
- * @param currency - Currency code (EGP, USD, GOLD_G)
+ * @param currency - Currency code (EGP, USD, GOLD)
  * @param options - Optional formatting options
  * @returns Formatted string with thousands separators
  * 
@@ -220,8 +220,8 @@ export function getCurrencySymbol(code: string): string {
  * formatCurrency(5000, 'EGP') → "E£5,000.00"
  * formatCurrency(114750.50, 'EGP') → "E£114,750.50"
  * formatCurrency(100, 'USD') → "$100.00"
- * formatCurrency(25.5, 'GOLD_G') → "25.500g"
- * formatCurrency(1234.567, 'GOLD_G') → "1,234.567g"
+ * formatCurrency(25.5, 'GOLD') → "25.500g"
+ * formatCurrency(1234.567, 'GOLD') → "1,234.567g"
  */
 export function formatCurrency(
   amount: number | string,
@@ -238,7 +238,7 @@ export function formatCurrency(
   }
   
   // Special handling for gold (grams)
-  if (currency === 'GOLD_G') {
+  if (currency === 'GOLD') {
     const formatted = new Intl.NumberFormat('en-US', {
       minimumFractionDigits: 3,
       maximumFractionDigits: 3,
@@ -287,4 +287,19 @@ export function formatCurrency(
  */
 export function formatCurrencyCompact(amount: number | string, currency: string): string {
   return formatCurrency(amount, currency, { compact: true })
+}
+
+/**
+ * Format number with compact notation (K, M, B)
+ * Useful for chart axes, labels, and other numeric displays
+ * @example formatNumberCompact(5000) → "5K"
+ * @example formatNumberCompact(1500000) → "1.5M"
+ * @example formatNumberCompact(2500000000) → "2.5B"
+ */
+export function formatNumberCompact(value: number, maxFractionDigits: number = 1): string {
+  return new Intl.NumberFormat('en-US', {
+    notation: 'compact',
+    compactDisplay: 'short',
+    maximumFractionDigits: maxFractionDigits,
+  }).format(value)
 }

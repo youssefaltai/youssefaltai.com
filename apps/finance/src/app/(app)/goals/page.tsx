@@ -1,14 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import { FloatingActionButton, Modal, Plus, Target } from '@repo/ui'
+import { FloatingActionButton, Modal, Plus, Target, PageLayout, EntityList, LoadingSkeleton } from '@repo/ui'
 import { useGoals, useCreateGoal, useUpdateGoal, useDeleteGoal } from '../../../hooks/use-goals'
 import { GoalCard } from '../../../components/goals/GoalCard'
 import { GoalForm } from '../../../components/forms/GoalForm'
-import { PageLayout } from '../../../components/shared/PageLayout'
-import { EntityList } from '../../../components/shared/EntityList'
-import { LoadingSkeleton } from '../../../components/shared/LoadingSkeleton'
 import type { Account } from '@repo/db'
+import { ensureDate } from '@repo/utils'
 
 export default function GoalsPage() {
   const { data: goals = [], isLoading } = useGoals()
@@ -59,8 +57,8 @@ export default function GoalsPage() {
         )}
       />
 
-      <FloatingActionButton 
-        icon={Plus} 
+      <FloatingActionButton
+        icon={Plus}
         label="Add Goal"
         onClick={() => setIsCreateModalOpen(true)}
         className="fixed bottom-20 right-4"
@@ -92,7 +90,7 @@ export default function GoalsPage() {
                 description: editingGoal.description || undefined,
                 target: editingGoal.target ? Number(editingGoal.target) : 0,
                 openingBalance: Number(editingGoal.balance),
-                dueDate: editingGoal.dueDate?.toISOString(),
+                dueDate: ensureDate(editingGoal.dueDate || new Date()).toISOString(),
               }}
               onSubmit={handleUpdate}
               onCancel={() => setEditingGoal(null)}

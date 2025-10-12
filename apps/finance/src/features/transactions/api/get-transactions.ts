@@ -16,7 +16,8 @@ export default async function getTransactions(
     const {
         dateFrom,
         dateTo,
-        accountIds,
+        fromAccountIds,
+        toAccountIds,
         minAmount,
         maxAmount,
         type,
@@ -81,12 +82,13 @@ export default async function getTransactions(
         }
     }
 
-    // Account filter - transactions involving any of the specified accounts
-    if (accountIds && accountIds.length > 0) {
-        where.OR = [
-            { fromAccountId: { in: accountIds } },
-            { toAccountId: { in: accountIds } },
-        ]
+    // Account filters - from and to accounts independently
+    if (fromAccountIds && fromAccountIds.length > 0) {
+        where.fromAccountId = { in: fromAccountIds }
+    }
+
+    if (toAccountIds && toAccountIds.length > 0) {
+        where.toAccountId = { in: toAccountIds }
     }
 
     // Amount range filter

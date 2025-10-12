@@ -1,28 +1,28 @@
 'use client'
 
-import { EmptyState } from '@repo/ui'
+import { EmptyState } from './EmptyState'
 import { GroupedList } from './GroupedList'
-import type { LucideIcon } from '@repo/ui'
+import type { LucideIcon } from 'lucide-react'
 
-interface EntityListProps {
-  items: any[]
+interface EntityListProps<T = any> {
+  items: T[]
   emptyIcon: LucideIcon
   emptyTitle: string
   emptyDescription: string
-  renderItem: (item: any, index: number) => React.ReactNode
+  renderItem: (item: T, index: number) => React.ReactNode
 }
 
 /**
  * Standard entity list with empty state
  * Ensures consistent spacing and structure
  */
-export function EntityList({
+export function EntityList<T = any>({
   items,
   emptyIcon,
   emptyTitle,
   emptyDescription,
   renderItem,
-}: EntityListProps) {
+}: EntityListProps<T>) {
   if (items.length === 0) {
     return (
       <div className="pt-16">

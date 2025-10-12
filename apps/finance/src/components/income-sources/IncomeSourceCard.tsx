@@ -2,7 +2,7 @@
 
 import { TrendingUp } from '@repo/ui'
 import type { Account } from '@repo/db'
-import { EntityListItem } from '../shared/EntityListItem'
+import { EntityListItem } from '@repo/ui'
 
 interface IncomeSourceCardProps {
   incomeSource: Account

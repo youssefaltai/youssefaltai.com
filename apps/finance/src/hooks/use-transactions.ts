@@ -7,7 +7,8 @@ import type { PaginatedResponse } from '@repo/types'
 interface TransactionFilters {
   dateFrom?: string
   dateTo?: string
-  accountIds?: string[]
+  fromAccountIds?: string[]
+  toAccountIds?: string[]
   minAmount?: number
   maxAmount?: number
   type?: 'income' | 'expense' | 'transfer'
@@ -51,8 +52,11 @@ export function useTransactions(filters?: TransactionFilters) {
       
       if (filters?.dateFrom) params.append('dateFrom', filters.dateFrom)
       if (filters?.dateTo) params.append('dateTo', filters.dateTo)
-      if (filters?.accountIds?.length) {
-        filters.accountIds.forEach(id => params.append('accountIds', id))
+      if (filters?.fromAccountIds?.length) {
+        filters.fromAccountIds.forEach(id => params.append('fromAccountIds', id))
+      }
+      if (filters?.toAccountIds?.length) {
+        filters.toAccountIds.forEach(id => params.append('toAccountIds', id))
       }
       if (filters?.minAmount !== undefined) params.append('minAmount', filters.minAmount.toString())
       if (filters?.maxAmount !== undefined) params.append('maxAmount', filters.maxAmount.toString())

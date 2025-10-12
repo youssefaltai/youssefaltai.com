@@ -1,21 +1,20 @@
 'use client'
 
 import { useState } from 'react'
-import { FloatingActionButton, EmptyState, Modal, Plus, CreditCard, SlidersHorizontal } from '@repo/ui'
+import { FloatingActionButton, EmptyState, Modal, Plus, CreditCard, SlidersHorizontal, PageLayout, GroupedList, LoadingSkeleton } from '@repo/ui'
 import { useTransactions, useCreateTransaction, useUpdateTransaction, useDeleteTransaction } from '../../../hooks/use-transactions'
 import { TransactionFilters } from '../../../components/transactions/TransactionFilters'
 import { TransactionItem } from '../../../components/transactions/TransactionItem'
 import { TransactionForm } from '../../../components/forms/TransactionForm'
-import { PageLayout } from '../../../components/shared/PageLayout'
-import { GroupedList } from '../../../components/shared/GroupedList'
-import { LoadingSkeleton } from '../../../components/shared/LoadingSkeleton'
-import { formatDate } from '../../../utils/format'
 import { cn } from '@repo/utils'
+import { formatDistanceToNow, isToday, isYesterday, startOfMonth, endOfMonth, isSameMonth, parseISO } from '@repo/utils'
+import { ensureDate } from '@repo/utils'
 
 interface TransactionFilters {
   dateFrom?: string
   dateTo?: string
-  accountIds?: string[]
+  fromAccountIds?: string[]
+  toAccountIds?: string[]
   minAmount?: number
   maxAmount?: number
   type?: 'income' | 'expense' | 'transfer'
@@ -29,8 +28,8 @@ interface TransactionFilters {
 export default function TransactionsPage() {
   // Get current month as default filter
   const now = new Date()
-  const defaultStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
-  const defaultEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59).toISOString()
+  const defaultStart = startOfMonth(now).toISOString()
+  const defaultEnd = endOfMonth(now).toISOString()
 
   const [filters, setFilters] = useState<TransactionFilters>({
     dateFrom: defaultStart,
@@ -68,11 +67,21 @@ export default function TransactionsPage() {
 
   // Group transactions by date
   const groupedTransactions = transactions.reduce((groups, transaction) => {
-    const date = formatDate(transaction.date, 'relative')
-    if (!groups[date]) {
-      groups[date] = []
+    const dateObj = ensureDate(transaction.date)
+    let dateLabel: string
+    
+    if (isToday(dateObj)) {
+      dateLabel = 'Today'
+    } else if (isYesterday(dateObj)) {
+      dateLabel = 'Yesterday'
+    } else {
+      dateLabel = formatDistanceToNow(dateObj, { addSuffix: true })
     }
-    groups[date].push(transaction)
+    
+    if (!groups[dateLabel]) {
+      groups[dateLabel] = []
+    }
+    groups[dateLabel]?.push(transaction)
     return groups
   }, {} as Record<string, typeof transactions>)
 
@@ -83,8 +92,7 @@ export default function TransactionsPage() {
     filters.maxAmount ||
     filters.type ||
     (filters.dateFrom && filters.dateTo &&
-      (new Date(filters.dateFrom).getMonth() !== now.getMonth() ||
-        new Date(filters.dateFrom).getFullYear() !== now.getFullYear()))
+      !isSameMonth(parseISO(filters.dateFrom), now))
 
   if (isLoading) {
     return <LoadingSkeleton title="Transactions" subtitle="View and manage your transactions" itemHeight={24} />
@@ -213,7 +221,15 @@ export default function TransactionsPage() {
         {editingTransaction && (
           <div className="space-y-4">
             <TransactionForm
-              initialData={editingTransaction}
+              initialData={{
+                description: editingTransaction.description,
+                fromAccountId: editingTransaction.fromAccount?.id || '',
+                toAccountId: editingTransaction.toAccount?.id || '',
+                amount: Number(editingTransaction.amount),
+                currency: editingTransaction.currency,
+                exchangeRate: editingTransaction.exchangeRate ? Number(editingTransaction.exchangeRate) : undefined,
+                date: editingTransaction.date,
+              }}
               onSubmit={handleUpdate}
               onCancel={() => setEditingTransaction(null)}
             />

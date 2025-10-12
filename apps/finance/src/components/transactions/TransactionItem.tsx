@@ -1,9 +1,10 @@
 'use client'
 
-import { ArrowRight } from '@repo/ui'
-import { formatCurrency, formatDate } from '../../utils/format'
+import { ArrowRight, Money } from '@repo/ui'
+import { ensureDate } from '@repo/utils'
 import type { TTransaction } from '@repo/db'
 import { cn } from '@repo/utils'
+import { formatDistanceToNow, format, differenceInDays } from '@repo/utils'
 
 interface TransactionItemProps {
   transaction: TTransaction
@@ -55,15 +56,24 @@ export function TransactionItem({ transaction, onClick, isFirst, isLast }: Trans
       {/* Amount and Date */}
       <div className="flex items-center justify-between">
         <span className="text-ios-callout text-ios-gray-2">
-          {formatDate(transaction.date, 'long')}
+          {(() => {
+            const date = ensureDate(transaction.date)
+            const daysDiff = Math.abs(differenceInDays(new Date(), date))
+            // Use relative format for dates within 7 days
+            if (daysDiff <= 7) {
+              return formatDistanceToNow(date, { addSuffix: true })
+            }
+            // Use full datetime for older dates
+            return format(date, 'PP p')
+          })()}
         </span>
         <span
           className={cn(
-            'text-ios-headline font-semibold',
+            'text-ios-callout sm:text-ios-headline font-semibold',
             'text-ios-blue' // Default color, can be enhanced later based on account types
           )}
         >
-          {formatCurrency(amount, transaction.currency)}
+          {<Money amount={amount} currency={transaction.currency} />}
         </span>
       </div>
     </button>

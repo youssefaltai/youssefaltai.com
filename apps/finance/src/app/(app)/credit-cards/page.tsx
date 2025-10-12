@@ -5,9 +5,7 @@ import { FloatingActionButton, Modal, Plus, CreditCard } from '@repo/ui'
 import { useCreditCards, useCreateCreditCard, useUpdateCreditCard, useDeleteCreditCard } from '../../../hooks/use-credit-cards'
 import { CreditCardCard } from '../../../components/credit-cards/CreditCardCard'
 import { CreditCardForm } from '../../../components/forms/CreditCardForm'
-import { PageLayout } from '../../../components/shared/PageLayout'
-import { EntityList } from '../../../components/shared/EntityList'
-import { LoadingSkeleton } from '../../../components/shared/LoadingSkeleton'
+import { PageLayout, EntityList, LoadingSkeleton } from '@repo/ui'
 import type { Account } from '@repo/db'
 
 export default function CreditCardsPage() {

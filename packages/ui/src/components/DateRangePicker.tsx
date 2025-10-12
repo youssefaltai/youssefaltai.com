@@ -1,11 +1,11 @@
 'use client'
 
-import { Button } from '@repo/ui'
-import { Input } from '@repo/ui'
+import { Button } from './Button'
+import { Input } from './Input'
 import { useState } from 'react'
-import { isoToDateInput, dateInputToISO } from '../../utils/format'
+import { startOfDay, endOfDay, startOfMonth, endOfMonth, parseISO, startOfWeek, endOfWeek, format } from '@repo/utils'
 
-interface DateRange {
+export interface DateRange {
   start: string // ISO date string
   end: string // ISO date string
 }
@@ -26,36 +26,25 @@ export function DateRangePicker({ value, onChange, label }: DateRangePickerProps
 
   const getToday = (): DateRange => {
     const today = new Date()
-    const start = new Date(today.setHours(0, 0, 0, 0)).toISOString()
-    const end = new Date(today.setHours(23, 59, 59, 999)).toISOString()
-    return { start, end }
+    return {
+      start: startOfDay(today).toISOString(),
+      end: endOfDay(today).toISOString(),
+    }
   }
 
   const getThisWeek = (): DateRange => {
     const today = new Date()
-    const dayOfWeek = today.getDay()
-    const startOfWeek = new Date(today)
-    startOfWeek.setDate(today.getDate() - dayOfWeek)
-    startOfWeek.setHours(0, 0, 0, 0)
-    
-    const endOfWeek = new Date(startOfWeek)
-    endOfWeek.setDate(startOfWeek.getDate() + 6)
-    endOfWeek.setHours(23, 59, 59, 999)
-    
     return {
-      start: startOfWeek.toISOString(),
-      end: endOfWeek.toISOString(),
+      start: startOfWeek(today).toISOString(),
+      end: endOfWeek(today).toISOString(),
     }
   }
 
   const getThisMonth = (): DateRange => {
     const today = new Date()
-    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1)
-    const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59, 999)
-    
     return {
-      start: startOfMonth.toISOString(),
-      end: endOfMonth.toISOString(),
+      start: startOfMonth(today).toISOString(),
+      end: endOfMonth(today).toISOString(),
     }
   }
 
@@ -76,7 +65,7 @@ export function DateRangePicker({ value, onChange, label }: DateRangePickerProps
   }
 
   const handleCustomChange = (field: 'start' | 'end', dateString: string) => {
-    const isoDate = dateInputToISO(dateString)
+    const isoDate = parseISO(dateString + 'T12:00:00').toISOString()
     onChange({
       ...value,
       [field]: isoDate,
@@ -139,7 +128,7 @@ export function DateRangePicker({ value, onChange, label }: DateRangePickerProps
             </label>
             <Input
               type="date"
-              value={isoToDateInput(value.start)}
+              value={format(parseISO(value.start), 'yyyy-MM-dd')}
               onChange={(e) => handleCustomChange('start', e.target.value)}
             />
           </div>
@@ -149,7 +138,7 @@ export function DateRangePicker({ value, onChange, label }: DateRangePickerProps
             </label>
             <Input
               type="date"
-              value={isoToDateInput(value.end)}
+              value={format(parseISO(value.end), 'yyyy-MM-dd')}
               onChange={(e) => handleCustomChange('end', e.target.value)}
             />
           </div>

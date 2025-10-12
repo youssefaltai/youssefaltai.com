@@ -1,13 +1,26 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Search, Button, Input } from '@repo/ui'
+import { Search, Button, Input, SegmentedControl, ChipSelect } from '@repo/ui'
+import type { SegmentedControlOption, ChipSelectOption } from '@repo/ui'
 import { cn } from '@repo/utils'
+import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, parseISO, isSameDay } from '@repo/utils'
+import { useAccounts } from '../../hooks/use-accounts'
+
+type TransactionType = 'all' | 'income' | 'expense' | 'transfer'
+
+const TRANSACTION_TYPE_OPTIONS: SegmentedControlOption<TransactionType>[] = [
+  { value: 'all', label: 'All' },
+  { value: 'income', label: 'Income' },
+  { value: 'expense', label: 'Expense' },
+  { value: 'transfer', label: 'Transfer' },
+]
 
 interface TransactionFilters {
   dateFrom?: string
   dateTo?: string
-  accountIds?: string[]
+  fromAccountIds?: string[]
+  toAccountIds?: string[]
   minAmount?: number
   maxAmount?: number
   type?: 'income' | 'expense' | 'transfer'
@@ -32,10 +45,104 @@ export function TransactionFilters({
   // Local draft state - changes here don't affect parent until Done is clicked
   const [draftFilters, setDraftFilters] = useState<TransactionFilters>(filters)
 
+  // Fetch accounts
+  const { data: allAccounts = [] } = useAccounts()
+
+  // Transform accounts to chip options
+  const accountOptions: ChipSelectOption[] = allAccounts.map(account => ({
+    id: account.id,
+    label: account.name,
+  }))
+
+  // Filter accounts based on selected transaction type
+  const getFromAccountOptions = (): ChipSelectOption[] => {
+    const selectedType = draftFilters.type
+    
+    if (!selectedType) {
+      return accountOptions // Show all when no type selected
+    }
+    
+    switch (selectedType) {
+      case 'income':
+        // Income transactions: FROM income accounts
+        return accountOptions.filter(opt => {
+          const account = allAccounts.find(a => a.id === opt.id)
+          return account?.type === 'income'
+        })
+      case 'expense':
+        // Expense transactions: FROM asset accounts
+        return accountOptions.filter(opt => {
+          const account = allAccounts.find(a => a.id === opt.id)
+          return account?.type === 'asset'
+        })
+      case 'transfer':
+        // Transfer transactions: FROM asset accounts
+        return accountOptions.filter(opt => {
+          const account = allAccounts.find(a => a.id === opt.id)
+          return account?.type === 'asset'
+        })
+      default:
+        return accountOptions
+    }
+  }
+
+  const getToAccountOptions = (): ChipSelectOption[] => {
+    const selectedType = draftFilters.type
+    
+    if (!selectedType) {
+      return accountOptions // Show all when no type selected
+    }
+    
+    switch (selectedType) {
+      case 'income':
+        // Income transactions: TO asset accounts
+        return accountOptions.filter(opt => {
+          const account = allAccounts.find(a => a.id === opt.id)
+          return account?.type === 'asset'
+        })
+      case 'expense':
+        // Expense transactions: TO expense accounts
+        return accountOptions.filter(opt => {
+          const account = allAccounts.find(a => a.id === opt.id)
+          return account?.type === 'expense'
+        })
+      case 'transfer':
+        // Transfer transactions: TO asset accounts
+        return accountOptions.filter(opt => {
+          const account = allAccounts.find(a => a.id === opt.id)
+          return account?.type === 'asset'
+        })
+      default:
+        return accountOptions
+    }
+  }
+
   // Update draft when parent filters change (e.g., on mount)
   useEffect(() => {
     setDraftFilters(filters)
   }, [filters])
+
+  const handleFromAccountToggle = (accountId: string) => {
+    const current = draftFilters.fromAccountIds || []
+    const updated = current.includes(accountId)
+      ? current.filter(id => id !== accountId)
+      : [...current, accountId]
+    setDraftFilters({
+      ...draftFilters,
+      fromAccountIds: updated.length > 0 ? updated : undefined
+    })
+  }
+
+  const handleToAccountToggle = (accountId: string) => {
+    const current = draftFilters.toAccountIds || []
+    const updated = current.includes(accountId)
+      ? current.filter(id => id !== accountId)
+      : [...current, accountId]
+    setDraftFilters({
+      ...draftFilters,
+      toAccountIds: updated.length > 0 ? updated : undefined
+    })
+  }
 
   const handleDatePreset = (preset: 'today' | 'week' | 'month' | 'all') => {
     const now = new Date()
@@ -44,21 +151,16 @@ export function TransactionFilters({
 
     switch (preset) {
       case 'today':
-        start = new Date(now.setHours(0, 0, 0, 0))
-        end = new Date(now.setHours(23, 59, 59, 999))
+        start = startOfDay(now)
+        end = endOfDay(now)
         break
       case 'week':
-        const dayOfWeek = now.getDay()
-        start = new Date(now)
-        start.setDate(now.getDate() - dayOfWeek)
-        start.setHours(0, 0, 0, 0)
-        end = new Date(start)
-        end.setDate(start.getDate() + 6)
-        end.setHours(23, 59, 59, 999)
+        start = startOfWeek(now)
+        end = endOfWeek(now)
         break
       case 'month':
-        start = new Date(now.getFullYear(), now.getMonth(), 1)
-        end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999)
+        start = startOfMonth(now)
+        end = endOfMonth(now)
         break
       case 'all':
         setDraftFilters({
@@ -80,22 +182,21 @@ export function TransactionFilters({
     if (!draftFilters.dateFrom || !draftFilters.dateTo) return 'all'
     
     const now = new Date()
-    const start = new Date(draftFilters.dateFrom)
-    const end = new Date(draftFilters.dateTo)
+    const start = parseISO(draftFilters.dateFrom)
+    const end = parseISO(draftFilters.dateTo)
     
     // Check if it's today
-    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-    const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59)
-    if (start.toDateString() === todayStart.toDateString() && 
-        end.toDateString() === todayEnd.toDateString()) {
+    if (isSameDay(start, startOfDay(now)) && isSameDay(end, endOfDay(now))) {
       return 'today'
     }
     
+    // Check if it's this week
+    if (isSameDay(start, startOfWeek(now)) && isSameDay(end, endOfWeek(now))) {
+      return 'week'
+    }
+    
     // Check if it's this month
-    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
-    const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0)
-    if (start.toDateString() === monthStart.toDateString() && 
-        end.getMonth() === monthEnd.getMonth()) {
+    if (isSameDay(start, startOfMonth(now)) && isSameDay(end, endOfMonth(now))) {
       return 'month'
     }
     
@@ -106,8 +207,8 @@ export function TransactionFilters({
 
   const handleClearAll = () => {
     const now = new Date()
-    const start = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
-    const end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59).toISOString()
+    const start = startOfMonth(now).toISOString()
+    const end = endOfMonth(now).toISOString()
     
     setDraftFilters({
       dateFrom: start,
@@ -119,7 +220,9 @@ export function TransactionFilters({
     draftFilters.search ||
     draftFilters.minAmount ||
     draftFilters.maxAmount ||
-    draftFilters.type
+    draftFilters.type ||
+    (draftFilters.fromAccountIds && draftFilters.fromAccountIds.length > 0) ||
+    (draftFilters.toAccountIds && draftFilters.toAccountIds.length > 0)
 
   const handleApply = () => {
     onApply(draftFilters)
@@ -206,67 +309,42 @@ export function TransactionFilters({
         <label className="text-ios-callout font-semibold text-ios-label-primary block mb-3">
           Type
         </label>
-        <div className="bg-ios-gray-6 rounded-ios-sm p-0.5 flex gap-0.5">
-          <button
-            onClick={() => setDraftFilters({ ...draftFilters, type: undefined })}
-            className={cn(
-              'flex-1 py-2 rounded-[7px] font-semibold text-ios-callout transition-all',
-              !draftFilters.type
-                ? 'bg-white text-ios-label-primary shadow-sm'
-                : 'text-ios-gray-1 hover:text-ios-label-primary'
-            )}
-          >
-            All
-          </button>
-          <button
-            onClick={() =>
-              setDraftFilters({
-                ...draftFilters,
-                type: draftFilters.type === 'income' ? undefined : 'income',
-              })
-            }
-            className={cn(
-              'flex-1 py-2 rounded-[7px] font-semibold text-ios-callout transition-all',
-              draftFilters.type === 'income'
-                ? 'bg-white text-ios-label-primary shadow-sm'
-                : 'text-ios-gray-1 hover:text-ios-label-primary'
-            )}
-          >
-            Income
-          </button>
-          <button
-            onClick={() =>
-              setDraftFilters({
-                ...draftFilters,
-                type: draftFilters.type === 'expense' ? undefined : 'expense',
-              })
-            }
-            className={cn(
-              'flex-1 py-2 rounded-[7px] font-semibold text-ios-callout transition-all',
-              draftFilters.type === 'expense'
-                ? 'bg-white text-ios-label-primary shadow-sm'
-                : 'text-ios-gray-1 hover:text-ios-label-primary'
-            )}
-          >
-            Expense
-          </button>
-          <button
-            onClick={() =>
-              setDraftFilters({
-                ...draftFilters,
-                type: draftFilters.type === 'transfer' ? undefined : 'transfer',
-              })
-            }
-            className={cn(
-              'flex-1 py-2 rounded-[7px] font-semibold text-ios-callout transition-all',
-              draftFilters.type === 'transfer'
-                ? 'bg-white text-ios-label-primary shadow-sm'
-                : 'text-ios-gray-1 hover:text-ios-label-primary'
-            )}
-          >
-            Transfer
-          </button>
-        </div>
+        <SegmentedControl
+          options={TRANSACTION_TYPE_OPTIONS}
+          value={(draftFilters.type || 'all') as TransactionType}
+          onChange={(value) =>
+            setDraftFilters({
+              ...draftFilters,
+              type: value === 'all' ? undefined : value,
+            })
+          }
+        />
+      </div>
+
+      {/* From Accounts */}
+      <div>
+        <label className="text-ios-callout font-semibold text-ios-label-primary block mb-3">
+          From Accounts
+        </label>
+        <ChipSelect
+          options={getFromAccountOptions()}
+          selectedIds={draftFilters.fromAccountIds || []}
+          onToggle={handleFromAccountToggle}
+          emptyMessage="No accounts available"
+        />
+      </div>
+
+      {/* To Accounts */}
+      <div>
+        <label className="text-ios-callout font-semibold text-ios-label-primary block mb-3">
+          To Accounts
+        </label>
+        <ChipSelect
+          options={getToAccountOptions()}
+          selectedIds={draftFilters.toAccountIds || []}
+          onToggle={handleToAccountToggle}
+          emptyMessage="No accounts available"
+        />
       </div>
 
       {/* Amount Range */}

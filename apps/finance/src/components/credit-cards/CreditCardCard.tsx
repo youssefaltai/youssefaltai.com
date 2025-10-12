@@ -1,9 +1,8 @@
 'use client'
 
-import { CreditCard } from '@repo/ui'
-import { formatCurrency } from '../../utils/format'
+import { CreditCard, Money } from '@repo/ui'
 import type { Account } from '@repo/db'
-import { EntityListItem } from '../shared/EntityListItem'
+import { EntityListItem } from '@repo/ui'
 
 interface CreditCardCardProps {
   creditCard: Account
@@ -26,8 +25,8 @@ export function CreditCardCard({ creditCard, onClick, isFirst, isLast }: CreditC
       subtitle={creditCard.description || undefined}
       rightContent={
         <div className="text-right">
-          <p className="text-ios-headline font-semibold text-ios-label-primary">
-            {formatCurrency(balance, creditCard.currency)}
+          <p className="text-ios-callout sm:text-ios-headline font-semibold text-ios-label-primary">
+            <Money amount={balance} currency={creditCard.currency} />
           </p>
         </div>
       }

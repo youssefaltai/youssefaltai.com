@@ -1,7 +1,7 @@
 'use client'
 
 import { cn } from '@repo/utils'
-import type { LucideIcon } from '@repo/ui'
+import type { LucideIcon } from 'lucide-react'
 
 interface EntityListItemProps {
   icon: LucideIcon

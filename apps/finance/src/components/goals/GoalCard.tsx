@@ -1,10 +1,11 @@
 'use client'
 
-import { ProgressBar } from '@repo/ui'
-import { formatCurrency, formatDate } from '../../utils/format'
+import { Money, ProgressBar } from '@repo/ui'
 import { calculateGoalProgress, formatDueDateStatus } from '../../utils/calculations'
+import { ensureDate } from '@repo/utils'
 import type { Account } from '@repo/db'
 import { cn } from '@repo/utils'
+import { formatDistanceToNow, format, differenceInDays } from '@repo/utils'
 
 interface GoalCardProps {
   goal: Account
@@ -60,8 +61,8 @@ export function GoalCard({ goal, onClick, isFirst, isLast }: GoalCardProps) {
           <ProgressBar value={progress} />
           <div className="flex items-center justify-between text-ios-footnote">
             <span className="text-ios-gray-1">
-              {formatCurrency(Number(goal.balance), goal.currency)} of{' '}
-              {formatCurrency(Number(goal.target), goal.currency)}
+              {<Money amount={Number(goal.balance)} currency={goal.currency} />} of{' '}
+              {<Money amount={Number(goal.target)} currency={goal.currency} />}
             </span>
             <span className="text-ios-label-primary font-semibold">
               {Math.round(progress)}%
@@ -76,7 +77,16 @@ export function GoalCard({ goal, onClick, isFirst, isLast }: GoalCardProps) {
               {formatDueDateStatus(goal.dueDate)}
             </span>
             <span className="text-ios-footnote text-ios-gray-2">
-              {formatDate(goal.dueDate, 'short')}
+              {(() => {
+                const date = ensureDate(goal.dueDate)
+                const daysDiff = differenceInDays(date, new Date())
+                // Use relative format for dates within 30 days
+                if (daysDiff >= 0 && daysDiff <= 30) {
+                  return formatDistanceToNow(date, { addSuffix: true })
+                }
+                // Use just date for further out
+                return format(date, 'PP')
+              })()}
             </span>
           </div>
         )}

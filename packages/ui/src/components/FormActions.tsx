@@ -1,10 +1,9 @@
 'use client'
 
-import { Button } from '@repo/ui'
+import { Button } from './Button'
 
 interface FormActionsProps {
   onCancel: () => void
-  onSubmit?: () => void
   isSubmitting?: boolean
   submitLabel?: string
   showDelete?: boolean
@@ -18,7 +17,6 @@ interface FormActionsProps {
  */
 export function FormActions({
   onCancel,
-  onSubmit,
   isSubmitting = false,
   submitLabel = 'Save',
   showDelete = false,
@@ -38,17 +36,14 @@ export function FormActions({
         >
           Cancel
         </Button>
-        {onSubmit && (
-          <Button
-            type="submit"
-            variant="primary"
-            disabled={isSubmitting}
-            className="flex-1"
-            onClick={onSubmit}
-          >
-            {isSubmitting ? 'Saving...' : submitLabel}
-          </Button>
-        )}
+        <Button
+          type="submit"
+          variant="primary"
+          disabled={isSubmitting}
+          className="flex-1"
+        >
+          {isSubmitting ? 'Saving...' : submitLabel}
+        </Button>
       </div>
 
       {/* Delete Action */}

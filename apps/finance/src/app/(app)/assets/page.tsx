@@ -1,13 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { FloatingActionButton, Modal, Plus, Wallet } from '@repo/ui'
+import { FloatingActionButton, Modal, Plus, Wallet, PageLayout, EntityList, LoadingSkeleton } from '@repo/ui'
 import { useAssets, useCreateAsset, useUpdateAsset, useDeleteAsset } from '../../../hooks/use-assets'
 import { AssetCard } from '../../../components/assets/AssetCard'
 import { AssetForm } from '../../../components/forms/AssetForm'
-import { PageLayout } from '../../../components/shared/PageLayout'
-import { EntityList } from '../../../components/shared/EntityList'
-import { LoadingSkeleton } from '../../../components/shared/LoadingSkeleton'
 import type { Account } from '@repo/db'
 
 export default function AssetsPage() {

@@ -1,6 +1,6 @@
 'use client'
 
-import { PageHeader } from '@repo/ui'
+import { PageHeader } from './PageHeader'
 
 interface PageLayoutProps {
   title: string

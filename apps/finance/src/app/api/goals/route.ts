@@ -1,38 +1,13 @@
-import { NextRequest, NextResponse } from "next/server"
-
-import { ApiResponse } from "@repo/types"
-import { BadRequestResponse, getJsonInput, SuccessResponse, UnauthorizedResponse } from "@/shared/utils/api"
-import { verifyAuth } from "@repo/auth/verify-auth"
-
-import { createGoal, getAllGoals } from "@/features/accounts/goal"
+/**
+ * Goal API routes
+ * Generated using createAccountRouteHandlers factory
+ */
 import { TAccount } from "@repo/db"
+import { createAccountRouteHandlers } from "@/shared/utils/api"
+import { createGoal, getAllGoals } from "@/features/accounts/goal"
 
-export async function POST(request: NextRequest): Promise<NextResponse<ApiResponse<TAccount>>> {
-    const { authenticated, userId } = await verifyAuth(request)
-    if (!authenticated) return UnauthorizedResponse(userId)
-
-    const jsonInput = await getJsonInput(request)
-    if (!jsonInput) return BadRequestResponse(jsonInput)
-
-    try {
-        const response = await createGoal(userId, jsonInput)
-        return SuccessResponse(response)
-    } catch (error) {
-        console.error('Error creating goal:', error)
-        return BadRequestResponse<TAccount>(error instanceof Error ? error.message : 'Failed to create goal')
-    }
-}
-
-export async function GET(request: NextRequest): Promise<NextResponse<ApiResponse<TAccount[]>>> {
-    const { authenticated, userId } = await verifyAuth(request)
-    if (!authenticated) return UnauthorizedResponse(userId)
-
-    try {
-        const response = await getAllGoals(userId)
-        return SuccessResponse(response)
-    } catch (error) {
-        console.error('Error getting goals:', error)
-        return BadRequestResponse<TAccount[]>(error instanceof Error ? error.message : 'Failed to get goals')
-    }
-}
+export const { POST, GET } = createAccountRouteHandlers<TAccount>({
+  createFn: createGoal,
+  getAllFn: getAllGoals,
+})
 

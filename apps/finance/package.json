@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "next dev --turbopack",
-    "dev:https": "next dev --turbopack --experimental-https --experimental-https-key ./certs/localhost+2-key.pem --experimental-https-cert ./certs/localhost+2.pem",
+    "dev:https": "next dev --turbopack --port 3001 --experimental-https --experimental-https-key ./certs/youssefaltai.local+4-key.pem --experimental-https-cert ./certs/youssefaltai.local+4.pem",
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "eslint"
@@ -26,6 +26,7 @@
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-hook-form": "^7.65.0",
+    "recharts": "^3.2.1",
     "tailwindcss": "^4.1.14",
     "zod": "^4.1.12",
     "zustand": "^5.0.8"

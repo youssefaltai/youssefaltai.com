@@ -1,7 +1,6 @@
 'use client'
 
-import { Card, ProgressBar, ChevronRight } from '@repo/ui'
-import { formatCurrency } from '../../utils/format'
+import { Card, ProgressBar, ChevronRight, Money } from '@repo/ui'
 import { calculateGoalProgress } from '../../utils/calculations'
 import { useRouter } from 'next/navigation'
 import type { Account } from '@repo/db'
@@ -63,12 +62,12 @@ export function GoalsProgress({ goals }: GoalsProgressProps) {
                   {Math.round(progress)}%
                 </span>
               </div>
-              
+
               <ProgressBar value={progress} className="mb-2" />
-              
+
               <p className="text-ios-footnote text-ios-gray-1">
-                {formatCurrency(Number(goal.balance), goal.currency)} of{' '}
-                {formatCurrency(Number(goal.target), goal.currency)}
+                <Money amount={Number(goal.balance)} currency={goal.currency} /> of{' '}
+                <Money amount={Number(goal.target)} currency={goal.currency} />
               </p>
             </div>
           )

@@ -1,0 +1,1 @@
+export type Currency = 'EGP' | 'USD' | 'GOLD'

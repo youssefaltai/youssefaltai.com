@@ -36,7 +36,8 @@ export async function GET(request: NextRequest): Promise<NextResponse<ApiRespons
         const rawFilters: Record<string, any> = {
             dateFrom: searchParams.get('dateFrom') || undefined,
             dateTo: searchParams.get('dateTo') || undefined,
-            accountIds: searchParams.getAll('accountIds').filter(Boolean),
+            fromAccountIds: searchParams.getAll('fromAccountIds').filter(Boolean),
+            toAccountIds: searchParams.getAll('toAccountIds').filter(Boolean),
             minAmount: searchParams.get('minAmount') ? parseFloat(searchParams.get('minAmount')!) : undefined,
             maxAmount: searchParams.get('maxAmount') ? parseFloat(searchParams.get('maxAmount')!) : undefined,
             type: searchParams.get('type') || undefined,

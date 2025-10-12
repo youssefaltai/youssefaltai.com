@@ -35,9 +35,12 @@ model User {
   deletedAt DateTime?
 
   // Relations
-  credentials  Credential[]  @relation("UserCredentials")
-  transactions Transaction[] @relation("UserTransactions")
-  accounts     Account[]     @relation("UserAccounts")
+  credentials       Credential[]       @relation("UserCredentials")
+  transactions      Transaction[]      @relation("UserTransactions")
+  accounts          Account[]          @relation("UserAccounts")
+  exchangeRates     ExchangeRate[]     @relation("UserExchangeRates")
+  widgetPreferences WidgetPreference[] @relation("UserWidgetPreferences")
+  Budget            Budget[]
 
   // Indexes
   @@index([email])
@@ -70,11 +73,11 @@ model Credential {
 }
 
 model Account {
-  id       String      @id @default(cuid())
-  name     String
+  id          String      @id @default(cuid())
+  name        String
   description String?
-  currency Currency    @default(EGP)
-  type     AccountType @default(asset)
+  currency    Currency    @default(EGP)
+  type        AccountType @default(asset)
 
   balance Decimal   @default(0)
   target  Decimal? // only used for goals
@@ -86,10 +89,11 @@ model Account {
   deletedAt DateTime?
 
   // Relationships
-  transactionsFrom Transaction[] @relation("FromAccount")
-  transactionsTo   Transaction[] @relation("ToAccount")
-  User             User          @relation("UserAccounts", fields: [userId], references: [id], onDelete: Cascade)
+  transactionsFrom Transaction[]   @relation("FromAccount")
+  transactionsTo   Transaction[]   @relation("ToAccount")
+  User             User            @relation("UserAccounts", fields: [userId], references: [id], onDelete: Cascade)
   userId           String
+  BudgetAccount    BudgetAccount[]
 
   // Indexes
   @@index([userId])
@@ -129,6 +133,56 @@ model Transaction {
   @@map("transactions")
 }
 
+// Exchange rate storage for currency conversions
+model ExchangeRate {
+  id           String   @id @default(cuid())
+  fromCurrency Currency
+  toCurrency   Currency
+  rate         Decimal  @db.Decimal(18, 6) // High precision for exchange rates
+
+  // Timestamps
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // Relationships
+  user   User   @relation("UserExchangeRates", fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+
+  // Constraints: One rate per currency pair per user
+  @@unique([userId, fromCurrency, toCurrency])
+  // Indexes
+  @@index([userId])
+  @@index([userId, fromCurrency, toCurrency])
+  // Map
+  @@map("exchange_rates")
+}
+
+// Widget preferences for dashboard customization
+model WidgetPreference {
+  id       String  @id @default(cuid())
+  widgetId String // e.g., "spending-trends", "alerts", "goals"
+  visible  Boolean @default(true)
+  order    Int     @default(0)
+
+  // Timestamps
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // Relationships
+  user   User   @relation("UserWidgetPreferences", fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+
+  // Constraints: One preference per widget per user
+  @@unique([userId, widgetId])
+  // Indexes
+  @@index([userId])
+  @@index([userId, order])
+  // Map
+  @@map("widget_preferences")
+}
+
 // Account type enum
 enum AccountType {
   asset // What you own (Cash, Bank, Wallet, Gold, Goal, Receivable)
@@ -136,4 +190,46 @@ enum AccountType {
   income // Sources of money (Salary, Investments, Freelance)
   expense // Spending categories (Groceries, Rent, Bills)
   equity // Starting capital or owner value (Opening Balance, Net Worth)
+}
+
+model Budget {
+  id        String   @id @default(cuid())
+  name      String   @db.VarChar(100)
+  amount    Decimal  @db.Decimal(18, 2)
+  currency  Currency @default(EGP)
+  startDate DateTime
+  endDate   DateTime
+
+  // Relationships
+  userId   String
+  user     User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accounts BudgetAccount[]
+
+  // Timestamps
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime? // Soft delete for consistency
+
+  // Indexes
+  @@index([userId])
+  @@index([userId, startDate, endDate])
+  // Map
+  @@map("budgets")
+}
+
+model BudgetAccount {
+  budgetId  String
+  accountId String
+
+  // Relationships
+  budget  Budget  @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  // Timestamps (for full auditability and consistency)
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
+
+  @@id([budgetId, accountId])
+  // Map
+  @@map("budget_accounts")
 }

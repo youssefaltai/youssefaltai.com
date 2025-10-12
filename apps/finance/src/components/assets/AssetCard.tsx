@@ -1,9 +1,7 @@
 'use client'
 
-import { Wallet } from '@repo/ui'
-import { formatCurrency } from '../../utils/format'
+import { Money, Wallet, EntityListItem } from '@repo/ui'
 import type { Account } from '@repo/db'
-import { EntityListItem } from '../shared/EntityListItem'
 
 interface AssetCardProps {
   asset: Account
@@ -26,8 +24,8 @@ export function AssetCard({ asset, onClick, isFirst, isLast }: AssetCardProps) {
       subtitle={asset.description || undefined}
       rightContent={
         <div className="text-right">
-          <p className="text-ios-headline font-semibold text-ios-label-primary">
-            {formatCurrency(balance, asset.currency)}
+          <p className="text-ios-callout sm:text-ios-headline font-semibold text-ios-label-primary">
+            <Money amount={balance} currency={asset.currency} />
           </p>
         </div>
       }

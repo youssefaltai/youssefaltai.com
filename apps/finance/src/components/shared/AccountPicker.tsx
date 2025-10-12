@@ -1,13 +1,13 @@
 'use client'
 
-import { Select } from '@repo/ui'
+import { Money, GroupedSelect } from '@repo/ui'
+import type { GroupedSelectGroup } from '@repo/ui'
 import { useAssets } from '../../hooks/use-assets'
 import { useGoals } from '../../hooks/use-goals'
 import { useLoans } from '../../hooks/use-loans'
 import { useCreditCards } from '../../hooks/use-credit-cards'
 import { useIncomeSources } from '../../hooks/use-income-sources'
 import { useExpenseCategories } from '../../hooks/use-expense-categories'
-import { formatCurrency } from '../../utils/format'
 import { AccountType } from '@repo/db'
 
 interface AccountPickerProps {
@@ -17,13 +17,12 @@ interface AccountPickerProps {
   placeholder?: string
   error?: string
   filterTypes?: AccountType[]
-  excludeId?: string // Exclude a specific account (useful for "from" and "to" pickers)
+  excludeId?: string
 }
 
 /**
- * Account picker component
- * Shows all entities user can transact between, grouped by type
- * Displays user-friendly labels (never "Account")
+ * Finance-specific wrapper for GroupedSelect
+ * Fetches all account types and formats them for grouped display
  */
 export function AccountPicker({
   value,
@@ -62,42 +61,32 @@ export function AccountPicker({
     : filteredAccounts
 
   // Group accounts by type
-  const groupedAccounts: Record<string, typeof accounts> = {}
+  const groupedAccountsMap: Record<string, typeof accounts> = {}
   accounts.forEach(acc => {
-    if (!groupedAccounts[acc.groupLabel]) {
-      groupedAccounts[acc.groupLabel] = []
+    if (!groupedAccountsMap[acc.groupLabel]) {
+      groupedAccountsMap[acc.groupLabel] = []
     }
-    groupedAccounts[acc.groupLabel]!.push(acc)
+    groupedAccountsMap[acc.groupLabel]!.push(acc)
   })
 
+  // Convert to GroupedSelectGroup format
+  const groups: GroupedSelectGroup[] = Object.entries(groupedAccountsMap).map(([label, items]) => ({
+    label,
+    options: items.map(account => ({
+      value: account.id,
+      label: account.name,
+      metadata: `${Money({ amount: Number(account.balance), currency: account.currency })}`,
+    })),
+  }))
+
   return (
-    <div className="space-y-1">
-      {label && (
-        <label className="text-ios-footnote text-ios-gray-1">{label}</label>
-      )}
-      <Select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        error={error}
-      >
-        <option value="" disabled>
-          {placeholder}
-        </option>
-        
-        {Object.entries(groupedAccounts).map(([group, items]) => (
-          <optgroup key={group} label={group}>
-            {items.map(account => (
-              <option key={account.id} value={account.id}>
-                {account.name} ({formatCurrency(Number(account.balance), account.currency)})
-              </option>
-            ))}
-          </optgroup>
-        ))}
-      </Select>
-      {error && (
-        <p className="text-ios-footnote text-ios-red">{error}</p>
-      )}
-    </div>
+    <GroupedSelect
+      value={value}
+      onChange={onChange}
+      groups={groups}
+      label={label}
+      placeholder={placeholder}
+      error={error}
+    />
   )
 }
-

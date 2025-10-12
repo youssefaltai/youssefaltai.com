@@ -1,24 +1,21 @@
 'use client'
 
-import { useState } from 'react'
-import { Input, Select, Button } from '@repo/ui'
-import { Currency } from '@repo/db'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { Input, CurrencySelect } from '@repo/ui'
 import { AccountPicker } from '../shared/AccountPicker'
-import { isoToDateInput, isoToTimeInput, dateInputToISO } from '../../utils/format'
-
-interface TransactionFormData {
-  description: string
-  fromAccountId: string
-  toAccountId: string
-  amount: number
-  currency?: Currency
-  exchangeRate?: number
-  date: string
-}
+import { FormActions } from '@repo/ui'
+import { emptyStringToUndefined, emptyNumberToUndefined } from '../../utils/form'
+import { parseISO, format } from '@repo/utils'
+import { CURRENCY_OPTIONS } from '../../utils/currencies'
+import { useFormState } from '../../hooks/use-form-state'
+import { useAccounts } from '../../hooks/use-accounts'
+import { useExchangeRates } from '../../hooks/use-exchange-rates'
+import { createTransactionSchema, type CreateTransactionSchema } from '../../features/transactions/validation'
 
 interface TransactionFormProps {
-  initialData?: Partial<TransactionFormData>
-  onSubmit: (data: TransactionFormData) => Promise<void>
+  initialData?: Partial<CreateTransactionSchema>
+  onSubmit: (data: CreateTransactionSchema) => Promise<void>
   onCancel: () => void
 }
 
@@ -26,141 +23,128 @@ interface TransactionFormProps {
  * Form for creating/editing transactions
  */
 export function TransactionForm({ initialData, onSubmit, onCancel }: TransactionFormProps) {
-  const [formData, setFormData] = useState<TransactionFormData>({
-    description: initialData?.description || '',
-    fromAccountId: initialData?.fromAccountId || '',
-    toAccountId: initialData?.toAccountId || '',
-    amount: initialData?.amount || 0,
-    currency: initialData?.currency,
-    exchangeRate: initialData?.exchangeRate,
-    date: initialData?.date || new Date().toISOString(),
+  const { submitError, handleSubmit: handleFormSubmit } = useFormState({
+    onSubmit,
   })
 
-  const [errors, setErrors] = useState<Record<string, string>>({})
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  // Fetch accounts and exchange rates for smart fallbacks
+  const { data: allAccounts = [] } = useAccounts()
+  const { data: exchangeRates = [] } = useExchangeRates()
 
-  const validate = (): boolean => {
-    const newErrors: Record<string, string> = {}
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors, isSubmitting },
+  } = useForm<CreateTransactionSchema>({
+    resolver: zodResolver(createTransactionSchema),
+    defaultValues: {
+      description: initialData?.description || '',
+      fromAccountId: initialData?.fromAccountId || '',
+      toAccountId: initialData?.toAccountId || '',
+      amount: initialData?.amount || 0,
+      currency: initialData?.currency,
+      exchangeRate: initialData?.exchangeRate,
+      date: initialData?.date || new Date().toISOString(),
+    },
+  })
 
-    if (!formData.description.trim()) {
-      newErrors.description = 'Description is required'
-    }
+  const watchedDate = watch('date')
+  const watchedFromAccountId = watch('fromAccountId')
+  const watchedToAccountId = watch('toAccountId')
 
-    if (!formData.fromAccountId) {
-      newErrors.fromAccountId = 'From account is required'
-    }
+  // Derive account objects from selected IDs
+  const fromAccount = allAccounts.find(a => a.id === watchedFromAccountId)
+  const toAccount = allAccounts.find(a => a.id === watchedToAccountId)
 
-    if (!formData.toAccountId) {
-      newErrors.toAccountId = 'To account is required'
-    }
+  // Determine if this is a cross-currency transaction
+  const isCrossCurrency = fromAccount && toAccount && fromAccount.currency !== toAccount.currency
 
-    if (formData.fromAccountId === formData.toAccountId) {
-      newErrors.toAccountId = 'From and to accounts must be different'
-    }
+  // Find stored exchange rate for this currency pair
+  const storedRate = isCrossCurrency ? exchangeRates.find(rate =>
+    (rate.fromCurrency === fromAccount.currency && rate.toCurrency === toAccount.currency) ||
+    (rate.fromCurrency === toAccount.currency && rate.toCurrency === fromAccount.currency)
+  ) : null
 
-    if (!formData.amount || formData.amount <= 0) {
-      newErrors.amount = 'Amount must be greater than 0'
-    }
+  // Generate dynamic placeholders
+  const currencyPlaceholder = fromAccount
+    ? `Will use ${fromAccount.currency} if empty`
+    : 'Select accounts first...'
 
-    if (formData.exchangeRate && !formData.currency) {
-      newErrors.currency = 'Currency is required when exchange rate is provided'
-    }
+  const exchangeRatePlaceholder = storedRate
+    ? `Will use stored rate: ${Number(storedRate.rate).toFixed(6)}`
+    : 'No stored rate - required'
 
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
+  // Show exchange rate field for cross-currency transactions
+  const showExchangeRate = Boolean(isCrossCurrency)
+
+  const onFormSubmit = async (data: CreateTransactionSchema) => {
+    await handleFormSubmit(data, 'Failed to save transaction')
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!validate()) return
-
-    setIsSubmitting(true)
-    try {
-      await onSubmit(formData)
-    } catch (error) {
-      setErrors({ submit: error instanceof Error ? error.message : 'Failed to save transaction' })
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
-
-  const handleDateTimeChange = (dateString: string, timeString: string) => {
-    const isoDate = dateInputToISO(dateString, timeString)
-    setFormData({ ...formData, date: isoDate })
-  }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
+      {/* Hidden field to hold the actual date value (ISO string) */}
+      <input type="hidden" {...register('date')} />
+
       <Input
         label="Description"
-        value={formData.description}
-        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+        {...register('description')}
         placeholder="e.g., Groceries, Salary"
-        error={errors.description}
+        error={errors.description?.message}
         required
       />
 
       <AccountPicker
         label="From"
-        value={formData.fromAccountId}
-        onChange={(value) => setFormData({ ...formData, fromAccountId: value })}
+        value={watchedFromAccountId}
+        onChange={(value) => setValue('fromAccountId', value, { shouldValidate: true })}
         placeholder="Select source..."
-        error={errors.fromAccountId}
-        excludeId={formData.toAccountId}
+        error={errors.fromAccountId?.message}
+        excludeId={watchedToAccountId}
       />
 
       <AccountPicker
         label="To"
-        value={formData.toAccountId}
-        onChange={(value) => setFormData({ ...formData, toAccountId: value })}
+        value={watchedToAccountId}
+        onChange={(value) => setValue('toAccountId', value, { shouldValidate: true })}
         placeholder="Select destination..."
-        error={errors.toAccountId}
-        excludeId={formData.fromAccountId}
+        error={errors.toAccountId?.message}
+        excludeId={watchedFromAccountId}
       />
 
-      <div>
-        <label className="text-ios-footnote text-ios-gray-1 block mb-1">
-          Amount
-        </label>
+      <Input
+        type="number"
+        label="Amount"
+        {...register('amount', { valueAsNumber: true })}
+        placeholder="0.00"
+        error={errors.amount?.message}
+        step="0.01"
+        min="0"
+        required
+      />
+
+      <CurrencySelect
+        label="Currency (optional)"
+        {...register('currency', { setValueAs: emptyStringToUndefined })}
+        currencies={CURRENCY_OPTIONS}
+        error={errors.currency?.message}
+        includeEmpty={true}
+        emptyLabel={currencyPlaceholder}
+      />
+
+      {showExchangeRate && (
         <Input
           type="number"
-          value={formData.amount || ''}
-          onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })}
-          placeholder="0.00"
-          error={errors.amount}
-          step="0.01"
-          min="0"
-          required
-        />
-        {errors.amount && (
-          <p className="text-ios-footnote text-ios-red mt-1">{errors.amount}</p>
-        )}
-      </div>
-
-      <Select
-        label="Currency (Optional)"
-        value={formData.currency || ''}
-        onChange={(e) => setFormData({ ...formData, currency: e.target.value as Currency || undefined })}
-        error={errors.currency}
-      >
-        <option value="">Same as accounts</option>
-        <option value="EGP">Egyptian Pound (EGP)</option>
-        <option value="USD">US Dollar (USD)</option>
-        <option value="GOLD">Gold (grams)</option>
-      </Select>
-
-      {formData.currency && (
-        <Input
-          type="number"
-          label="Exchange Rate (Optional)"
-          value={formData.exchangeRate || ''}
-          onChange={(e) => setFormData({
-            ...formData,
-            exchangeRate: e.target.value ? parseFloat(e.target.value) : undefined
-          })}
-          placeholder="e.g., 50.5"
+          label={`Exchange Rate${storedRate ? ' (optional)' : ''}`}
+          {...register('exchangeRate', { setValueAs: emptyNumberToUndefined })}
+          placeholder={exchangeRatePlaceholder}
+          error={errors.exchangeRate?.message}
           step="0.000001"
+          min="0"
+          required={!storedRate}
         />
       )}
 
@@ -168,42 +152,38 @@ export function TransactionForm({ initialData, onSubmit, onCancel }: Transaction
         <Input
           type="date"
           label="Date"
-          value={isoToDateInput(formData.date)}
-          onChange={(e) => handleDateTimeChange(e.target.value, isoToTimeInput(formData.date))}
+          value={format(parseISO(watchedDate), 'yyyy-MM-dd')}
+          onChange={(e) => {
+            const currentTime = format(parseISO(watchedDate), 'HH:mm')
+            const newIso = parseISO(`${e.target.value}T${currentTime}`).toISOString()
+            setValue('date', newIso, { shouldValidate: true })
+          }}
+          error={errors.date?.message}
           required
         />
         <Input
           type="time"
           label="Time"
-          value={isoToTimeInput(formData.date)}
-          onChange={(e) => handleDateTimeChange(isoToDateInput(formData.date), e.target.value)}
+          value={format(parseISO(watchedDate), 'HH:mm')}
+          onChange={(e) => {
+            const currentDate = format(parseISO(watchedDate), 'yyyy-MM-dd')
+            const newIso = parseISO(`${currentDate}T${e.target.value}`).toISOString()
+            setValue('date', newIso, { shouldValidate: true })
+          }}
+          error={errors.date?.message}
           required
         />
       </div>
 
-      {errors.submit && (
-        <p className="text-ios-footnote text-ios-red">{errors.submit}</p>
+      {submitError && (
+        <p className="text-ios-footnote text-ios-red">{submitError}</p>
       )}
 
-      <div className="flex gap-3 pt-2">
-        <Button
-          type="button"
-          variant="secondary"
-          onClick={onCancel}
-          disabled={isSubmitting}
-          className="flex-1"
-        >
-          Cancel
-        </Button>
-        <Button
-          type="submit"
-          variant="primary"
-          disabled={isSubmitting}
-          className="flex-1"
-        >
-          {isSubmitting ? 'Saving...' : initialData ? 'Update' : 'Create'}
-        </Button>
-      </div>
+      <FormActions
+        onCancel={onCancel}
+        isSubmitting={isSubmitting}
+        submitLabel={initialData ? 'Update' : 'Create'}
+      />
     </form>
   )
 }

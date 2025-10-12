@@ -54,6 +54,61 @@ pnpm dev --filter=finance
 pnpm dev
 ```
 
+### **5. HTTPS Development (Optional)**
+
+For testing HTTPS locally (e.g., PWA installation, secure contexts):
+
+**Step 1: Install mkcert**
+```bash
+# macOS
+brew install mkcert
+
+# Linux
+sudo apt install mkcert  # Debian/Ubuntu
+sudo dnf install mkcert  # Fedora
+
+# Windows (run as Administrator)
+choco install mkcert
+```
+
+**Step 2: Create local CA and certificates**
+```bash
+# Install local CA
+mkcert -install
+
+# Generate certificates for each app
+cd apps/finance/certs
+mkcert localhost 127.0.0.1 ::1
+
+cd ../../dashboard/certs
+mkcert localhost 127.0.0.1 ::1
+
+cd ../../fitness/certs
+mkcert localhost 127.0.0.1 ::1
+```
+
+**Step 3: Run with HTTPS**
+```bash
+# Start app with HTTPS (one at a time, all use port 3000)
+pnpm --filter=finance dev:https
+pnpm --filter=dashboard dev:https
+pnpm --filter=fitness dev:https
+
+# Access at: https://localhost:3000
+```
+
+**Note:** All apps use port 3000, so run only one app at a time with HTTPS. For running multiple apps simultaneously with different ports:
+```bash
+# Finance on 3000
+pnpm --filter=finance dev:https
+
+# Dashboard on 3001 (in another terminal)
+PORT=3001 pnpm --filter=dashboard dev:https
+
+# Fitness on 3002 (in another terminal)
+PORT=3002 pnpm --filter=fitness dev:https
+```
+
 ---
 
 ## 🐳 Docker Compose Services
@@ -289,6 +344,7 @@ pnpm db:generate
 | **Push schema** | `pnpm db:push` |
 | **Open DB GUI** | `pnpm db:studio` |
 | **Start Finance app** | `pnpm dev --filter=finance` |
+| **Start with HTTPS** | `pnpm --filter=finance dev:https` |
 | **Build all apps** | `pnpm build` |
 | **Type-check all** | `pnpm type-check` |
 

@@ -52,7 +52,10 @@ export function calculateCurrencyConversion(
   }
 
   if (!providedExchangeRate || new Prisma.Decimal(providedExchangeRate).lte(0)) {
-    throw new Error("Exchange rate is required and must be positive for cross-currency transactions")
+    throw new Error(
+      "Exchange rate is required for cross-currency transactions. " +
+      "Please set a default rate in Settings or provide one manually."
+    )
   }
 
   // Validate transaction currency matches one of the accounts
@@ -112,5 +115,86 @@ export function reverseCurrencyConversion(
   const amountToRemove = isInFromCurrency ? amount.mul(exchangeRate) : amount
 
   return { amountToRestore, amountToRemove }
+}
+
+/**
+ * Exchange rate map for easy lookup
+ */
+export type ExchangeRateMap = Map<string, Prisma.Decimal>
+
+/**
+ * Get exchange rate key for lookup
+ */
+function getExchangeRateKey(fromCurrency: Currency, toCurrency: Currency): string {
+  return `${fromCurrency}_TO_${toCurrency}`
+}
+
+/**
+ * Find exchange rate from the map (checks both directions)
+ * 
+ * @param fromCurrency - Source currency
+ * @param toCurrency - Target currency
+ * @param rateMap - Map of exchange rates
+ * @returns Exchange rate or null if not found
+ */
+export function findExchangeRate(
+  fromCurrency: Currency,
+  toCurrency: Currency,
+  rateMap: ExchangeRateMap
+): Prisma.Decimal | null {
+  // Same currency = 1:1
+  if (fromCurrency === toCurrency) {
+    return new Prisma.Decimal(1)
+  }
+
+  // Check direct rate
+  const directKey = getExchangeRateKey(fromCurrency, toCurrency)
+  if (rateMap.has(directKey)) {
+    return rateMap.get(directKey)!
+  }
+
+  // Check inverse rate
+  const inverseKey = getExchangeRateKey(toCurrency, fromCurrency)
+  if (rateMap.has(inverseKey)) {
+    const inverseRate = rateMap.get(inverseKey)!
+    return new Prisma.Decimal(1).div(inverseRate)
+  }
+
+  return null
+}
+
+/**
+ * Convert amount from one currency to another using provided exchange rates
+ * 
+ * @param amount - Amount to convert
+ * @param fromCurrency - Source currency
+ * @param toCurrency - Target currency
+ * @param rateMap - Map of exchange rates
+ * @returns Converted amount
+ * @throws Error if exchange rate not found
+ */
+export function convertAmount(
+  amount: Prisma.Decimal | number,
+  fromCurrency: Currency,
+  toCurrency: Currency,
+  rateMap: ExchangeRateMap
+): Prisma.Decimal {
+  const decimalAmount = new Prisma.Decimal(amount)
+
+  // Same currency - no conversion needed
+  if (fromCurrency === toCurrency) {
+    return decimalAmount
+  }
+
+  // Find exchange rate
+  const rate = findExchangeRate(fromCurrency, toCurrency, rateMap)
+  
+  if (!rate) {
+    throw new Error(
+      `Exchange rate not found for ${fromCurrency} to ${toCurrency}. Please set it in settings.`
+    )
+  }
+
+  return decimalAmount.mul(rate)
 }
 

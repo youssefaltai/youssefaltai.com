@@ -5,9 +5,7 @@ import { FloatingActionButton, Modal, Plus, TrendingDown } from '@repo/ui'
 import { useExpenseCategories, useCreateExpenseCategory, useUpdateExpenseCategory, useDeleteExpenseCategory } from '../../../hooks/use-expense-categories'
 import { ExpenseCategoryCard } from '../../../components/expense-categories/ExpenseCategoryCard'
 import { ExpenseCategoryForm } from '../../../components/forms/ExpenseCategoryForm'
-import { PageLayout } from '../../../components/shared/PageLayout'
-import { EntityList } from '../../../components/shared/EntityList'
-import { LoadingSkeleton } from '../../../components/shared/LoadingSkeleton'
+import { PageLayout, EntityList, LoadingSkeleton } from '@repo/ui'
 import type { Account } from '@repo/db'
 
 export default function ExpenseCategoriesPage() {
@@ -38,11 +36,11 @@ export default function ExpenseCategoriesPage() {
   }
 
   if (isLoading) {
-    return <LoadingSkeleton title="Expense Categories" subtitle="Organize your spending" />
+    return <LoadingSkeleton title="Expense Categories" subtitle="Manage your spending categories" />
   }
 
   return (
-    <PageLayout title="Expense Categories" subtitle="Organize your spending">
+    <PageLayout title="Expense Categories" subtitle="Manage your spending categories">
       <EntityList
         items={expenseCategories}
         emptyIcon={TrendingDown}

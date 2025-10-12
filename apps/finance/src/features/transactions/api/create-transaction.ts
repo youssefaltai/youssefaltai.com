@@ -3,6 +3,7 @@ import { prisma, TTransaction } from "@repo/db"
 import { validateAccountsOwnership } from "../../../shared/account-validators"
 import { calculateCurrencyConversion } from "../../../shared/finance-utils"
 import { TRANSACTION_OMIT_FIELDS } from "../../../shared/omit-fields"
+import getExchangeRates from "../../exchange-rates/api/get-exchange-rates"
 
 /**
  * Creates a new transaction and updates account balances accordingly.
@@ -19,18 +20,43 @@ import { TRANSACTION_OMIT_FIELDS } from "../../../shared/omit-fields"
  *       - Currency is optional (automatically uses account currency)
  *       - Exchange rate is not needed (will be null)
  *       For cross-currency transactions:
- *       - Currency is required (must match one of the accounts)
- *       - Exchange rate is required
+ *       - Currency is optional (uses account currency)
+ *       - Exchange rate is optional (fetches from user's saved rates if not provided)
  */
 export default async function createTransaction(userId: string, input: CreateTransactionSchema): Promise<TTransaction> {
     // Validate the input
     const validated = createTransactionSchema.parse(input)
-    const { description, amount, currency, fromAccountId, toAccountId, exchangeRate, date } = validated;
+    let { description, amount, currency, fromAccountId, toAccountId, exchangeRate, date } = validated;
 
     // Validate accounts ownership
     const accountMap = await validateAccountsOwnership([fromAccountId, toAccountId], userId)
     const fromAccount = accountMap.get(fromAccountId)!
     const toAccount = accountMap.get(toAccountId)!
+
+    // For cross-currency transactions, fetch default exchange rate if not provided
+    if (fromAccount.currency !== toAccount.currency && !exchangeRate) {
+        // Default to fromAccount currency if not specified
+        if (!currency) {
+            currency = fromAccount.currency
+        }
+        
+        // Determine which rate to fetch based on transaction currency
+        const fromCurrency = currency === fromAccount.currency ? fromAccount.currency : toAccount.currency
+        const toCurrency = currency === fromAccount.currency ? toAccount.currency : fromAccount.currency
+        
+        const rates = await getExchangeRates(userId, fromCurrency, toCurrency)
+        
+        const defaultRate = rates[0]
+        if (!defaultRate) {
+            throw new Error(
+                `No exchange rate found for ${fromCurrency} to ${toCurrency}. ` +
+                `Please set a default rate in Settings or provide an exchange rate.`
+            )
+        }
+        
+        exchangeRate = Number(defaultRate.rate)
+        console.log(`Using default exchange rate for ${fromCurrency}→${toCurrency}: ${exchangeRate}`)
+    }
 
     // Calculate currency conversion amounts
     const conversion = calculateCurrencyConversion({
@@ -38,7 +64,7 @@ export default async function createTransaction(userId: string, input: CreateTra
         fromCurrency: fromAccount.currency,
         toCurrency: toAccount.currency,
         providedCurrency: currency,
-        providedExchangeRate: exchangeRate,
+        providedExchangeRate: exchangeRate, // Will be fetched default or user-provided
     })
 
     console.log('Creating transaction:', {

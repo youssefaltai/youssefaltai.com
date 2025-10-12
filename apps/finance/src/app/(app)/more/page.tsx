@@ -7,7 +7,8 @@ import { useCreditCards } from '../../../hooks/use-credit-cards'
 import { useLoans } from '../../../hooks/use-loans'
 import { useIncomeSources } from '../../../hooks/use-income-sources'
 import { useExpenseCategories } from '../../../hooks/use-expense-categories'
-import { PageLayout } from '../../../components/shared/PageLayout'
+import { PageLayout } from '@repo/ui'
+import { ExchangeRatesManager } from '../../../components/settings/ExchangeRatesManager'
 
 export default function MorePage() {
   const router = useRouter()
@@ -16,6 +17,16 @@ export default function MorePage() {
   const { data: loans = [] } = useLoans()
   const { data: incomeSources = [] } = useIncomeSources()
   const { data: expenseCategories = [] } = useExpenseCategories()
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' })
+    } catch (error) {
+      console.error('Logout error:', error)
+    } finally {
+      router.push('/login')
+    }
+  }
 
   return (
     <PageLayout title="More" subtitle="Settings and preferences">
@@ -58,13 +69,11 @@ export default function MorePage() {
           />
         </CardSection>
 
+        {/* Exchange Rates */}
+        <ExchangeRatesManager />
+
         {/* Settings */}
         <CardSection title="Settings">
-          <ListItem
-            label="Profile"
-            chevron
-            onClick={() => router.push('/profile')}
-          />
           <ListItem
             label="Preferences"
             chevron
@@ -90,6 +99,14 @@ export default function MorePage() {
             value="1.0.0"
           />
         </CardSection>
+
+        {/* Logout Button */}
+        <button
+          onClick={handleLogout}
+          className="w-full py-3 bg-ios-red text-white rounded-ios font-semibold hover:bg-ios-red/90 active:scale-95 transition-all"
+        >
+          Log Out
+        </button>
       </div>
     </PageLayout>
   )

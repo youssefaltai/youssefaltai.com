@@ -21,5 +21,5 @@ if (process.env.NODE_ENV !== 'production') {
 
 // Re-export Prisma types for convenience
 export { PrismaClient, Prisma, Currency, $Enums, } from '../generated/prisma'
-export type { Account, AccountType, Credential, PrismaPromise, Transaction, User } from '../generated/prisma'
+export type { Account, AccountType, Credential, ExchangeRate, PrismaPromise, Transaction, User } from '../generated/prisma'
 export type { TAccount, TTransaction, TGoal, TEquity, TExpense, TIncome } from './types/finance'

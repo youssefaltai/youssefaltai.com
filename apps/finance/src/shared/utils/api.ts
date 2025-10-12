@@ -68,3 +68,48 @@ export function InternalServerErrorResponse<T>(error?: any): NextResponse<ApiRes
 export function SuccessResponse<T>(data: T, message?: string): NextResponse<ApiResponse<T>> {
     return NextResponse.json({ success: true, data, message: message ?? "Success", error: null }, { status: 200 })
 }
+
+/**
+ * Generic CRUD route handler factory
+ * Creates standard POST/GET handlers for account-type resources
+ * Eliminates ~30 lines of boilerplate per resource
+ */
+import { verifyAuth } from "@repo/auth/verify-auth"
+
+export function createAccountRouteHandlers<T>(config: {
+  createFn: (userId: string, data: any) => Promise<T>
+  getAllFn: (userId: string) => Promise<T[]>
+}) {
+  const { createFn, getAllFn } = config
+
+  async function POST(request: NextRequest): Promise<NextResponse<ApiResponse<T>>> {
+    const { authenticated, userId } = await verifyAuth(request)
+    if (!authenticated) return UnauthorizedResponse(userId)
+
+    const jsonInput = await getJsonInput(request)
+    if (!jsonInput) return BadRequestResponse(jsonInput)
+
+    try {
+      const response = await createFn(userId, jsonInput)
+      return SuccessResponse(response)
+    } catch (error) {
+      console.error('Error in POST:', error)
+      return BadRequestResponse<T>(error instanceof Error ? error.message : 'Failed to create resource')
+    }
+  }
+
+  async function GET(request: NextRequest): Promise<NextResponse<ApiResponse<T[]>>> {
+    const { authenticated, userId } = await verifyAuth(request)
+    if (!authenticated) return UnauthorizedResponse(userId)
+
+    try {
+      const response = await getAllFn(userId)
+      return SuccessResponse(response)
+    } catch (error) {
+      console.error('Error in GET:', error)
+      return BadRequestResponse<T[]>(error instanceof Error ? error.message : 'Failed to get resources')
+    }
+  }
+
+  return { POST, GET }
+}

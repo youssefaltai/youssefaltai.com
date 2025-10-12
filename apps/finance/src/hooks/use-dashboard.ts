@@ -1,11 +1,8 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
-import { useAssets } from './use-assets'
+import { parseISO, compareAsc } from '@repo/utils'
 import { useGoals } from './use-goals'
-import { useLoans } from './use-loans'
-import { useCreditCards } from './use-credit-cards'
-import { calculateNetWorth, calculateTotalBalance } from '../utils/calculations'
 
 interface DashboardSummary {
   totalBalance: number
@@ -15,73 +12,22 @@ interface DashboardSummary {
 }
 
 /**
- * Fetch dashboard summary data
- * Aggregates data from multiple sources
+ * Fetch dashboard summary from server
+ * All calculations and currency conversions done server-side
  */
 export function useDashboardSummary() {
-  const { data: assets = [] } = useAssets()
-  const { data: goals = [] } = useGoals()
-  const { data: loans = [] } = useLoans()
-  const { data: creditCards = [] } = useCreditCards()
-
   return useQuery<DashboardSummary>({
     queryKey: ['dashboard', 'summary'],
     queryFn: async () => {
-      // Combine all accounts
-      const allAccounts = [...assets, ...goals, ...loans, ...creditCards]
-
-      // Calculate totals
-      const totalBalance = calculateTotalBalance(allAccounts, 'asset')
-      const netWorth = calculateNetWorth(allAccounts)
-
-      // Calculate current month date range
-      const now = new Date()
-      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
-      const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999).toISOString()
-
-      // Fetch this month's transactions
-      const params = new URLSearchParams({
-        dateFrom: monthStart,
-        dateTo: monthEnd,
-        limit: '1000', // Get all transactions for the month
-      })
-
-      const response = await fetch(`/api/transactions?${params.toString()}`)
-      if (!response.ok) {
-        throw new Error('Failed to fetch transactions for dashboard')
-      }
+      const response = await fetch('/api/dashboard/summary')
       
-      const transactionData = await response.json()
-      const transactions = transactionData.data?.data || []
-
-      // Calculate income and expenses based on transaction types
-      let thisMonthIncome = 0
-      let thisMonthExpenses = 0
-
-      transactions.forEach((transaction: any) => {
-        const amount = Number(transaction.amount)
-        const fromType = transaction.fromAccount?.type
-        const toType = transaction.toAccount?.type
-
-        // Income: FROM income account TO asset account
-        if (fromType === 'income' && toType === 'asset') {
-          thisMonthIncome += amount
-        }
-        
-        // Expense: FROM asset account TO expense account
-        if (fromType === 'asset' && toType === 'expense') {
-          thisMonthExpenses += amount
-        }
-      })
-
-      return {
-        totalBalance,
-        netWorth,
-        thisMonthIncome,
-        thisMonthExpenses,
+      if (!response.ok) {
+        throw new Error('Failed to fetch dashboard summary')
       }
+
+      const { data } = await response.json()
+      return data
     },
-    enabled: assets.length > 0 || loans.length > 0, // Only run when we have data
   })
 }
 
@@ -122,7 +68,9 @@ export function useActiveGoals() {
         .sort((a, b) => {
           // Sort by due date (soonest first)
           if (a.dueDate && b.dueDate) {
-            return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
+            const dateA = a.dueDate instanceof Date ? a.dueDate : parseISO(a.dueDate)
+            const dateB = b.dueDate instanceof Date ? b.dueDate : parseISO(b.dueDate)
+            return compareAsc(dateA, dateB)
           }
           if (a.dueDate) return -1
           if (b.dueDate) return 1

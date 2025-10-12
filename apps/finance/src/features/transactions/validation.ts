@@ -56,7 +56,8 @@ export const getTransactionsQuerySchema = z.object({
     dateTo: z.iso.datetime().optional(),
     
     // Account filtering
-    accountIds: z.array(z.cuid()).optional(),
+    fromAccountIds: z.array(z.cuid()).optional(),
+    toAccountIds: z.array(z.cuid()).optional(),
     
     // Amount range
     minAmount: z.number().positive().optional(),
@@ -78,6 +79,18 @@ export const getTransactionsQuerySchema = z.object({
 })
 
 export type GetTransactionsQuerySchema = z.infer<typeof getTransactionsQuerySchema>
+
+// Query schema for GET /api/transactions/summary
+export const getTransactionsSummaryQuerySchema = z.object({
+    // Date range (required for summary)
+    dateFrom: z.iso.datetime(),
+    dateTo: z.iso.datetime(),
+    
+    // Optional account filtering
+    accountIds: z.array(z.cuid()).optional(),
+})
+
+export type GetTransactionsSummaryQuerySchema = z.infer<typeof getTransactionsSummaryQuerySchema>
 
 /**
  * Determine transaction type based on account types

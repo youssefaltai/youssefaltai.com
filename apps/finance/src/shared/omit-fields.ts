@@ -57,3 +57,13 @@ export const TRANSACTION_OMIT_FIELDS = {
   toAccountId: true,
 } as const
 
+/**
+ * Standard fields to omit when returning budgets to clients.
+ * Excludes internal timestamps, soft-delete markers, and user ownership.
+ */
+export const BUDGET_OMIT_FIELDS = {
+  userId: true,
+  updatedAt: true,
+  deletedAt: true,
+} as const
+

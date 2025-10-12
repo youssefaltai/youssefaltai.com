@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
+    "dev:https": "next dev --turbopack --port 3002 --experimental-https --experimental-https-key ./certs/youssefaltai.local+4-key.pem --experimental-https-cert ./certs/youssefaltai.local+4.pem",
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "eslint"

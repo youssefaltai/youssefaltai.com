@@ -5,9 +5,7 @@ import { FloatingActionButton, Modal, Plus, TrendingUp } from '@repo/ui'
 import { useIncomeSources, useCreateIncomeSource, useUpdateIncomeSource, useDeleteIncomeSource } from '../../../hooks/use-income-sources'
 import { IncomeSourceCard } from '../../../components/income-sources/IncomeSourceCard'
 import { IncomeSourceForm } from '../../../components/forms/IncomeSourceForm'
-import { PageLayout } from '../../../components/shared/PageLayout'
-import { EntityList } from '../../../components/shared/EntityList'
-import { LoadingSkeleton } from '../../../components/shared/LoadingSkeleton'
+import { PageLayout, EntityList, LoadingSkeleton } from '@repo/ui'
 import type { Account } from '@repo/db'
 
 export default function IncomeSourcesPage() {
@@ -38,11 +36,11 @@ export default function IncomeSourcesPage() {
   }
 
   if (isLoading) {
-    return <LoadingSkeleton title="Income Sources" subtitle="Your sources of income" />
+    return <LoadingSkeleton title="Income Sources" subtitle="Manage your income sources" />
   }
 
   return (
-    <PageLayout title="Income Sources" subtitle="Your sources of income">
+    <PageLayout title="Income Sources" subtitle="Manage your income sources">
       <EntityList
         items={incomeSources}
         emptyIcon={TrendingUp}

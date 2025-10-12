@@ -5,9 +5,7 @@ import { FloatingActionButton, Modal, Plus, Landmark } from '@repo/ui'
 import { useLoans, useCreateLoan, useUpdateLoan, useDeleteLoan } from '../../../hooks/use-loans'
 import { LoanCard } from '../../../components/loans/LoanCard'
 import { LoanForm } from '../../../components/forms/LoanForm'
-import { PageLayout } from '../../../components/shared/PageLayout'
-import { EntityList } from '../../../components/shared/EntityList'
-import { LoadingSkeleton } from '../../../components/shared/LoadingSkeleton'
+import { PageLayout, EntityList, LoadingSkeleton } from '@repo/ui'
 import type { Account } from '@repo/db'
 
 export default function LoansPage() {

@@ -9,7 +9,7 @@ export const baseCreateAccountSchema = z.object({
     name: z.string().min(1),
     description: z.string().optional(),
     currency: z.enum(Currency),
-    openingBalance: z.number().positive().optional(),
+    openingBalance: z.number().nonnegative().optional(),
     openingBalanceExchangeRate: z.number().positive().optional(),
 })
 

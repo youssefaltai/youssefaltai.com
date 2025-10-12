@@ -1,6 +1,6 @@
 'use client'
 
-import { PageHeader } from '@repo/ui'
+import { PageHeader } from './PageHeader'
 
 interface LoadingSkeletonProps {
   title: string
@@ -36,3 +36,4 @@ export function LoadingSkeleton({ title, subtitle, itemCount = 3, itemHeight = 2
     </div>
   )
 }
+
