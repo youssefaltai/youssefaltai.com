@@ -26,6 +26,10 @@ export async function GET(request: NextRequest): Promise<NextResponse<ApiRespons
   if (!authenticated) return UnauthorizedResponse(userId)
 
   try {
+    // Get month parameter (YYYY-MM format) or default to current month
+    const monthParam = request.nextUrl.searchParams.get('month')
+    const referenceDate = monthParam ? new Date(`${monthParam}-01`) : new Date()
+
     // Fetch user profile for base currency
     const profile = await prisma.user.findUnique({
       where: { id: userId },
@@ -102,11 +106,10 @@ export async function GET(request: NextRequest): Promise<NextResponse<ApiRespons
 
     const netWorth = assets - liabilities
 
-    // Get this month's transaction summary
-    const now = new Date()
+    // Get transaction summary for selected month
     const summary = await getTransactionsSummary(userId, {
-      dateFrom: startOfMonth(now).toISOString(),
-      dateTo: endOfMonth(now).toISOString(),
+      dateFrom: startOfMonth(referenceDate).toISOString(),
+      dateTo: endOfMonth(referenceDate).toISOString(),
     })
 
     return SuccessResponse({

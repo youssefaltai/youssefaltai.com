@@ -6,12 +6,16 @@ import { useMonthComparison } from '../../hooks/use-dashboard-analytics'
 import { formatNumberCompact } from '@repo/utils'
 import { TrendingUp, TrendingDown, Money } from '@repo/ui'
 
+interface MonthComparisonWidgetProps {
+  selectedMonth?: string
+}
+
 /**
  * Month comparison widget
  * Shows the last 6 months of income, expenses, and savings
  */
-export function MonthComparisonWidget() {
-  const { data: comparison, isLoading, error } = useMonthComparison()
+export function MonthComparisonWidget({ selectedMonth }: MonthComparisonWidgetProps) {
+  const { data: comparison, isLoading, error } = useMonthComparison(selectedMonth)
 
   // Format data for chart - use the 6 months data
   const chartData = comparison?.months.map((month) => ({

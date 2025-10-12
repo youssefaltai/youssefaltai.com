@@ -1,18 +1,34 @@
 'use client'
 
+import { useMemo } from 'react'
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts'
 import { DashboardWidget } from './DashboardWidget'
 import { useCategoryBreakdown } from '../../hooks/use-dashboard-analytics'
 import { Receipt, Money } from '@repo/ui'
+import { format, parseISO } from '@repo/utils'
 
 const COLORS = ['#007AFF', '#34C759', '#FF9500', '#FF3B30', '#AF52DE']
+
+interface CategoryBreakdownChartProps {
+  selectedMonth?: string
+}
 
 /**
  * Category breakdown chart widget
  * Shows top 5 expense categories as a pie chart
  */
-export function CategoryBreakdownChart() {
-    const { data: categories, isLoading, error } = useCategoryBreakdown()
+export function CategoryBreakdownChart({ selectedMonth }: CategoryBreakdownChartProps) {
+    const { data: categories, isLoading, error } = useCategoryBreakdown(selectedMonth)
+
+    // Get subtitle text based on selected month
+    const subtitle = useMemo(() => {
+        if (!selectedMonth) {
+            return 'Where your money is going'
+        }
+        const monthDate = parseISO(`${selectedMonth}-01`)
+        const monthName = format(monthDate, 'MMMM yyyy')
+        return `${monthName} expenses`
+    }, [selectedMonth])
 
     // Format data for chart
     const chartData = categories.map((cat) => ({
@@ -65,19 +81,19 @@ export function CategoryBreakdownChart() {
     return (
     <DashboardWidget
       title="Top Expense Categories"
-      subtitle="Where your money is going"
+      subtitle={subtitle}
       loading={isLoading}
             error={error instanceof Error ? error.message : null}
             isEmpty={chartData.length === 0}
             emptyMessage="No expense transactions this month"
             emptyIcon={<Receipt className="w-12 h-12" />}
         >
-            <ResponsiveContainer width="100%" height={300}>
+            <ResponsiveContainer width="100%" height={350}>
                 <PieChart>
                     <Pie
                         data={chartData}
                         cx="50%"
-                        cy="40%"
+                        cy="45%"
                         labelLine={false}
                         outerRadius={80}
                         fill="#8884d8"

@@ -8,7 +8,7 @@ import { useDashboardSummary, useRecentTransactions, useActiveGoals } from '../.
 import { useIsWidgetVisible } from '../../hooks/use-widget-preferences'
 import { TTransaction } from '@repo/db'
 import { calculateGoalProgress } from '../../utils/calculations'
-import { cn, getGreeting } from '@repo/utils'
+import { cn, getGreeting, format, parseISO } from '@repo/utils'
 import { AlertsWidget } from '../../components/dashboard/AlertsWidget'
 import { FinancialHealthWidget } from '../../components/dashboard/FinancialHealthWidget'
 import { SpendingTrendsChart } from '../../components/dashboard/SpendingTrendsChart'
@@ -18,13 +18,16 @@ import { QuickStatsWidget } from '../../components/dashboard/QuickStatsWidget'
 import { AccountBalancesWidget } from '../../components/dashboard/AccountBalancesWidget'
 import { InsightsWidget } from '../../components/dashboard/InsightsWidget'
 import { WidgetSettings } from '../../components/dashboard/WidgetSettings'
+import { MonthSelector } from '../../components/dashboard/MonthSelector'
 
 export default function HomePage() {
   const router = useRouter()
-  const { data: summary } = useDashboardSummary()
+  const [selectedMonth, setSelectedMonth] = useState<string | undefined>(undefined)
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+  
+  const { data: summary } = useDashboardSummary(selectedMonth)
   const { data: recentTransactions = [] } = useRecentTransactions(5)
   const { data: activeGoals = [] } = useActiveGoals()
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
 
   // Widget visibility checks
   const showNetWorth = useIsWidgetVisible('net-worth')
@@ -43,6 +46,11 @@ export default function HomePage() {
   const hasAnyWidgets = showNetWorth || showAlerts || showFinancialHealth ||
     showSpendingTrends || showCategoryBreakdown || showMonthComparison ||
     showQuickStats || showGoals || showAccountBalances || showInsights || showRecentTransactions
+
+  // Get display month for subtitles
+  const displayMonth = selectedMonth 
+    ? format(parseISO(`${selectedMonth}-01`), 'MMMM yyyy')
+    : format(new Date(), 'MMMM yyyy')
 
   return (
     <>
@@ -64,6 +72,12 @@ export default function HomePage() {
           />
         </div>
 
+        {/* Month Selector */}
+        <MonthSelector 
+          selectedMonth={selectedMonth}
+          onChange={setSelectedMonth}
+        />
+
         {/* Hero Section - Net Worth */}
         {showNetWorth && (
           <div className="px-4 pb-6">
@@ -75,13 +89,13 @@ export default function HomePage() {
 
               <div className="grid grid-cols-2 gap-4 pt-4 border-t border-ios-gray-5">
                 <div>
-                  <p className="text-ios-caption text-ios-gray-2 mb-1">This Month's Income</p>
+                  <p className="text-ios-caption text-ios-gray-2 mb-1">{displayMonth} Income</p>
                   <p className="text-ios-callout sm:text-ios-body font-semibold text-ios-label-primary">
                     {summary ? <Money amount={summary.thisMonthIncome} currency='EGP' /> : '—'}
                   </p>
                 </div>
                 <div>
-                  <p className="text-ios-caption text-ios-gray-2 mb-1">This Month's Expenses</p>
+                  <p className="text-ios-caption text-ios-gray-2 mb-1">{displayMonth} Expenses</p>
                   <p className="text-ios-callout sm:text-ios-body font-semibold text-ios-label-primary">
                     {summary ? <Money amount={summary.thisMonthExpenses} currency='EGP' /> : '—'}
                   </p>
@@ -120,14 +134,14 @@ export default function HomePage() {
           {showFinancialHealth && <FinancialHealthWidget />}
 
           {/* Charts Section */}
-          {showSpendingTrends && <SpendingTrendsChart />}
-          {showCategoryBreakdown && <CategoryBreakdownChart />}
+          {showSpendingTrends && <SpendingTrendsChart selectedMonth={selectedMonth} />}
+          {showCategoryBreakdown && <CategoryBreakdownChart selectedMonth={selectedMonth} />}
 
           {/* Month Comparison */}
-          {showMonthComparison && <MonthComparisonWidget />}
+          {showMonthComparison && <MonthComparisonWidget selectedMonth={selectedMonth} />}
 
           {/* Quick Stats */}
-          {showQuickStats && <QuickStatsWidget />}
+          {showQuickStats && <QuickStatsWidget selectedMonth={selectedMonth} />}
 
           {/* Active Goals */}
           {showGoals && activeGoals.length > 0 && (

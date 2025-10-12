@@ -8,12 +8,16 @@ import { convertAmount, ExchangeRateMap } from '../../shared/finance-utils'
 import { useExchangeRates } from '../../hooks/use-exchange-rates'
 import { calculateCreditUtilization } from '../../utils/calculations'
 
+interface QuickStatsWidgetProps {
+  selectedMonth?: string
+}
+
 /**
  * Quick stats widget
  * Shows key financial metrics at a glance
  */
-export function QuickStatsWidget() {
-  const { data: summary, isLoading: summaryLoading } = useDashboardSummary()
+export function QuickStatsWidget({ selectedMonth }: QuickStatsWidgetProps) {
+  const { data: summary, isLoading: summaryLoading } = useDashboardSummary(selectedMonth)
   const { data: accounts, isLoading: accountsLoading } = useAccounts()
   const { data: rates } = useExchangeRates()
 

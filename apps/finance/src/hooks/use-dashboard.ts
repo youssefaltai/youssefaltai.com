@@ -14,12 +14,16 @@ interface DashboardSummary {
 /**
  * Fetch dashboard summary from server
  * All calculations and currency conversions done server-side
+ * @param month - Optional month in YYYY-MM format (undefined = current month)
  */
-export function useDashboardSummary() {
+export function useDashboardSummary(month?: string) {
   return useQuery<DashboardSummary>({
-    queryKey: ['dashboard', 'summary'],
+    queryKey: ['dashboard', 'summary', month],
     queryFn: async () => {
-      const response = await fetch('/api/dashboard/summary')
+      const url = month 
+        ? `/api/dashboard/summary?month=${month}` 
+        : '/api/dashboard/summary'
+      const response = await fetch(url)
       
       if (!response.ok) {
         throw new Error('Failed to fetch dashboard summary')

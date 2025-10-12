@@ -65,6 +65,10 @@ export async function GET(request: NextRequest): Promise<NextResponse<ApiRespons
   if (!authenticated) return UnauthorizedResponse(userId)
 
   try {
+    // Get month parameter (YYYY-MM format) or default to current month
+    const monthParam = request.nextUrl.searchParams.get('month')
+    const referenceDate = monthParam ? new Date(`${monthParam}-01`) : new Date()
+
     // Get user's base currency and exchange rates
     const [user, exchangeRates] = await Promise.all([
       prisma.user.findUnique({
@@ -90,14 +94,13 @@ export async function GET(request: NextRequest): Promise<NextResponse<ApiRespons
       rateMap.set(key, rate.rate)
     }
 
-    const now = new Date()
-    const thisMonthStart = startOfMonth(now)
-    const thisMonthEnd = endOfMonth(now)
-    const lastMonthStart = startOfMonth(subMonths(now, 1))
-    const lastMonthEnd = endOfMonth(subMonths(now, 1))
+    const thisMonthStart = startOfMonth(referenceDate)
+    const thisMonthEnd = endOfMonth(referenceDate)
+    const lastMonthStart = startOfMonth(subMonths(referenceDate, 1))
+    const lastMonthEnd = endOfMonth(subMonths(referenceDate, 1))
     
     // Get start of 6 months ago for historical data
-    const sixMonthsAgoStart = startOfMonth(subMonths(now, 5))
+    const sixMonthsAgoStart = startOfMonth(subMonths(referenceDate, 5))
 
     // Fetch all data in parallel
     const [thisMonthTransactions, lastMonthTransactions, sixMonthsTransactions] = await Promise.all([
@@ -126,7 +129,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<ApiRespons
       thisMonthTransactions,
       lastMonthTransactions,
       sixMonthsTransactions,
-      now,
+      referenceDate,
       baseCurrency,
       rateMap
     )

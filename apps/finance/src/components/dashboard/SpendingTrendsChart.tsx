@@ -1,10 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { DashboardWidget } from './DashboardWidget'
 import { useSpendingTrends } from '../../hooks/use-dashboard-analytics'
-import { getDate, formatNumberCompact } from '@repo/utils'
+import { getDate, formatNumberCompact, format, parseISO } from '@repo/utils'
 import { Money, SegmentedControl } from '@repo/ui'
 import type { SegmentedControlOption } from '@repo/ui'
 
@@ -16,13 +16,27 @@ const VIEW_MODE_OPTIONS: SegmentedControlOption<ViewMode>[] = [
     { value: 'expenses', label: 'Expenses' },
 ]
 
+interface SpendingTrendsChartProps {
+  selectedMonth?: string
+}
+
 /**
  * Spending trends chart widget
- * Shows daily income and expenses for the current month
+ * Shows daily income and expenses for the selected month
  */
-export function SpendingTrendsChart() {
-    const { data: trends, isLoading, error } = useSpendingTrends()
+export function SpendingTrendsChart({ selectedMonth }: SpendingTrendsChartProps) {
+    const { data: trends, isLoading, error } = useSpendingTrends(selectedMonth)
     const [viewMode, setViewMode] = useState<ViewMode>('both')
+
+    // Get subtitle text based on selected month
+    const subtitle = useMemo(() => {
+        if (!selectedMonth) {
+            return 'Daily breakdown for this month'
+        }
+        const monthDate = parseISO(`${selectedMonth}-01`)
+        const monthName = format(monthDate, 'MMMM yyyy')
+        return `Daily breakdown for ${monthName}`
+    }, [selectedMonth])
 
     // Format data for chart
     const chartData = trends.map((day) => ({
@@ -57,7 +71,7 @@ export function SpendingTrendsChart() {
     return (
         <DashboardWidget
             title="Spending Trends"
-            subtitle="Daily breakdown for this month"
+            subtitle={subtitle}
             loading={isLoading}
             error={error instanceof Error ? error.message : null}
             isEmpty={chartData.length === 0}
