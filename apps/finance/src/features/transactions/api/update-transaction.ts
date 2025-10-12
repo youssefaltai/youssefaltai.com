@@ -56,8 +56,12 @@ export default async function updateTransaction(userId: string, transactionId: s
 
     // Validate accounts ownership
     const accountMap = await validateAccountsOwnership([newFromAccountId, newToAccountId], userId)
-    const newFromAccount = accountMap.get(newFromAccountId)!
-    const newToAccount = accountMap.get(newToAccountId)!
+    const newFromAccount = accountMap.get(newFromAccountId)
+    const newToAccount = accountMap.get(newToAccountId)
+    
+    if (!newFromAccount || !newToAccount) {
+        throw new Error('Internal error: Account validation failed')
+    }
 
     // Calculate final currency conversion for new transaction
     const newConversion = calculateCurrencyConversion({
@@ -67,6 +71,33 @@ export default async function updateTransaction(userId: string, transactionId: s
         providedCurrency: newCurrency,
         providedExchangeRate: newExchangeRate,
     })
+
+    // Validate sufficient funds for asset accounts
+    // Need to account for the fact that we're reversing the old transaction first
+    if (newFromAccount.type === 'asset') {
+        // Calculate what the balance will be after reversing old transaction
+        const { amountToRestore } = reverseCurrencyConversion(
+            oldTransaction.amount,
+            oldTransaction.currency,
+            oldTransaction.fromAccount.currency,
+            oldTransaction.toAccount.currency,
+            oldTransaction.exchangeRate
+        )
+        
+        // If updating the same account, add back what we're reversing
+        const effectiveBalance = oldTransaction.fromAccountId === newFromAccountId 
+            ? newFromAccount.balance.add(amountToRestore)
+            : newFromAccount.balance
+        
+        const newBalance = effectiveBalance.sub(newConversion.amountToDeduct)
+        if (newBalance.lt(0)) {
+            throw new Error(
+                `Insufficient funds in ${newFromAccount.name}. ` +
+                `Available: ${effectiveBalance.toFixed(2)} ${newFromAccount.currency}, ` +
+                `Required: ${newConversion.amountToDeduct.toFixed(2)} ${newFromAccount.currency}`
+            )
+        }
+    }
 
     console.log('Updating transaction:', {
         userId,

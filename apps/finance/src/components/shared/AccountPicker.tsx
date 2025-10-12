@@ -1,7 +1,8 @@
 'use client'
 
-import { Money, GroupedSelect } from '@repo/ui'
+import { GroupedSelect } from '@repo/ui'
 import type { GroupedSelectGroup } from '@repo/ui'
+import { formatCurrencyCompact } from '@repo/utils'
 import { useAssets } from '../../hooks/use-assets'
 import { useGoals } from '../../hooks/use-goals'
 import { useLoans } from '../../hooks/use-loans'
@@ -75,7 +76,7 @@ export function AccountPicker({
     options: items.map(account => ({
       value: account.id,
       label: account.name,
-      metadata: `${Money({ amount: Number(account.balance), currency: account.currency })}`,
+      metadata: formatCurrencyCompact(Number(account.balance), account.currency),
     })),
   }))
 

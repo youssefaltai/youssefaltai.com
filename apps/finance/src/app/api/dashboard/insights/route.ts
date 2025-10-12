@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server"
 import { verifyAuth } from "@repo/auth/verify-auth"
 import { ApiResponse } from "@repo/types"
 import { UnauthorizedResponse, SuccessResponse, InternalServerErrorResponse } from "@/shared/utils/api"
-import { prisma } from "@repo/db"
-import { startOfMonth, endOfMonth, getDaysInMonth, getDate } from "@repo/utils"
+import { prisma, Prisma } from "@repo/db"
+import { startOfMonth, endOfMonth, getDaysInMonth, getDate, subMonths } from "@repo/utils"
 import { convertAmount, ExchangeRateMap } from "@/shared/finance-utils"
 import {
   calculateSpendingVelocity,
@@ -263,6 +263,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<ApiRespons
     const accounts = await prisma.account.findMany({
       where: { userId, deletedAt: null },
       select: {
+        id: true,
         type: true,
         balance: true,
         target: true,
@@ -347,13 +348,35 @@ export async function GET(request: NextRequest): Promise<NextResponse<ApiRespons
 
     // Goal forecast insights
     const goals = accounts.filter((acc) => acc.type === 'asset' && acc.target && acc.dueDate)
+    const sixMonthsAgo = subMonths(now, 6)
+    
     for (const goal of goals.slice(0, 2)) {
       // Top 2 goals
       if (!goal.target || !goal.dueDate) continue
 
-      // Estimate monthly contribution based on recent activity
-      // Simplified: assume current balance was accumulated over time
-      const monthlyContribution = Number(goal.balance) / 6 // Rough estimate
+      // Calculate actual contributions from transaction history
+      const contributions = await prisma.transaction.findMany({
+        where: {
+          toAccountId: goal.id,
+          date: { gte: sixMonthsAgo },
+          deletedAt: null,
+        },
+        select: { amount: true, currency: true },
+      })
+
+      let totalContributed = new Prisma.Decimal(0)
+      for (const contrib of contributions) {
+        try {
+          const converted = convertAmount(contrib.amount, contrib.currency, baseCurrency, rateMap)
+          totalContributed = totalContributed.add(converted)
+        } catch (error) {
+          console.warn('Failed to convert contribution:', error)
+        }
+      }
+
+      const monthlyContribution = contributions.length > 0 
+        ? Number(totalContributed) / 6 
+        : 0
 
       const forecast = forecastGoalCompletion(
         Number(goal.balance),
@@ -364,14 +387,14 @@ export async function GET(request: NextRequest): Promise<NextResponse<ApiRespons
 
       if (!forecast.onTrack && forecast.monthsRemaining < Infinity) {
         insights.push({
-          id: `goal-forecast-${goal}`,
+          id: `goal-forecast-${goal.id}`,
           type: 'warning',
           icon: 'Target',
           message: `You may not reach your goal on time. Consider increasing contributions`,
         })
       } else if (forecast.onTrack && forecast.monthsRemaining > 0) {
         insights.push({
-          id: `goal-forecast-${goal}`,
+          id: `goal-forecast-${goal.id}`,
           type: 'positive',
           icon: 'Target',
           message: `You're on track to reach your goal in ${forecast.monthsRemaining} months`,

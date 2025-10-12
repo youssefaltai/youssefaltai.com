@@ -30,8 +30,12 @@ export default async function createTransaction(userId: string, input: CreateTra
 
     // Validate accounts ownership
     const accountMap = await validateAccountsOwnership([fromAccountId, toAccountId], userId)
-    const fromAccount = accountMap.get(fromAccountId)!
-    const toAccount = accountMap.get(toAccountId)!
+    const fromAccount = accountMap.get(fromAccountId)
+    const toAccount = accountMap.get(toAccountId)
+    
+    if (!fromAccount || !toAccount) {
+        throw new Error('Internal error: Account validation failed')
+    }
 
     // For cross-currency transactions, fetch default exchange rate if not provided
     if (fromAccount.currency !== toAccount.currency && !exchangeRate) {
@@ -66,6 +70,18 @@ export default async function createTransaction(userId: string, input: CreateTra
         providedCurrency: currency,
         providedExchangeRate: exchangeRate, // Will be fetched default or user-provided
     })
+
+    // Validate sufficient funds for asset accounts
+    if (fromAccount.type === 'asset') {
+        const newBalance = fromAccount.balance.sub(conversion.amountToDeduct)
+        if (newBalance.lt(0)) {
+            throw new Error(
+                `Insufficient funds in ${fromAccount.name}. ` +
+                `Available: ${fromAccount.balance.toFixed(2)} ${fromAccount.currency}, ` +
+                `Required: ${conversion.amountToDeduct.toFixed(2)} ${fromAccount.currency}`
+            )
+        }
+    }
 
     console.log('Creating transaction:', {
         userId,

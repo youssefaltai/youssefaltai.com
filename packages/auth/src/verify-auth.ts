@@ -30,11 +30,18 @@ export async function verifyAuth(request: NextRequest): Promise<VerifyAuthRespon
     })
 
     if (!user) {
+      console.warn('Auth verification failed: User not found in database', {
+        userId: payload.id,
+      })
       return { authenticated: false, userId: null }
     }
 
     return { authenticated: true, userId: payload.id }
-  } catch {
+  } catch (error) {
+    console.warn('Auth verification failed:', {
+      reason: error instanceof Error ? error.message : 'Unknown',
+      hasToken: !!token,
+    })
     return { authenticated: false, userId: null }
   }
 }

@@ -4,12 +4,21 @@ import { useState } from 'react'
 import { Currency } from '@repo/db'
 import { useExchangeRates, useSetExchangeRate } from '../../hooks/use-exchange-rates'
 import { CardSection } from '@repo/ui'
+import { formatRelative, differenceInDays } from '@repo/utils'
 
 const CURRENCY_PAIRS: Array<{ from: Currency; to: Currency; label: string }> = [
   { from: Currency.USD, to: Currency.EGP, label: '1 USD = ? EGP' },
   { from: Currency.GOLD, to: Currency.EGP, label: '1g Gold = ? EGP' },
   { from: Currency.USD, to: Currency.GOLD, label: '1 USD = ? g Gold' },
 ]
+
+/**
+ * Check if exchange rate hasn't been updated in 30+ days
+ */
+function isStale(updatedAt: Date | string): boolean {
+  const daysSinceUpdate = differenceInDays(new Date(), new Date(updatedAt))
+  return daysSinceUpdate > 30
+}
 
 export function ExchangeRatesManager() {
   const { data: rates = [], isLoading } = useExchangeRates()
@@ -18,17 +27,17 @@ export function ExchangeRatesManager() {
   const [editValue, setEditValue] = useState('')
 
   // Get current rate for a currency pair
-  const getRate = (from: Currency, to: Currency): number | null => {
+  const getRate = (from: Currency, to: Currency) => {
     const rate = rates.find(
       (r) => r.fromCurrency === from && r.toCurrency === to
     )
-    return rate ? Number(rate.rate) : null
+    return rate
   }
 
   const handleEdit = (from: Currency, to: Currency) => {
-    const currentRate = getRate(from, to)
+    const rateObj = getRate(from, to)
     setEditingPair(`${from}_${to}`)
-    setEditValue(currentRate?.toString() || '')
+    setEditValue(rateObj ? Number(rateObj.rate).toString() : '')
   }
 
   const handleSave = async (from: Currency, to: Currency) => {
@@ -69,9 +78,11 @@ export function ExchangeRatesManager() {
   return (
     <CardSection title="Exchange Rates">
       {CURRENCY_PAIRS.map((pair, index) => {
-        const currentRate = getRate(pair.from, pair.to)
+        const rateObj = getRate(pair.from, pair.to)
         const isEditing = editingPair === `${pair.from}_${pair.to}`
         const isLast = index === CURRENCY_PAIRS.length - 1
+        const currentRate = rateObj ? Number(rateObj.rate) : null
+        const showStaleWarning = rateObj && isStale(rateObj.updatedAt)
 
         return (
           <div
@@ -83,9 +94,17 @@ export function ExchangeRatesManager() {
                 <span className="text-ios-body text-ios-label-primary">
                   {pair.label}
                 </span>
-                {!isEditing && !currentRate && (
+                {!isEditing && !rateObj && (
                   <p className="text-ios-caption text-ios-gray-2 mt-0.5">
                     Not set
+                  </p>
+                )}
+                {!isEditing && rateObj && (
+                  <p className="text-ios-footnote text-ios-gray-2 mt-0.5">
+                    Last updated: {formatRelative(new Date(rateObj.updatedAt), new Date())}
+                    {showStaleWarning && (
+                      <span className="text-ios-orange ml-1.5">⚠ Consider updating</span>
+                    )}
                   </p>
                 )}
               </div>

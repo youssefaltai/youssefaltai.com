@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server"
 import { verifyAuth } from "@repo/auth/verify-auth"
 import { ApiResponse } from "@repo/types"
-import { UnauthorizedResponse, SuccessResponse, InternalServerErrorResponse } from "@/shared/utils/api"
+import { UnauthorizedResponse, SuccessResponse, InternalServerErrorResponse, BadRequestResponse } from "@/shared/utils/api"
 import { prisma } from "@repo/db"
-import { startOfMonth, endOfMonth } from "@repo/utils"
+import { startOfMonth, endOfMonth, parseISO, isValid } from "@repo/utils"
 import { convertAmount, ExchangeRateMap } from "@/shared/finance-utils"
 import getTransactionsSummary from "@/features/transactions/api/get-transactions-summary"
 
@@ -28,7 +28,15 @@ export async function GET(request: NextRequest): Promise<NextResponse<ApiRespons
   try {
     // Get month parameter (YYYY-MM format) or default to current month
     const monthParam = request.nextUrl.searchParams.get('month')
-    const referenceDate = monthParam ? new Date(`${monthParam}-01`) : new Date()
+    let referenceDate = new Date()
+
+    if (monthParam) {
+      const parsed = parseISO(`${monthParam}-01`)
+      if (!isValid(parsed)) {
+        return BadRequestResponse<DashboardSummary>('Invalid month format. Use YYYY-MM')
+      }
+      referenceDate = parsed
+    }
 
     // Fetch user profile for base currency
     const profile = await prisma.user.findUnique({
@@ -47,6 +55,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<ApiRespons
       prisma.account.findMany({
         where: { userId, deletedAt: null },
         select: {
+          name: true,
           type: true,
           balance: true,
           currency: true,
@@ -76,7 +85,8 @@ export async function GET(request: NextRequest): Promise<NextResponse<ApiRespons
         try {
           const converted = convertAmount(acc.balance, acc.currency, baseCurrency, rateMap)
           return sum + Number(converted)
-        } catch {
+        } catch (error) {
+          console.warn(`Failed to convert ${acc.name} (${acc.currency}) balance:`, error)
           return sum
         }
       }, 0)
@@ -88,7 +98,8 @@ export async function GET(request: NextRequest): Promise<NextResponse<ApiRespons
         try {
           const converted = convertAmount(acc.balance, acc.currency, baseCurrency, rateMap)
           return sum + Number(converted)
-        } catch {
+        } catch (error) {
+          console.warn(`Failed to convert ${acc.name} (${acc.currency}) balance:`, error)
           return sum
         }
       }, 0)
@@ -99,7 +110,8 @@ export async function GET(request: NextRequest): Promise<NextResponse<ApiRespons
         try {
           const converted = convertAmount(acc.balance, acc.currency, baseCurrency, rateMap)
           return sum + Number(converted)
-        } catch {
+        } catch (error) {
+          console.warn(`Failed to convert ${acc.name} (${acc.currency}) balance:`, error)
           return sum
         }
       }, 0)

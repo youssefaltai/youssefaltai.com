@@ -2,10 +2,12 @@ import { prisma } from "@repo/db"
 
 /**
  * Soft-deletes an asset account.
+ * Prevents deletion if account has active transactions.
  * 
  * @param accountId - Account ID to delete
  * @param userId - User ID (for ownership validation)
  * @returns Success message
+ * @throws Error if account has transactions or user doesn't own it
  */
 export async function deleteAssetAccount(
     accountId: string,
@@ -21,6 +23,24 @@ export async function deleteAssetAccount(
 
     if (!account) {
         throw new Error("Account not found or you don't have permission to delete it")
+    }
+
+    // Check for existing transactions
+    const transactionCount = await prisma.transaction.count({
+        where: {
+            OR: [
+                { fromAccountId: accountId },
+                { toAccountId: accountId },
+            ],
+            deletedAt: null,
+        },
+    })
+
+    if (transactionCount > 0) {
+        throw new Error(
+            `Cannot delete account with ${transactionCount} active transaction${transactionCount === 1 ? '' : 's'}. ` +
+            `Please delete transactions first or keep account for history.`
+        )
     }
 
     await prisma.account.update({

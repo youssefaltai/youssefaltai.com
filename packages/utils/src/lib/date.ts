@@ -6,6 +6,7 @@ import { parseISO } from 'date-fns'
  */
 export {
   format,
+  formatRelative,
   parseISO,
   formatDistanceToNow,
   differenceInDays,
@@ -30,6 +31,7 @@ export {
   isYesterday,
   getDate,
   getDaysInMonth,
+  isValid,
 } from 'date-fns'
 
 /**

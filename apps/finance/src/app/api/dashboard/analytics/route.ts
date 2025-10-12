@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server"
 import { verifyAuth } from "@repo/auth/verify-auth"
 import { ApiResponse } from "@repo/types"
-import { UnauthorizedResponse, SuccessResponse, InternalServerErrorResponse } from "@/shared/utils/api"
+import { UnauthorizedResponse, SuccessResponse, InternalServerErrorResponse, BadRequestResponse } from "@/shared/utils/api"
 import { prisma, Currency } from "@repo/db"
-import { startOfMonth, endOfMonth, subMonths, getDaysInMonth } from "@repo/utils"
+import { startOfMonth, endOfMonth, subMonths, getDaysInMonth, parseISO, isValid } from "@repo/utils"
 import { convertAmount, ExchangeRateMap } from "@/shared/finance-utils"
 
 export interface DailySpending {
@@ -67,7 +67,15 @@ export async function GET(request: NextRequest): Promise<NextResponse<ApiRespons
   try {
     // Get month parameter (YYYY-MM format) or default to current month
     const monthParam = request.nextUrl.searchParams.get('month')
-    const referenceDate = monthParam ? new Date(`${monthParam}-01`) : new Date()
+    let referenceDate = new Date()
+
+    if (monthParam) {
+      const parsed = parseISO(`${monthParam}-01`)
+      if (!isValid(parsed)) {
+        return BadRequestResponse<DashboardAnalytics>('Invalid month format. Use YYYY-MM')
+      }
+      referenceDate = parsed
+    }
 
     // Get user's base currency and exchange rates
     const [user, exchangeRates] = await Promise.all([
@@ -98,16 +106,25 @@ export async function GET(request: NextRequest): Promise<NextResponse<ApiRespons
     const thisMonthEnd = endOfMonth(referenceDate)
     const lastMonthStart = startOfMonth(subMonths(referenceDate, 1))
     const lastMonthEnd = endOfMonth(subMonths(referenceDate, 1))
-    
-    // Get start of 6 months ago for historical data
-    const sixMonthsAgoStart = startOfMonth(subMonths(referenceDate, 5))
 
-    // Fetch all data in parallel
-    const [thisMonthTransactions, lastMonthTransactions, sixMonthsTransactions] = await Promise.all([
+    // Fetch this month and last month transactions in parallel
+    const [thisMonthTransactions, lastMonthTransactions] = await Promise.all([
       fetchTransactionsWithAccounts(userId, thisMonthStart, thisMonthEnd),
       fetchTransactionsWithAccounts(userId, lastMonthStart, lastMonthEnd),
-      fetchTransactionsWithAccounts(userId, sixMonthsAgoStart, thisMonthEnd),
     ])
+    
+    // Fetch 6 months of data with separate queries for better performance
+    const monthlyData = await Promise.all(
+      Array.from({ length: 6 }, async (_, i) => {
+        const monthDate = subMonths(referenceDate, 5 - i)
+        const monthStart = startOfMonth(monthDate)
+        const monthEnd = endOfMonth(monthDate)
+        
+        const transactions = await fetchTransactionsWithAccounts(userId, monthStart, monthEnd)
+        
+        return { monthDate, transactions }
+      })
+    )
 
     // Calculate spending trends (daily breakdown)
     const spendingTrends = calculateDailySpending(
@@ -128,8 +145,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<ApiRespons
     const monthComparison = calculateMonthComparison(
       thisMonthTransactions,
       lastMonthTransactions,
-      sixMonthsTransactions,
-      referenceDate,
+      monthlyData,
       baseCurrency,
       rateMap
     )
@@ -278,8 +294,7 @@ function calculateCategoryBreakdown(
 function calculateMonthComparison(
   thisMonthTransactions: any[],
   lastMonthTransactions: any[],
-  sixMonthsTransactions: any[],
-  now: Date,
+  monthlyData: { monthDate: Date; transactions: any[] }[],
   baseCurrency: Currency,
   rateMap: ExchangeRateMap
 ): MonthComparison {
@@ -293,31 +308,20 @@ function calculateMonthComparison(
     savings: lastMonth.savings > 0 ? ((thisMonth.savings - lastMonth.savings) / lastMonth.savings) * 100 : 0,
   }
 
-  // Calculate data for last 6 months
-  const months: MonthData[] = []
+  // Calculate data for last 6 months using pre-fetched data
   const monthNames: string[] = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
   
-  for (let i = 5; i >= 0; i--) {
-    const monthDate = subMonths(now, i)
-    const monthStart = startOfMonth(monthDate)
-    const monthEnd = endOfMonth(monthDate)
-    
-    // Filter transactions for this specific month
-    const monthTransactions = sixMonthsTransactions.filter((tx: any) => {
-      const txDate = new Date(tx.date)
-      return txDate >= monthStart && txDate <= monthEnd
-    })
-    
-    const totals = calculateMonthTotals(monthTransactions, baseCurrency, rateMap)
+  const months: MonthData[] = monthlyData.map(({ monthDate, transactions }) => {
+    const totals = calculateMonthTotals(transactions, baseCurrency, rateMap)
     const monthName = monthNames[monthDate.getMonth()]!
     
-    months.push({
+    return {
       month: monthName, // Just the month abbreviation (e.g., "Jan", "Feb")
       income: totals.income,
       expenses: totals.expenses,
       savings: totals.savings,
-    })
-  }
+    }
+  })
 
   return {
     months,
