@@ -72,34 +72,6 @@ export default function MorePage() {
         {/* Exchange Rates */}
         <ExchangeRatesManager />
 
-        {/* Settings */}
-        <CardSection title="Settings">
-          <ListItem
-            label="Preferences"
-            chevron
-            onClick={() => {
-              // TODO: Create preferences page
-              alert('Preferences page coming soon')
-            }}
-          />
-        </CardSection>
-
-        {/* About */}
-        <CardSection title="About">
-          <ListItem
-            label="Help & Support"
-            chevron
-            onClick={() => {
-              // TODO: Create help page
-              alert('Help page coming soon')
-            }}
-          />
-          <ListItem
-            label="Version"
-            value="1.0.0"
-          />
-        </CardSection>
-
         {/* Logout Button */}
         <button
           onClick={handleLogout}
