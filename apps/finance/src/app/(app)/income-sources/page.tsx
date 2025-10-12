@@ -7,6 +7,7 @@ import { IncomeSourceCard } from '../../../components/income-sources/IncomeSourc
 import { IncomeSourceForm } from '../../../components/forms/IncomeSourceForm'
 import { PageLayout, EntityList, LoadingSkeleton } from '@repo/ui'
 import type { Account } from '@repo/db'
+import type { CreateIncomeSourceSchema, UpdateIncomeSourceSchema } from '../../../features/accounts/income/validation'
 
 export default function IncomeSourcesPage() {
   const { data: incomeSources = [], isLoading } = useIncomeSources()
@@ -17,12 +18,12 @@ export default function IncomeSourcesPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [editingSource, setEditingSource] = useState<Account | null>(null)
 
-  const handleCreate = async (data: any) => {
+  const handleCreate = async (data: CreateIncomeSourceSchema) => {
     await createIncomeSource.mutateAsync(data)
     setIsCreateModalOpen(false)
   }
 
-  const handleUpdate = async (data: any) => {
+  const handleUpdate = async (data: UpdateIncomeSourceSchema) => {
     if (!editingSource) return
     await updateIncomeSource.mutateAsync({ id: editingSource.id, data })
     setEditingSource(null)

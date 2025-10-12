@@ -7,6 +7,7 @@ import { ExpenseCategoryCard } from '../../../components/expense-categories/Expe
 import { ExpenseCategoryForm } from '../../../components/forms/ExpenseCategoryForm'
 import { PageLayout, EntityList, LoadingSkeleton } from '@repo/ui'
 import type { Account } from '@repo/db'
+import type { CreateExpenseCategorySchema, UpdateExpenseCategorySchema } from '../../../features/accounts/expense/validation'
 
 export default function ExpenseCategoriesPage() {
   const { data: expenseCategories = [], isLoading } = useExpenseCategories()
@@ -17,12 +18,12 @@ export default function ExpenseCategoriesPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [editingCategory, setEditingCategory] = useState<Account | null>(null)
 
-  const handleCreate = async (data: any) => {
+  const handleCreate = async (data: CreateExpenseCategorySchema) => {
     await createExpenseCategory.mutateAsync(data)
     setIsCreateModalOpen(false)
   }
 
-  const handleUpdate = async (data: any) => {
+  const handleUpdate = async (data: UpdateExpenseCategorySchema) => {
     if (!editingCategory) return
     await updateExpenseCategory.mutateAsync({ id: editingCategory.id, data })
     setEditingCategory(null)

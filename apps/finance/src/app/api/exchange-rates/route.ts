@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { verifyAuth } from "@repo/auth/verify-auth"
 import { ApiResponse } from "@repo/types"
 import { BadRequestResponse, getJsonInput, SuccessResponse, UnauthorizedResponse } from "@/shared/utils/api"
-import { ExchangeRate } from "@repo/db"
+import { ExchangeRate, Currency } from "@repo/db"
 import getExchangeRates from "@/features/exchange-rates/api/get-exchange-rates"
 import setExchangeRate from "@/features/exchange-rates/api/set-exchange-rate"
 
@@ -20,13 +20,13 @@ export async function GET(request: NextRequest): Promise<NextResponse<ApiRespons
 
     try {
         const { searchParams } = new URL(request.url)
-        const fromCurrency = searchParams.get('fromCurrency') || undefined
-        const toCurrency = searchParams.get('toCurrency') || undefined
+        const fromCurrency = (searchParams.get('fromCurrency') || undefined) as Currency | undefined
+        const toCurrency = (searchParams.get('toCurrency') || undefined) as Currency | undefined
 
         const rates = await getExchangeRates(
             userId,
-            fromCurrency as any,
-            toCurrency as any
+            fromCurrency,
+            toCurrency
         )
 
         return SuccessResponse(rates)

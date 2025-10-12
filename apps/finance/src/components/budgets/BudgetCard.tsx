@@ -4,6 +4,7 @@ import { Money, ProgressBar } from '@repo/ui'
 import { format } from '@repo/utils'
 import { cn } from '@repo/utils'
 import { useBudgetProgress } from '../../hooks/use-budget-progress'
+import type { Currency } from '@repo/db'
 
 interface Budget {
   id: string
@@ -75,7 +76,7 @@ export function BudgetCard({ budget, onClick, isFirst, isLast }: BudgetCardProps
           <div className="text-right">
             <Money
               amount={Number(budget.amount)}
-              currency={budget.currency as any}
+              currency={budget.currency as Currency}
               className="text-ios-headline font-semibold"
             />
           </div>
@@ -99,7 +100,7 @@ export function BudgetCard({ budget, onClick, isFirst, isLast }: BudgetCardProps
             </div>
             <div className="flex items-center justify-between text-ios-footnote">
               <span className="text-ios-gray-1">
-                <Money amount={progress.spent} currency={progress.budgetCurrency as any} /> spent
+                <Money amount={progress.spent} currency={progress.budgetCurrency as Currency} /> spent
               </span>
               <span
                 className={cn(
@@ -109,11 +110,11 @@ export function BudgetCard({ budget, onClick, isFirst, isLast }: BudgetCardProps
               >
                 {isOverBudget ? (
                   <>
-                    +<Money amount={Math.abs(progress.remaining)} currency={progress.budgetCurrency as any} /> over
+                    +<Money amount={Math.abs(progress.remaining)} currency={progress.budgetCurrency as Currency} /> over
                   </>
                 ) : (
                   <>
-                    <Money amount={progress.remaining} currency={progress.budgetCurrency as any} /> left
+                    <Money amount={progress.remaining} currency={progress.budgetCurrency as Currency} /> left
                   </>
                 )}
               </span>

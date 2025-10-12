@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo } from 'react'
-import { format, parseISO, startOfMonth, subMonths } from '@repo/utils'
+import { format, startOfMonth, subMonths } from '@repo/utils'
 import { ChevronRight } from '@repo/ui'
 
 interface MonthSelectorProps {
@@ -40,13 +40,6 @@ export function MonthSelector({ selectedMonth, onChange, earliestDate }: MonthSe
     
     return months
   }, [earliestDate])
-  
-  // Get current selection label
-  const currentLabel = useMemo(() => {
-    if (!selectedMonth) return 'Current Month'
-    const month = availableMonths.find(m => m.value === selectedMonth)
-    return month?.label || selectedMonth
-  }, [selectedMonth, availableMonths])
   
   return (
     <div className="px-4 pb-4">

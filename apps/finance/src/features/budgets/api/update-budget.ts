@@ -46,7 +46,7 @@ export async function updateBudget(
     // Update budget in a transaction
     const budget = await prisma.$transaction(async (tx) => {
         // Update budget fields
-        const updateData: any = {}
+        const updateData: Record<string, unknown> = {}
         if (name !== undefined) updateData.name = name
         if (amount !== undefined) updateData.amount = amount
         if (currency !== undefined) updateData.currency = currency

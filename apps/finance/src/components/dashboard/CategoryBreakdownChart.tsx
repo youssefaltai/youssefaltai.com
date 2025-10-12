@@ -39,6 +39,7 @@ export function CategoryBreakdownChart({ selectedMonth }: CategoryBreakdownChart
     }))
 
     // Custom tooltip
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const CustomTooltip = ({ active, payload }: any) => {
         if (!active || !payload || !payload.length) return null
 
@@ -56,11 +57,13 @@ export function CategoryBreakdownChart({ selectedMonth }: CategoryBreakdownChart
     }
 
     // Custom legend
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const renderLegend = (props: any) => {
         const { payload } = props
+        if (!payload) return null
         return (
             <div className="flex flex-col gap-2 mt-4">
-                {payload.map((entry: any, index: number) => (
+                {payload.map((entry: { color: string; value: string; payload: { percentage: number } }, index: number) => (
                     <div key={`legend-${index}`} className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <div
@@ -98,7 +101,10 @@ export function CategoryBreakdownChart({ selectedMonth }: CategoryBreakdownChart
                         outerRadius={80}
                         fill="#8884d8"
                         dataKey="value"
-                        label={(props: any) => `${props.percent ? (props.percent * 100).toFixed(0) : 0}%`}
+                        label={
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                            (props: any) => `${props.percent ? (props.percent * 100).toFixed(0) : 0}%`
+                        }
                     >
                         {chartData.map((_, index) => (
                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />

@@ -7,6 +7,7 @@ import { LoanCard } from '../../../components/loans/LoanCard'
 import { LoanForm } from '../../../components/forms/LoanForm'
 import { PageLayout, EntityList, LoadingSkeleton } from '@repo/ui'
 import type { Account } from '@repo/db'
+import type { CreateLoanSchema, UpdateLoanSchema } from '../../../features/accounts/loan/validation'
 
 export default function LoansPage() {
   const { data: loans = [], isLoading } = useLoans()
@@ -17,12 +18,12 @@ export default function LoansPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [editingLoan, setEditingLoan] = useState<Account | null>(null)
 
-  const handleCreate = async (data: any) => {
+  const handleCreate = async (data: CreateLoanSchema) => {
     await createLoan.mutateAsync(data)
     setIsCreateModalOpen(false)
   }
 
-  const handleUpdate = async (data: any) => {
+  const handleUpdate = async (data: UpdateLoanSchema) => {
     if (!editingLoan) return
     await updateLoan.mutateAsync({ id: editingLoan.id, data })
     setEditingLoan(null)

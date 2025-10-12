@@ -1,7 +1,7 @@
 'use client'
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import type { Transaction } from '@repo/db'
+import type { TTransaction } from '@repo/db'
 import type { PaginatedResponse } from '@repo/types'
 
 interface TransactionFilters {
@@ -45,7 +45,7 @@ interface UpdateTransactionData {
 export function useTransactions(filters?: TransactionFilters) {
   const queryKey = ['transactions', filters]
 
-  return useQuery<PaginatedResponse<Transaction>>({
+  return useQuery<PaginatedResponse<TTransaction>>({
     queryKey,
     queryFn: async () => {
       const params = new URLSearchParams()

@@ -26,6 +26,7 @@ export function MonthComparisonWidget({ selectedMonth }: MonthComparisonWidgetPr
   })) || []
 
   // Custom tooltip
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const CustomTooltip = ({ active, payload }: any) => {
     if (!active || !payload || !payload.length) return null
 
@@ -34,7 +35,7 @@ export function MonthComparisonWidget({ selectedMonth }: MonthComparisonWidgetPr
         <p className="text-ios-body font-semibold text-ios-label-primary mb-2">
           {payload[0].payload.name}
         </p>
-        {payload.map((entry: any, index: number) => (
+        {payload.map((entry: { name: string; value: number; color: string }, index: number) => (
           <p
             key={`tooltip-${index}`}
             className="text-ios-callout text-ios-gray-1"

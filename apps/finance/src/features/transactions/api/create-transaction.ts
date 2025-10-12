@@ -26,13 +26,14 @@ import getExchangeRates from "../../exchange-rates/api/get-exchange-rates"
 export default async function createTransaction(userId: string, input: CreateTransactionSchema): Promise<TTransaction> {
     // Validate the input
     const validated = createTransactionSchema.parse(input)
-    let { description, amount, currency, fromAccountId, toAccountId, exchangeRate, date } = validated;
+    const { description, amount, fromAccountId, toAccountId, date } = validated
+    let { currency, exchangeRate } = validated
 
     // Validate accounts ownership
     const accountMap = await validateAccountsOwnership([fromAccountId, toAccountId], userId)
     const fromAccount = accountMap.get(fromAccountId)
     const toAccount = accountMap.get(toAccountId)
-    
+
     if (!fromAccount || !toAccount) {
         throw new Error('Internal error: Account validation failed')
     }
@@ -43,13 +44,13 @@ export default async function createTransaction(userId: string, input: CreateTra
         if (!currency) {
             currency = fromAccount.currency
         }
-        
+
         // Determine which rate to fetch based on transaction currency
         const fromCurrency = currency === fromAccount.currency ? fromAccount.currency : toAccount.currency
         const toCurrency = currency === fromAccount.currency ? toAccount.currency : fromAccount.currency
-        
+
         const rates = await getExchangeRates(userId, fromCurrency, toCurrency)
-        
+
         const defaultRate = rates[0]
         if (!defaultRate) {
             throw new Error(
@@ -57,7 +58,7 @@ export default async function createTransaction(userId: string, input: CreateTra
                 `Please set a default rate in Settings or provide an exchange rate.`
             )
         }
-        
+
         exchangeRate = Number(defaultRate.rate)
         console.log(`Using default exchange rate for ${fromCurrency}→${toCurrency}: ${exchangeRate}`)
     }

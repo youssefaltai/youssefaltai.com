@@ -18,7 +18,7 @@ export async function updateCreditCard(
 ): Promise<TAccount> {
     const validated = updateCreditCardSchema.parse(input)
 
-    const updateData: any = {}
+    const updateData: Partial<UpdateCreditCardSchema> = {}
     if (validated.name !== undefined) updateData.name = validated.name
     if (validated.description !== undefined) updateData.description = validated.description
     if (validated.currency !== undefined) updateData.currency = validated.currency

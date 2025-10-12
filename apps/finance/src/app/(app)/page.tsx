@@ -115,7 +115,7 @@ export default function HomePage() {
                 No Widgets Enabled
               </h3>
               <p className="text-ios-body text-ios-gray-1 mb-4">
-                You've hidden all dashboard widgets. Enable some widgets to see your financial data.
+                You&apos;ve hidden all dashboard widgets. Enable some widgets to see your financial data.
               </p>
               <button
                 onClick={() => setIsSettingsOpen(true)}

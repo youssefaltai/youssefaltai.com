@@ -1,6 +1,7 @@
 import { dirname } from "path";
 import { fileURLToPath } from "url";
 import { FlatCompat } from "@eslint/eslintrc";
+import nextConfig from "@repo/config/eslint/next.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -10,7 +11,7 @@ const compat = new FlatCompat({
 });
 
 const eslintConfig = [
-  ...compat.config(require("@repo/config/eslint/next")),
+  ...compat.config(nextConfig),
   {
     ignores: [
       "node_modules/**",

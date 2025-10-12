@@ -166,8 +166,8 @@ export async function GET(request: NextRequest): Promise<NextResponse<ApiRespons
     // Calculate totals
     let totalIncome = 0
     let totalExpenses = 0
-    let largestExpense: any = null
-    let largestIncome: any = null
+    let largestExpense: { amount: number; category: string; currency: string } | undefined = undefined
+    let largestIncome: { amount: number; source: string; currency: string } | undefined = undefined
 
     for (const tx of transactions) {
       try {
@@ -176,7 +176,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<ApiRespons
         // Income
         if (tx.fromAccount.type === 'income' && tx.toAccount.type === 'asset') {
           totalIncome += amount
-          if (!largestIncome || amount > largestIncome.amount) {
+          if (largestIncome === undefined || amount > largestIncome.amount) {
             largestIncome = {
               amount,
               source: tx.fromAccount.name,
@@ -187,7 +187,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<ApiRespons
         // Expense
         else if (tx.fromAccount.type === 'asset' && tx.toAccount.type === 'expense') {
           totalExpenses += amount
-          if (!largestExpense || amount > largestExpense.amount) {
+          if (largestExpense === undefined || amount > largestExpense.amount) {
             largestExpense = {
               amount,
               category: tx.toAccount.name,

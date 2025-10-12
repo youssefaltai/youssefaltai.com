@@ -140,7 +140,7 @@ export async function createAccountWithOpeningBalance(
 export async function updateAccountFields(
     accountId: string,
     userId: string,
-    updateData: any,
+    updateData: Record<string, unknown>,
     omitFields: Record<string, boolean> = {}
 ): Promise<TAccount> {
     const updatedAccount = await prisma.account.update({

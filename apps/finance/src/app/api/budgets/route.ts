@@ -9,10 +9,12 @@ import {
 import { verifyAuth } from "@repo/auth/verify-auth"
 import { createBudget, getAllBudgets } from "@/features/budgets"
 
+type BudgetResponse = Awaited<ReturnType<typeof createBudget>>
+
 /**
  * POST /api/budgets - Create a new budget
  */
-export async function POST(request: NextRequest): Promise<NextResponse<ApiResponse<any>>> {
+export async function POST(request: NextRequest): Promise<NextResponse<ApiResponse<BudgetResponse>>> {
     const { authenticated, userId } = await verifyAuth(request)
     if (!authenticated) return UnauthorizedResponse(userId)
 
@@ -24,7 +26,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
         return SuccessResponse(response)
     } catch (error) {
         console.error('Error creating budget:', error)
-        return BadRequestResponse<any>(
+        return BadRequestResponse<BudgetResponse>(
             error instanceof Error ? error.message : 'Failed to create budget'
         )
     }
@@ -33,7 +35,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
 /**
  * GET /api/budgets - Get all budgets
  */
-export async function GET(request: NextRequest): Promise<NextResponse<ApiResponse<any[]>>> {
+export async function GET(request: NextRequest): Promise<NextResponse<ApiResponse<BudgetResponse[]>>> {
     const { authenticated, userId } = await verifyAuth(request)
     if (!authenticated) return UnauthorizedResponse(userId)
 
@@ -42,7 +44,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<ApiRespons
         return SuccessResponse(response)
     } catch (error) {
         console.error('Error getting budgets:', error)
-        return BadRequestResponse<any[]>(
+        return BadRequestResponse<BudgetResponse[]>(
             error instanceof Error ? error.message : 'Failed to get budgets'
         )
     }

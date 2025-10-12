@@ -10,19 +10,11 @@ interface CrudConfig {
   resourceName: string
 }
 
-interface CreateData {
-  [key: string]: any
-}
-
-interface UpdateData {
-  [key: string]: any
-}
-
 /**
  * Factory function that generates CRUD hooks for a resource
  * Eliminates ~100 lines of boilerplate per resource
  */
-export function createCrudHooks<T>(config: CrudConfig) {
+export function createCrudHooks<T, TCreate = Partial<T>, TUpdate = Partial<T>>(config: CrudConfig) {
   const { endpoint, queryKey, resourceName } = config
 
   /**
@@ -45,11 +37,11 @@ export function createCrudHooks<T>(config: CrudConfig) {
   /**
    * Create a new item
    */
-  function useCreateItem(): UseMutationResult<T, Error, CreateData> {
+  function useCreateItem(): UseMutationResult<T, Error, TCreate> {
     const queryClient = useQueryClient()
 
     return useMutation({
-      mutationFn: async (data: CreateData) => {
+      mutationFn: async (data: TCreate) => {
         const response = await fetch(endpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -74,11 +66,11 @@ export function createCrudHooks<T>(config: CrudConfig) {
   /**
    * Update an existing item
    */
-  function useUpdateItem(): UseMutationResult<T, Error, { id: string; data: UpdateData }> {
+  function useUpdateItem(): UseMutationResult<T, Error, { id: string; data: TUpdate }> {
     const queryClient = useQueryClient()
 
     return useMutation({
-      mutationFn: async ({ id, data }: { id: string; data: UpdateData }) => {
+      mutationFn: async ({ id, data }: { id: string; data: TUpdate }) => {
         const response = await fetch(`${endpoint}/${id}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
@@ -103,7 +95,7 @@ export function createCrudHooks<T>(config: CrudConfig) {
   /**
    * Delete an item
    */
-  function useDeleteItem(): UseMutationResult<any, Error, string> {
+  function useDeleteItem(): UseMutationResult<void, Error, string> {
     const queryClient = useQueryClient()
 
     return useMutation({

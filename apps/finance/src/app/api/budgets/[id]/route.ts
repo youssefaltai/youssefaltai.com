@@ -9,13 +9,17 @@ import {
 import { verifyAuth } from "@repo/auth/verify-auth"
 import { getBudget, updateBudget, deleteBudget } from "@/features/budgets"
 
+type BudgetResponse = Awaited<ReturnType<typeof getBudget>>
+type BudgetUpdateResponse = Awaited<ReturnType<typeof updateBudget>>
+type BudgetDeleteResponse = Awaited<ReturnType<typeof deleteBudget>>
+
 /**
  * GET /api/budgets/[id] - Get a budget by ID
  */
 export async function GET(
     request: NextRequest,
     context: { params: Promise<{ id: string }> }
-): Promise<NextResponse<ApiResponse<any>>> {
+): Promise<NextResponse<ApiResponse<BudgetResponse>>> {
     const { authenticated, userId } = await verifyAuth(request)
     if (!authenticated) return UnauthorizedResponse(userId)
 
@@ -26,7 +30,7 @@ export async function GET(
         return SuccessResponse(response)
     } catch (error) {
         console.error('Error getting budget:', error)
-        return BadRequestResponse<any>(
+        return BadRequestResponse<BudgetResponse>(
             error instanceof Error ? error.message : 'Failed to get budget'
         )
     }
@@ -38,7 +42,7 @@ export async function GET(
 export async function PATCH(
     request: NextRequest,
     context: { params: Promise<{ id: string }> }
-): Promise<NextResponse<ApiResponse<any>>> {
+): Promise<NextResponse<ApiResponse<BudgetUpdateResponse>>> {
     const { authenticated, userId } = await verifyAuth(request)
     if (!authenticated) return UnauthorizedResponse(userId)
 
@@ -52,7 +56,7 @@ export async function PATCH(
         return SuccessResponse(response)
     } catch (error) {
         console.error('Error updating budget:', error)
-        return BadRequestResponse<any>(
+        return BadRequestResponse<BudgetUpdateResponse>(
             error instanceof Error ? error.message : 'Failed to update budget'
         )
     }
@@ -64,7 +68,7 @@ export async function PATCH(
 export async function DELETE(
     request: NextRequest,
     context: { params: Promise<{ id: string }> }
-): Promise<NextResponse<ApiResponse<any>>> {
+): Promise<NextResponse<ApiResponse<BudgetDeleteResponse>>> {
     const { authenticated, userId } = await verifyAuth(request)
     if (!authenticated) return UnauthorizedResponse(userId)
 
@@ -75,7 +79,7 @@ export async function DELETE(
         return SuccessResponse(response)
     } catch (error) {
         console.error('Error deleting budget:', error)
-        return BadRequestResponse<any>(
+        return BadRequestResponse<BudgetDeleteResponse>(
             error instanceof Error ? error.message : 'Failed to delete budget'
         )
     }

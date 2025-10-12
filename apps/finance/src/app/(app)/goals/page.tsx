@@ -7,6 +7,7 @@ import { GoalCard } from '../../../components/goals/GoalCard'
 import { GoalForm } from '../../../components/forms/GoalForm'
 import type { Account } from '@repo/db'
 import { ensureDate } from '@repo/utils'
+import type { CreateGoalSchema, UpdateGoalSchema } from '../../../features/accounts/goal/validation'
 
 export default function GoalsPage() {
   const { data: goals = [], isLoading } = useGoals()
@@ -17,12 +18,12 @@ export default function GoalsPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [editingGoal, setEditingGoal] = useState<Account | null>(null)
 
-  const handleCreate = async (data: any) => {
+  const handleCreate = async (data: CreateGoalSchema) => {
     await createGoal.mutateAsync(data)
     setIsCreateModalOpen(false)
   }
 
-  const handleUpdate = async (data: any) => {
+  const handleUpdate = async (data: UpdateGoalSchema) => {
     if (!editingGoal) return
     await updateGoal.mutateAsync({ id: editingGoal.id, data })
     setEditingGoal(null)

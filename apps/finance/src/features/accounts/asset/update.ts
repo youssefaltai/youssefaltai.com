@@ -18,7 +18,7 @@ export async function updateAssetAccount(
 ): Promise<TAccount> {
     const validated = updateAssetAccountSchema.parse(input)
 
-    const updateData: any = {}
+    const updateData: Partial<UpdateAssetAccountSchema> = {}
     if (validated.name !== undefined) updateData.name = validated.name
     if (validated.description !== undefined) updateData.description = validated.description
     if (validated.currency !== undefined) updateData.currency = validated.currency

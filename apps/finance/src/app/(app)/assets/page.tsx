@@ -6,6 +6,7 @@ import { useAssets, useCreateAsset, useUpdateAsset, useDeleteAsset } from '../..
 import { AssetCard } from '../../../components/assets/AssetCard'
 import { AssetForm } from '../../../components/forms/AssetForm'
 import type { Account } from '@repo/db'
+import type { CreateAssetAccountSchema, UpdateAssetAccountSchema } from '../../../features/accounts/asset/validation'
 
 export default function AssetsPage() {
   const { data: assets = [], isLoading } = useAssets()
@@ -16,12 +17,12 @@ export default function AssetsPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [editingAsset, setEditingAsset] = useState<Account | null>(null)
 
-  const handleCreate = async (data: any) => {
+  const handleCreate = async (data: CreateAssetAccountSchema) => {
     await createAsset.mutateAsync(data)
     setIsCreateModalOpen(false)
   }
 
-  const handleUpdate = async (data: any) => {
+  const handleUpdate = async (data: UpdateAssetAccountSchema) => {
     if (!editingAsset) return
     await updateAsset.mutateAsync({ id: editingAsset.id, data })
     setEditingAsset(null)

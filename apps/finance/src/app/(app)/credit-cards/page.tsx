@@ -7,6 +7,7 @@ import { CreditCardCard } from '../../../components/credit-cards/CreditCardCard'
 import { CreditCardForm } from '../../../components/forms/CreditCardForm'
 import { PageLayout, EntityList, LoadingSkeleton } from '@repo/ui'
 import type { Account } from '@repo/db'
+import type { CreateCreditCardSchema, UpdateCreditCardSchema } from '../../../features/accounts/credit-card/validation'
 
 export default function CreditCardsPage() {
   const { data: creditCards = [], isLoading } = useCreditCards()
@@ -17,12 +18,12 @@ export default function CreditCardsPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [editingCard, setEditingCard] = useState<Account | null>(null)
 
-  const handleCreate = async (data: any) => {
+  const handleCreate = async (data: CreateCreditCardSchema) => {
     await createCreditCard.mutateAsync(data)
     setIsCreateModalOpen(false)
   }
 
-  const handleUpdate = async (data: any) => {
+  const handleUpdate = async (data: UpdateCreditCardSchema) => {
     if (!editingCard) return
     await updateCreditCard.mutateAsync({ id: editingCard.id, data })
     setEditingCard(null)

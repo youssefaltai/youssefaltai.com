@@ -18,7 +18,7 @@ export async function updateExpenseCategory(
 ): Promise<TAccount> {
     const validated = updateExpenseCategorySchema.parse(input)
 
-    const updateData: any = {}
+    const updateData: Partial<UpdateExpenseCategorySchema> = {}
     if (validated.name !== undefined) updateData.name = validated.name
     if (validated.description !== undefined) updateData.description = validated.description
     if (validated.currency !== undefined) updateData.currency = validated.currency

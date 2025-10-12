@@ -9,6 +9,8 @@ import { TransactionForm } from '../../../components/forms/TransactionForm'
 import { cn } from '@repo/utils'
 import { formatDistanceToNow, isToday, isYesterday, startOfMonth, endOfMonth, isSameMonth, parseISO } from '@repo/utils'
 import { ensureDate } from '@repo/utils'
+import type { TTransaction } from '@repo/db'
+import type { CreateTransactionSchema, UpdateTransactionSchema } from '../../../features/transactions/validation'
 
 interface TransactionFilters {
   dateFrom?: string
@@ -45,14 +47,14 @@ export default function TransactionsPage() {
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [isFiltersModalOpen, setIsFiltersModalOpen] = useState(false)
-  const [editingTransaction, setEditingTransaction] = useState<any | null>(null)
+  const [editingTransaction, setEditingTransaction] = useState<TTransaction | null>(null)
 
-  const handleCreate = async (data: any) => {
+  const handleCreate = async (data: CreateTransactionSchema) => {
     await createTransaction.mutateAsync(data)
     setIsCreateModalOpen(false)
   }
 
-  const handleUpdate = async (data: any) => {
+  const handleUpdate = async (data: UpdateTransactionSchema) => {
     if (!editingTransaction) return
     await updateTransaction.mutateAsync({ id: editingTransaction.id, data })
     setEditingTransaction(null)
@@ -140,7 +142,7 @@ export default function TransactionsPage() {
                 {groupTransactions.map((transaction, index) => (
                   <TransactionItem
                     key={transaction.id}
-                    transaction={transaction as any}
+                    transaction={transaction}
                     onClick={() => setEditingTransaction(transaction)}
                     isFirst={index === 0}
                     isLast={index === groupTransactions.length - 1}
@@ -222,13 +224,13 @@ export default function TransactionsPage() {
           <div className="space-y-4">
             <TransactionForm
               initialData={{
-                description: editingTransaction.description,
+                description: editingTransaction.description || undefined,
                 fromAccountId: editingTransaction.fromAccount?.id || '',
                 toAccountId: editingTransaction.toAccount?.id || '',
                 amount: Number(editingTransaction.amount),
                 currency: editingTransaction.currency,
                 exchangeRate: editingTransaction.exchangeRate ? Number(editingTransaction.exchangeRate) : undefined,
-                date: editingTransaction.date,
+                date: new Date(editingTransaction.date).toISOString(),
               }}
               onSubmit={handleUpdate}
               onCancel={() => setEditingTransaction(null)}

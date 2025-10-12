@@ -3,6 +3,7 @@
  * Generated using createCrudHooks factory
  */
 import { createCrudHooks } from './create-crud-hooks'
+import type { CreateBudgetSchema, UpdateBudgetSchema } from '@/features/budgets/validation'
 
 // Budget type from Prisma with accounts relation
 interface Budget {
@@ -25,7 +26,7 @@ interface Budget {
   }>
 }
 
-const { useItems, useCreateItem, useUpdateItem, useDeleteItem } = createCrudHooks<Budget>({
+const { useItems, useCreateItem, useUpdateItem, useDeleteItem } = createCrudHooks<Budget, CreateBudgetSchema, UpdateBudgetSchema>({
   endpoint: '/api/budgets',
   queryKey: 'budgets',
   resourceName: 'budget',

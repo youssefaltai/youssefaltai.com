@@ -33,7 +33,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<ApiRespons
         const { searchParams } = new URL(request.url)
         
         // Extract and convert query parameters
-        const rawFilters: Record<string, any> = {
+        const rawFilters: Record<string, unknown> = {
             dateFrom: searchParams.get('dateFrom') || undefined,
             dateTo: searchParams.get('dateTo') || undefined,
             accountIds: searchParams.getAll('accountIds').filter(Boolean),

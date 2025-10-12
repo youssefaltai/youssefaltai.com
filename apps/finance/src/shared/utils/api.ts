@@ -53,7 +53,7 @@ export function UnauthorizedResponse<T>(userId: string | null | undefined): Next
     return response as NextResponse<ApiResponse<T>>
 }
 
-export function BadRequestResponse<T>(error?: any): NextResponse<ApiResponse<T>> {
+export function BadRequestResponse<T>(error?: unknown): NextResponse<ApiResponse<T>> {
     return NextResponse.json({ success: false, data: null, message: "Bad Request", error }, { status: 400 })
 }
 
@@ -61,7 +61,7 @@ export function NotFoundResponse<T>(message?: string): NextResponse<ApiResponse<
     return NextResponse.json({ success: false, data: null, message: message || "Not Found", error: null }, { status: 404 })
 }
 
-export function InternalServerErrorResponse<T>(error?: any): NextResponse<ApiResponse<T>> {
+export function InternalServerErrorResponse<T>(error?: unknown): NextResponse<ApiResponse<T>> {
     return NextResponse.json({ success: false, data: null, message: "Internal Server Error", error }, { status: 500 })
 }
 
@@ -77,6 +77,7 @@ export function SuccessResponse<T>(data: T, message?: string): NextResponse<ApiR
 import { verifyAuth } from "@repo/auth/verify-auth"
 
 export function createAccountRouteHandlers<T>(config: {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   createFn: (userId: string, data: any) => Promise<T>
   getAllFn: (userId: string) => Promise<T[]>
 }) {

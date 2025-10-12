@@ -5,6 +5,7 @@ import { FloatingActionButton, Modal, Plus, Wallet, PageLayout, EntityList, Load
 import { useBudgets, useCreateBudget, useUpdateBudget, useDeleteBudget } from '../../../hooks/use-budgets'
 import { BudgetCard } from '../../../components/budgets/BudgetCard'
 import { BudgetForm } from '../../../components/forms/BudgetForm'
+import type { CreateBudgetSchema, UpdateBudgetSchema } from '../../../features/budgets/validation'
 
 interface Budget {
   id: string
@@ -33,12 +34,12 @@ export default function BudgetsPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [editingBudget, setEditingBudget] = useState<Budget | null>(null)
 
-  const handleCreate = async (data: any) => {
+  const handleCreate = async (data: CreateBudgetSchema) => {
     await createBudget.mutateAsync(data)
     setIsCreateModalOpen(false)
   }
 
-  const handleUpdate = async (data: any) => {
+  const handleUpdate = async (data: UpdateBudgetSchema) => {
     if (!editingBudget) return
     await updateBudget.mutateAsync({ id: editingBudget.id, data })
     setEditingBudget(null)

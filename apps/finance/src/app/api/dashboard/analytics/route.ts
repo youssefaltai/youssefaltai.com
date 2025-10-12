@@ -53,6 +53,11 @@ export interface DashboardAnalytics {
 }
 
 /**
+ * Transaction with account information
+ */
+type TransactionWithAccounts = Awaited<ReturnType<typeof fetchTransactionsWithAccounts>>[number]
+
+/**
  * GET /api/dashboard/analytics
  * Returns comprehensive analytics for the dashboard
  * - Daily spending trends for current month
@@ -197,7 +202,7 @@ async function fetchTransactionsWithAccounts(userId: string, start: Date, end: D
  * Calculate daily spending for the month
  */
 function calculateDailySpending(
-  transactions: any[],
+  transactions: TransactionWithAccounts[],
   monthStart: Date,
   baseCurrency: Currency,
   rateMap: ExchangeRateMap
@@ -248,7 +253,7 @@ function calculateDailySpending(
  * Calculate category breakdown (top 5 expense categories)
  */
 function calculateCategoryBreakdown(
-  transactions: any[],
+  transactions: TransactionWithAccounts[],
   baseCurrency: Currency,
   rateMap: ExchangeRateMap
 ): CategoryBreakdown[] {
@@ -292,9 +297,9 @@ function calculateCategoryBreakdown(
  * Calculate month-over-month comparison (6 months)
  */
 function calculateMonthComparison(
-  thisMonthTransactions: any[],
-  lastMonthTransactions: any[],
-  monthlyData: { monthDate: Date; transactions: any[] }[],
+  thisMonthTransactions: TransactionWithAccounts[],
+  lastMonthTransactions: TransactionWithAccounts[],
+  monthlyData: { monthDate: Date; transactions: TransactionWithAccounts[] }[],
   baseCurrency: Currency,
   rateMap: ExchangeRateMap
 ): MonthComparison {
@@ -335,7 +340,7 @@ function calculateMonthComparison(
  * Calculate totals for a month
  */
 function calculateMonthTotals(
-  transactions: any[],
+  transactions: TransactionWithAccounts[],
   baseCurrency: Currency,
   rateMap: ExchangeRateMap
 ): {
