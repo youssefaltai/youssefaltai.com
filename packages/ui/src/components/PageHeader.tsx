@@ -10,7 +10,7 @@ interface PageHeaderProps {
  */
 export function PageHeader({ title, subtitle, actions }: PageHeaderProps) {
   return (
-    <div className="px-4 pt-6 pb-4">
+    <div className="pb-4">
       <div className="flex justify-between items-start">
         <div>
           <h1 className="text-ios-title-1 font-bold text-ios-label-primary">{title}</h1>

@@ -1,10 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { PageHeader, FloatingActionButton, EmptyState, Modal, Plus, TrendingUp } from '@repo/ui'
+import { FloatingActionButton, Modal, Plus, TrendingUp } from '@repo/ui'
 import { useIncomeSources, useCreateIncomeSource, useUpdateIncomeSource, useDeleteIncomeSource } from '../../../hooks/use-income-sources'
 import { IncomeSourceCard } from '../../../components/income-sources/IncomeSourceCard'
 import { IncomeSourceForm } from '../../../components/forms/IncomeSourceForm'
+import { PageLayout } from '../../../components/shared/PageLayout'
+import { EntityList } from '../../../components/shared/EntityList'
+import { LoadingSkeleton } from '../../../components/shared/LoadingSkeleton'
 import type { Account } from '@repo/db'
 
 export default function IncomeSourcesPage() {
@@ -35,48 +38,32 @@ export default function IncomeSourcesPage() {
   }
 
   if (isLoading) {
-    return (
-      <div className="p-4">
-        <PageHeader title="Income Sources" />
-        <div className="space-y-3 mt-6">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="h-20 bg-ios-gray-5 rounded-ios animate-pulse" />
-          ))}
-        </div>
-      </div>
-    )
+    return <LoadingSkeleton title="Income Sources" subtitle="Your sources of income" />
   }
 
   return (
-    <div className="p-4 pb-24">
-      <PageHeader title="Income Sources" />
-
-      {incomeSources.length === 0 ? (
-        <div className="mt-12">
-          <EmptyState
-            icon={TrendingUp}
-            title="No Income Sources Added"
-            description="Add your first income source"
+    <PageLayout title="Income Sources" subtitle="Your sources of income">
+      <EntityList
+        items={incomeSources}
+        emptyIcon={TrendingUp}
+        emptyTitle="No Income Sources Added"
+        emptyDescription="Add your first income source"
+        renderItem={(source, index) => (
+          <IncomeSourceCard
+            key={source.id}
+            incomeSource={source}
+            onClick={() => setEditingSource(source)}
+            isFirst={index === 0}
+            isLast={index === incomeSources.length - 1}
           />
-        </div>
-      ) : (
-        <div className="mt-6 bg-white rounded-ios border border-ios-gray-5 shadow-ios-sm overflow-hidden">
-          {incomeSources.map((source, index) => (
-            <IncomeSourceCard
-              key={source.id}
-              incomeSource={source}
-              onClick={() => setEditingSource(source)}
-              isFirst={index === 0}
-              isLast={index === incomeSources.length - 1}
-            />
-          ))}
-        </div>
-      )}
+        )}
+      />
 
       <FloatingActionButton 
         icon={Plus} 
         label="Add Income Source"
-        onClick={() => setIsCreateModalOpen(true)} 
+        onClick={() => setIsCreateModalOpen(true)}
+        className="fixed bottom-20 right-4"
       />
 
       {/* Create Modal */}
@@ -100,7 +87,10 @@ export default function IncomeSourcesPage() {
         {editingSource && (
           <div className="space-y-4">
             <IncomeSourceForm
-              initialData={editingSource}
+              initialData={{
+                ...editingSource,
+                description: editingSource.description || undefined,
+              }}
               onSubmit={handleUpdate}
               onCancel={() => setEditingSource(null)}
             />
@@ -113,7 +103,6 @@ export default function IncomeSourcesPage() {
           </div>
         )}
       </Modal>
-    </div>
+    </PageLayout>
   )
 }
-

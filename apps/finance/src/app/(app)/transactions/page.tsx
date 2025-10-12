@@ -1,11 +1,14 @@
 'use client'
 
 import { useState } from 'react'
-import { PageHeader, FloatingActionButton, EmptyState, Modal, Plus, CreditCard, SlidersHorizontal } from '@repo/ui'
+import { FloatingActionButton, EmptyState, Modal, Plus, CreditCard, SlidersHorizontal } from '@repo/ui'
 import { useTransactions, useCreateTransaction, useUpdateTransaction, useDeleteTransaction } from '../../../hooks/use-transactions'
 import { TransactionFilters } from '../../../components/transactions/TransactionFilters'
 import { TransactionItem } from '../../../components/transactions/TransactionItem'
 import { TransactionForm } from '../../../components/forms/TransactionForm'
+import { PageLayout } from '../../../components/shared/PageLayout'
+import { GroupedList } from '../../../components/shared/GroupedList'
+import { LoadingSkeleton } from '../../../components/shared/LoadingSkeleton'
 import { formatDate } from '../../../utils/format'
 import { cn } from '@repo/utils'
 
@@ -67,59 +70,42 @@ export default function TransactionsPage() {
     return groups
   }, {} as Record<string, typeof transactions>)
 
-  if (isLoading) {
-    return (
-      <div className="p-4">
-        <PageHeader title="Transactions" />
-        <div className="mt-4">
-          <div className="h-32 bg-ios-gray-5 rounded-ios animate-pulse mb-4" />
-          <div className="space-y-3">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-24 bg-ios-gray-5 rounded-ios animate-pulse" />
-            ))}
-          </div>
-        </div>
-      </div>
-    )
-  }
-
   // Check if any filters are active
   const hasActiveFilters =
     filters.search ||
     filters.minAmount ||
     filters.maxAmount ||
     filters.type ||
-    (filters.dateFrom && filters.dateTo && 
+    (filters.dateFrom && filters.dateTo &&
       (new Date(filters.dateFrom).getMonth() !== now.getMonth() ||
-       new Date(filters.dateFrom).getFullYear() !== now.getFullYear()))
+        new Date(filters.dateFrom).getFullYear() !== now.getFullYear()))
+
+  if (isLoading) {
+    return <LoadingSkeleton title="Transactions" subtitle="View and manage your transactions" itemHeight={24} />
+  }
 
   return (
-    <div className="p-4 pb-24">
-      <PageHeader title="Transactions" />
-
-      {/* Filter Button */}
-      <div className="mt-4 mb-6 flex items-center justify-between">
+    <PageLayout
+      title="Transactions"
+      subtitle="View and manage your transactions"
+      headerAction={
         <button
           onClick={() => setIsFiltersModalOpen(true)}
           className={cn(
-            'flex items-center gap-2 px-4 py-2.5 rounded-ios font-semibold text-ios-callout transition-all active:scale-95',
+            'flex items-center gap-2 px-4 py-2 rounded-ios font-semibold text-ios-callout transition-all active:scale-95',
             hasActiveFilters
               ? 'bg-ios-blue text-white shadow-ios'
               : 'bg-white text-ios-label-primary border border-ios-gray-5'
           )}
         >
-          <SlidersHorizontal className="w-5 h-5" />
-          {hasActiveFilters ? 'Filters Active' : 'Filter'}
+          <SlidersHorizontal className="w-4 h-4" />
+          {hasActiveFilters ? `${transactions.length}` : 'Filter'}
         </button>
-
-        <p className="text-ios-footnote text-ios-gray-1">
-          {transactions.length} {transactions.length === 1 ? 'transaction' : 'transactions'}
-        </p>
-      </div>
-
+      }
+    >
       {/* Transaction List */}
       {transactions.length === 0 ? (
-        <div className="mt-12">
+        <div className="pt-16">
           <EmptyState
             icon={CreditCard}
             title="No Transactions Yet"
@@ -134,9 +120,9 @@ export default function TransactionsPage() {
               <h3 className="text-ios-footnote text-ios-gray-1 uppercase tracking-wide mb-2 px-2">
                 {date}
               </h3>
-              
+
               {/* Transactions for this date */}
-              <div className="bg-white rounded-ios border border-ios-gray-5 shadow-ios-sm overflow-hidden">
+              <GroupedList>
                 {groupTransactions.map((transaction, index) => (
                   <TransactionItem
                     key={transaction.id}
@@ -146,16 +132,16 @@ export default function TransactionsPage() {
                     isLast={index === groupTransactions.length - 1}
                   />
                 ))}
-              </div>
+              </GroupedList>
             </div>
           ))}
         </div>
       )}
 
-      <FloatingActionButton 
-        icon={Plus} 
+      <FloatingActionButton
+        icon={Plus}
         label="Add Transaction"
-        onClick={() => setIsCreateModalOpen(true)} 
+        onClick={() => setIsCreateModalOpen(true)}
         className="fixed bottom-20 right-4"
       />
 
@@ -209,6 +195,6 @@ export default function TransactionsPage() {
           </div>
         )}
       </Modal>
-    </div>
+    </PageLayout>
   )
 }

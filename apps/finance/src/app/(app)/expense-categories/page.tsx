@@ -1,10 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { PageHeader, FloatingActionButton, EmptyState, Modal, Plus, TrendingDown } from '@repo/ui'
+import { FloatingActionButton, Modal, Plus, TrendingDown } from '@repo/ui'
 import { useExpenseCategories, useCreateExpenseCategory, useUpdateExpenseCategory, useDeleteExpenseCategory } from '../../../hooks/use-expense-categories'
 import { ExpenseCategoryCard } from '../../../components/expense-categories/ExpenseCategoryCard'
 import { ExpenseCategoryForm } from '../../../components/forms/ExpenseCategoryForm'
+import { PageLayout } from '../../../components/shared/PageLayout'
+import { EntityList } from '../../../components/shared/EntityList'
+import { LoadingSkeleton } from '../../../components/shared/LoadingSkeleton'
 import type { Account } from '@repo/db'
 
 export default function ExpenseCategoriesPage() {
@@ -35,48 +38,32 @@ export default function ExpenseCategoriesPage() {
   }
 
   if (isLoading) {
-    return (
-      <div className="p-4">
-        <PageHeader title="Expense Categories" />
-        <div className="space-y-3 mt-6">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="h-20 bg-ios-gray-5 rounded-ios animate-pulse" />
-          ))}
-        </div>
-      </div>
-    )
+    return <LoadingSkeleton title="Expense Categories" subtitle="Organize your spending" />
   }
 
   return (
-    <div className="p-4 pb-24">
-      <PageHeader title="Expense Categories" />
-
-      {expenseCategories.length === 0 ? (
-        <div className="mt-12">
-          <EmptyState
-            icon={TrendingDown}
-            title="No Expense Categories Created"
-            description="Add your first expense category"
+    <PageLayout title="Expense Categories" subtitle="Organize your spending">
+      <EntityList
+        items={expenseCategories}
+        emptyIcon={TrendingDown}
+        emptyTitle="No Expense Categories Created"
+        emptyDescription="Add your first expense category"
+        renderItem={(category, index) => (
+          <ExpenseCategoryCard
+            key={category.id}
+            expenseCategory={category}
+            onClick={() => setEditingCategory(category)}
+            isFirst={index === 0}
+            isLast={index === expenseCategories.length - 1}
           />
-        </div>
-      ) : (
-        <div className="mt-6 bg-white rounded-ios border border-ios-gray-5 shadow-ios-sm overflow-hidden">
-          {expenseCategories.map((category, index) => (
-            <ExpenseCategoryCard
-              key={category.id}
-              expenseCategory={category}
-              onClick={() => setEditingCategory(category)}
-              isFirst={index === 0}
-              isLast={index === expenseCategories.length - 1}
-            />
-          ))}
-        </div>
-      )}
+        )}
+      />
 
       <FloatingActionButton 
         icon={Plus} 
         label="Add Category"
-        onClick={() => setIsCreateModalOpen(true)} 
+        onClick={() => setIsCreateModalOpen(true)}
+        className="fixed bottom-20 right-4"
       />
 
       {/* Create Modal */}
@@ -100,7 +87,10 @@ export default function ExpenseCategoriesPage() {
         {editingCategory && (
           <div className="space-y-4">
             <ExpenseCategoryForm
-              initialData={editingCategory}
+              initialData={{
+                ...editingCategory,
+                description: editingCategory.description || undefined,
+              }}
               onSubmit={handleUpdate}
               onCancel={() => setEditingCategory(null)}
             />
@@ -113,7 +103,6 @@ export default function ExpenseCategoriesPage() {
           </div>
         )}
       </Modal>
-    </div>
+    </PageLayout>
   )
 }
-

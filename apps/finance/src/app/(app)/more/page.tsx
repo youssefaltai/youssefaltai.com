@@ -1,12 +1,13 @@
 'use client'
 
-import { PageHeader, CardSection, ListItem } from '@repo/ui'
+import { CardSection, ListItem } from '@repo/ui'
 import { useRouter } from 'next/navigation'
 import { useAssets } from '../../../hooks/use-assets'
 import { useCreditCards } from '../../../hooks/use-credit-cards'
 import { useLoans } from '../../../hooks/use-loans'
 import { useIncomeSources } from '../../../hooks/use-income-sources'
 import { useExpenseCategories } from '../../../hooks/use-expense-categories'
+import { PageLayout } from '../../../components/shared/PageLayout'
 
 export default function MorePage() {
   const router = useRouter()
@@ -17,10 +18,8 @@ export default function MorePage() {
   const { data: expenseCategories = [] } = useExpenseCategories()
 
   return (
-    <div className="p-4 pb-24">
-      <PageHeader title="More" />
-
-      <div className="space-y-6 mt-6">
+    <PageLayout title="More" subtitle="Settings and preferences">
+      <div className="space-y-6">
         {/* Financial Entities */}
         <CardSection title="Financial Management">
           <ListItem
@@ -92,7 +91,6 @@ export default function MorePage() {
           />
         </CardSection>
       </div>
-    </div>
+    </PageLayout>
   )
 }
-

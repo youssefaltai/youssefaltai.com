@@ -104,7 +104,7 @@ export function dateInputToISO(dateString: string, timeString?: string): string 
  */
 export function isoToDateInput(isoString: string): string {
   const date = new Date(isoString)
-  return date.toISOString().split('T')[0]
+  return date.toISOString().split('T')[0]!
 }
 
 /**

@@ -5,7 +5,6 @@ import { useAssets } from './use-assets'
 import { useGoals } from './use-goals'
 import { useLoans } from './use-loans'
 import { useCreditCards } from './use-credit-cards'
-import { useTransactions } from './use-transactions'
 import { calculateNetWorth, calculateTotalBalance } from '../utils/calculations'
 
 interface DashboardSummary {
@@ -25,16 +24,6 @@ export function useDashboardSummary() {
   const { data: loans = [] } = useLoans()
   const { data: creditCards = [] } = useCreditCards()
 
-  // Get this month's date range
-  const now = new Date()
-  const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
-  const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0)
-
-  const { data: thisMonthTransactions = [] } = useTransactions({
-    dateFrom: firstDayOfMonth.toISOString(),
-    dateTo: lastDayOfMonth.toISOString(),
-  })
-
   return useQuery<DashboardSummary>({
     queryKey: ['dashboard', 'summary'],
     queryFn: async () => {
@@ -45,18 +34,10 @@ export function useDashboardSummary() {
       const totalBalance = calculateTotalBalance(allAccounts, 'asset')
       const netWorth = calculateNetWorth(allAccounts)
 
-      // Calculate this month's income and expenses
-      let thisMonthIncome = 0
-      let thisMonthExpenses = 0
-
-      thisMonthTransactions.forEach((transaction) => {
-        const amount = Number(transaction.amount)
-        // Simplified: check if transaction is income or expense based on account types
-        // In reality, we'd need to check the account types of fromAccountId and toAccountId
-        // For now, we'll implement this once we have the full transaction data with accounts
-        
-        // TODO: Implement proper income/expense calculation based on account types
-      })
+      // TODO: Implement proper income/expense calculation based on account types
+      // For now, just return 0 until we have the full transaction data with account types
+      const thisMonthIncome = 0
+      const thisMonthExpenses = 0
 
       return {
         totalBalance,

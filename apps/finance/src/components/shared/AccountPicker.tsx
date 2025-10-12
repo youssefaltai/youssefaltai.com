@@ -67,7 +67,7 @@ export function AccountPicker({
     if (!groupedAccounts[acc.groupLabel]) {
       groupedAccounts[acc.groupLabel] = []
     }
-    groupedAccounts[acc.groupLabel].push(acc)
+    groupedAccounts[acc.groupLabel]!.push(acc)
   })
 
   return (

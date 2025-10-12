@@ -1,9 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Input, Select, Button, Textarea } from '@repo/ui'
+import { Input, Select, Button } from '@repo/ui'
 import { Currency } from '@repo/db'
-import { CurrencyInput } from '../shared/CurrencyInput'
 import { AccountPicker } from '../shared/AccountPicker'
 import { isoToDateInput, isoToTimeInput, dateInputToISO } from '../../utils/format'
 

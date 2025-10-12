@@ -1,10 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { PageHeader, FloatingActionButton, EmptyState, Modal, Plus, Landmark } from '@repo/ui'
+import { FloatingActionButton, Modal, Plus, Landmark } from '@repo/ui'
 import { useLoans, useCreateLoan, useUpdateLoan, useDeleteLoan } from '../../../hooks/use-loans'
 import { LoanCard } from '../../../components/loans/LoanCard'
 import { LoanForm } from '../../../components/forms/LoanForm'
+import { PageLayout } from '../../../components/shared/PageLayout'
+import { EntityList } from '../../../components/shared/EntityList'
+import { LoadingSkeleton } from '../../../components/shared/LoadingSkeleton'
 import type { Account } from '@repo/db'
 
 export default function LoansPage() {
@@ -35,48 +38,32 @@ export default function LoansPage() {
   }
 
   if (isLoading) {
-    return (
-      <div className="p-4">
-        <PageHeader title="Loans" />
-        <div className="space-y-3 mt-6">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="h-20 bg-ios-gray-5 rounded-ios animate-pulse" />
-          ))}
-        </div>
-      </div>
-    )
+    return <LoadingSkeleton title="Loans" subtitle="Track debts and payments" />
   }
 
   return (
-    <div className="p-4 pb-24">
-      <PageHeader title="Loans" />
-
-      {loans.length === 0 ? (
-        <div className="mt-12">
-          <EmptyState
-            icon={Landmark}
-            title="No Loans Tracked"
-            description="Add a loan to track payments"
+    <PageLayout title="Loans" subtitle="Track debts and payments">
+      <EntityList
+        items={loans}
+        emptyIcon={Landmark}
+        emptyTitle="No Loans Tracked"
+        emptyDescription="Add a loan to track payments"
+        renderItem={(loan, index) => (
+          <LoanCard
+            key={loan.id}
+            loan={loan}
+            onClick={() => setEditingLoan(loan)}
+            isFirst={index === 0}
+            isLast={index === loans.length - 1}
           />
-        </div>
-      ) : (
-        <div className="mt-6 bg-white rounded-ios border border-ios-gray-5 shadow-ios-sm overflow-hidden">
-          {loans.map((loan, index) => (
-            <LoanCard
-              key={loan.id}
-              loan={loan}
-              onClick={() => setEditingLoan(loan)}
-              isFirst={index === 0}
-              isLast={index === loans.length - 1}
-            />
-          ))}
-        </div>
-      )}
+        )}
+      />
 
       <FloatingActionButton 
         icon={Plus} 
         label="Add Loan"
-        onClick={() => setIsCreateModalOpen(true)} 
+        onClick={() => setIsCreateModalOpen(true)}
+        className="fixed bottom-20 right-4"
       />
 
       {/* Create Modal */}
@@ -100,7 +87,12 @@ export default function LoansPage() {
         {editingLoan && (
           <div className="space-y-4">
             <LoanForm
-              initialData={editingLoan}
+              initialData={{
+                ...editingLoan,
+                description: editingLoan.description || undefined,
+                openingBalance: Number(editingLoan.balance),
+                dueDate: editingLoan.dueDate?.toISOString(),
+              }}
               onSubmit={handleUpdate}
               onCancel={() => setEditingLoan(null)}
             />
@@ -113,7 +105,6 @@ export default function LoansPage() {
           </div>
         )}
       </Modal>
-    </div>
+    </PageLayout>
   )
 }
-

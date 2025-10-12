@@ -1,4 +1,4 @@
-import { Prisma, TAccount } from "@repo/db"
+import { TAccount } from "@repo/db"
 import { updateLoanSchema, UpdateLoanSchema } from "./validation"
 import { updateAccountFields } from "../shared/account-helpers"
 import { LOAN_OMIT_FIELDS } from "../../../shared/omit-fields"

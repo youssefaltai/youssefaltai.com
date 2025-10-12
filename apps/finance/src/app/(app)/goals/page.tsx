@@ -1,10 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { PageHeader, FloatingActionButton, EmptyState, Modal, Plus, Target } from '@repo/ui'
+import { FloatingActionButton, Modal, Plus, Target } from '@repo/ui'
 import { useGoals, useCreateGoal, useUpdateGoal, useDeleteGoal } from '../../../hooks/use-goals'
 import { GoalCard } from '../../../components/goals/GoalCard'
 import { GoalForm } from '../../../components/forms/GoalForm'
+import { PageLayout } from '../../../components/shared/PageLayout'
+import { EntityList } from '../../../components/shared/EntityList'
+import { LoadingSkeleton } from '../../../components/shared/LoadingSkeleton'
 import type { Account } from '@repo/db'
 
 export default function GoalsPage() {
@@ -35,48 +38,32 @@ export default function GoalsPage() {
   }
 
   if (isLoading) {
-    return (
-      <div className="p-4">
-        <PageHeader title="Goals" />
-        <div className="space-y-3 mt-6">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="h-32 bg-ios-gray-5 rounded-ios animate-pulse" />
-          ))}
-        </div>
-      </div>
-    )
+    return <LoadingSkeleton title="Goals" subtitle="Track your financial goals" itemHeight={32} />
   }
 
   return (
-    <div className="p-4 pb-24">
-      <PageHeader title="Goals" />
-
-      {goals.length === 0 ? (
-        <div className="mt-12">
-          <EmptyState
-            icon={Target}
-            title="No Goals Yet"
-            description="Set your first financial goal!"
+    <PageLayout title="Goals" subtitle="Track your financial goals">
+      <EntityList
+        items={goals}
+        emptyIcon={Target}
+        emptyTitle="No Goals Yet"
+        emptyDescription="Set your first financial goal!"
+        renderItem={(goal, index) => (
+          <GoalCard
+            key={goal.id}
+            goal={goal}
+            onClick={() => setEditingGoal(goal)}
+            isFirst={index === 0}
+            isLast={index === goals.length - 1}
           />
-        </div>
-      ) : (
-        <div className="mt-6 bg-white rounded-ios border border-ios-gray-5 shadow-ios-sm overflow-hidden">
-          {goals.map((goal, index) => (
-            <GoalCard
-              key={goal.id}
-              goal={goal}
-              onClick={() => setEditingGoal(goal)}
-              isFirst={index === 0}
-              isLast={index === goals.length - 1}
-            />
-          ))}
-        </div>
-      )}
+        )}
+      />
 
       <FloatingActionButton 
         icon={Plus} 
         label="Add Goal"
-        onClick={() => setIsCreateModalOpen(true)} 
+        onClick={() => setIsCreateModalOpen(true)}
+        className="fixed bottom-20 right-4"
       />
 
       {/* Create Modal */}
@@ -100,7 +87,13 @@ export default function GoalsPage() {
         {editingGoal && (
           <div className="space-y-4">
             <GoalForm
-              initialData={editingGoal}
+              initialData={{
+                ...editingGoal,
+                description: editingGoal.description || undefined,
+                target: editingGoal.target ? Number(editingGoal.target) : 0,
+                openingBalance: Number(editingGoal.balance),
+                dueDate: editingGoal.dueDate?.toISOString(),
+              }}
               onSubmit={handleUpdate}
               onCancel={() => setEditingGoal(null)}
             />
@@ -113,6 +106,6 @@ export default function GoalsPage() {
           </div>
         )}
       </Modal>
-    </div>
+    </PageLayout>
   )
 }

@@ -1,10 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { PageHeader, FloatingActionButton, EmptyState, Modal, Plus, CreditCard } from '@repo/ui'
+import { FloatingActionButton, Modal, Plus, CreditCard } from '@repo/ui'
 import { useCreditCards, useCreateCreditCard, useUpdateCreditCard, useDeleteCreditCard } from '../../../hooks/use-credit-cards'
 import { CreditCardCard } from '../../../components/credit-cards/CreditCardCard'
 import { CreditCardForm } from '../../../components/forms/CreditCardForm'
+import { PageLayout } from '../../../components/shared/PageLayout'
+import { EntityList } from '../../../components/shared/EntityList'
+import { LoadingSkeleton } from '../../../components/shared/LoadingSkeleton'
 import type { Account } from '@repo/db'
 
 export default function CreditCardsPage() {
@@ -35,48 +38,32 @@ export default function CreditCardsPage() {
   }
 
   if (isLoading) {
-    return (
-      <div className="p-4">
-        <PageHeader title="Credit Cards" />
-        <div className="space-y-3 mt-6">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="h-20 bg-ios-gray-5 rounded-ios animate-pulse" />
-          ))}
-        </div>
-      </div>
-    )
+    return <LoadingSkeleton title="Credit Cards" subtitle="Manage your credit cards" />
   }
 
   return (
-    <div className="p-4 pb-24">
-      <PageHeader title="Credit Cards" />
-
-      {creditCards.length === 0 ? (
-        <div className="mt-12">
-          <EmptyState
-            icon={CreditCard}
-            title="No Credit Cards Added"
-            description="Add your first credit card"
+    <PageLayout title="Credit Cards" subtitle="Manage your credit cards">
+      <EntityList
+        items={creditCards}
+        emptyIcon={CreditCard}
+        emptyTitle="No Credit Cards Added"
+        emptyDescription="Add your first credit card"
+        renderItem={(card, index) => (
+          <CreditCardCard
+            key={card.id}
+            creditCard={card}
+            onClick={() => setEditingCard(card)}
+            isFirst={index === 0}
+            isLast={index === creditCards.length - 1}
           />
-        </div>
-      ) : (
-        <div className="mt-6 bg-white rounded-ios border border-ios-gray-5 shadow-ios-sm overflow-hidden">
-          {creditCards.map((card, index) => (
-            <CreditCardCard
-              key={card.id}
-              creditCard={card}
-              onClick={() => setEditingCard(card)}
-              isFirst={index === 0}
-              isLast={index === creditCards.length - 1}
-            />
-          ))}
-        </div>
-      )}
+        )}
+      />
 
       <FloatingActionButton 
         icon={Plus} 
         label="Add Credit Card"
-        onClick={() => setIsCreateModalOpen(true)} 
+        onClick={() => setIsCreateModalOpen(true)}
+        className="fixed bottom-20 right-4"
       />
 
       {/* Create Modal */}
@@ -100,7 +87,11 @@ export default function CreditCardsPage() {
         {editingCard && (
           <div className="space-y-4">
             <CreditCardForm
-              initialData={editingCard}
+              initialData={{
+                ...editingCard,
+                description: editingCard.description || undefined,
+                openingBalance: Number(editingCard.balance),
+              }}
               onSubmit={handleUpdate}
               onCancel={() => setEditingCard(null)}
             />
@@ -113,7 +104,6 @@ export default function CreditCardsPage() {
           </div>
         )}
       </Modal>
-    </div>
+    </PageLayout>
   )
 }
-

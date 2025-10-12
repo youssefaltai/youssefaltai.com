@@ -1,10 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { PageHeader, FloatingActionButton, EmptyState, Modal, Plus, Wallet } from '@repo/ui'
+import { FloatingActionButton, Modal, Plus, Wallet } from '@repo/ui'
 import { useAssets, useCreateAsset, useUpdateAsset, useDeleteAsset } from '../../../hooks/use-assets'
 import { AssetCard } from '../../../components/assets/AssetCard'
 import { AssetForm } from '../../../components/forms/AssetForm'
+import { PageLayout } from '../../../components/shared/PageLayout'
+import { EntityList } from '../../../components/shared/EntityList'
+import { LoadingSkeleton } from '../../../components/shared/LoadingSkeleton'
 import type { Account } from '@repo/db'
 
 export default function AssetsPage() {
@@ -35,48 +38,32 @@ export default function AssetsPage() {
   }
 
   if (isLoading) {
-    return (
-      <div className="p-4">
-        <PageHeader title="Assets" />
-        <div className="space-y-3 mt-6">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="h-20 bg-ios-gray-5 rounded-ios animate-pulse" />
-          ))}
-        </div>
-      </div>
-    )
+    return <LoadingSkeleton title="Assets" subtitle="Manage your assets and accounts" />
   }
 
   return (
-    <div className="p-4 pb-24">
-      <PageHeader title="Assets" />
-
-      {assets.length === 0 ? (
-        <div className="mt-12">
-          <EmptyState
-            icon={Wallet}
-            title="No Assets Yet"
-            description="Add your first asset to get started!"
+    <PageLayout title="Assets" subtitle="Manage your assets and accounts">
+      <EntityList
+        items={assets}
+        emptyIcon={Wallet}
+        emptyTitle="No Assets Yet"
+        emptyDescription="Add your first asset to get started!"
+        renderItem={(asset, index) => (
+          <AssetCard
+            key={asset.id}
+            asset={asset}
+            onClick={() => setEditingAsset(asset)}
+            isFirst={index === 0}
+            isLast={index === assets.length - 1}
           />
-        </div>
-      ) : (
-        <div className="mt-6 bg-white rounded-ios border border-ios-gray-5 shadow-ios-sm overflow-hidden">
-          {assets.map((asset, index) => (
-            <AssetCard
-              key={asset.id}
-              asset={asset}
-              onClick={() => setEditingAsset(asset)}
-              isFirst={index === 0}
-              isLast={index === assets.length - 1}
-            />
-          ))}
-        </div>
-      )}
+        )}
+      />
 
       <FloatingActionButton 
         icon={Plus} 
         label="Add Asset"
-        onClick={() => setIsCreateModalOpen(true)} 
+        onClick={() => setIsCreateModalOpen(true)}
+        className="fixed bottom-20 right-4"
       />
 
       {/* Create Modal */}
@@ -100,7 +87,11 @@ export default function AssetsPage() {
         {editingAsset && (
           <div className="space-y-4">
             <AssetForm
-              initialData={editingAsset}
+              initialData={{
+                ...editingAsset,
+                description: editingAsset.description || undefined,
+                openingBalance: Number(editingAsset.balance),
+              }}
               onSubmit={handleUpdate}
               onCancel={() => setEditingAsset(null)}
             />
@@ -113,7 +104,6 @@ export default function AssetsPage() {
           </div>
         )}
       </Modal>
-    </div>
+    </PageLayout>
   )
 }
-
