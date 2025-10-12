@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 
 import { ApiResponse } from "@repo/types"
 import { BadRequestResponse, getJsonInput, SuccessResponse, UnauthorizedResponse } from "@/shared/utils/api"
-import { verifyAuth } from "@repo/auth"
+import { verifyAuth } from "@repo/auth/verify-auth"
 
 import { getExpenseCategory, updateExpenseCategory, deleteExpenseCategory } from "@/features/accounts/expense"
 import { TAccount } from "@repo/db"

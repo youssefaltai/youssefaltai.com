@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { verifyToken } from './lib/jwt'
+import { COOKIE_NAME } from './lib/cookies'
 
 /**
  * Authentication middleware for Next.js
@@ -14,7 +15,7 @@ import { verifyToken } from './lib/jwt'
  * ```
  */
 export async function authMiddleware(request: NextRequest): Promise<NextResponse> {
-  const token = request.cookies.get('auth_token')?.value
+  const token = request.cookies.get(COOKIE_NAME)?.value
 
   // Allow access to login and public routes
   if (
@@ -33,8 +34,11 @@ export async function authMiddleware(request: NextRequest): Promise<NextResponse
   }
 
   try {
-    // Verify token
+    // Verify token (signature, expiration, format)
     const payload = await verifyToken(token)
+
+    // Note: We cannot check database in middleware (Edge Runtime doesn't support Prisma)
+    // Database validation happens in API routes via verifyAuth()
 
     // Add user info to headers for downstream consumption
     request.headers.set('x-user-id', payload.id)
@@ -42,9 +46,11 @@ export async function authMiddleware(request: NextRequest): Promise<NextResponse
 
     return NextResponse.next()
   } catch {
-    // Invalid token - redirect to login
+    // Invalid token - clear cookie and redirect to login
     const loginUrl = getLoginUrl(request)
-    return NextResponse.redirect(loginUrl)
+    const response = NextResponse.redirect(loginUrl)
+    clearCookieInResponse(response)
+    return response
   }
 }
 
@@ -52,4 +58,23 @@ function getLoginUrl(request: NextRequest): URL {
   const loginUrl = new URL('/login', request.url)
   loginUrl.searchParams.set('redirect', request.nextUrl.pathname)
   return loginUrl
+}
+
+/**
+ * Clear authentication cookie in middleware response
+ * Handles both production (with domain) and development
+ */
+function clearCookieInResponse(response: NextResponse): void {
+  const isProduction = process.env.NODE_ENV === 'production'
+  const domain = isProduction ? '.youssefaltai.com' : undefined
+  
+  // Set cookie with immediate expiration
+  response.cookies.set(COOKIE_NAME, '', {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: 'lax',
+    domain,
+    path: '/',
+    maxAge: 0, // Immediate expiration
+  })
 }

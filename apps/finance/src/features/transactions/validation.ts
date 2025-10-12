@@ -1,4 +1,4 @@
-import { Currency } from "@repo/db"
+import { Currency, AccountType } from "@repo/db"
 import { z } from "zod"
 import {
     differentAccountsRefinement,
@@ -40,3 +40,65 @@ export const updateTransactionSchema = z.object({
 })
 
 export type UpdateTransactionSchema = z.infer<typeof updateTransactionSchema>
+
+// Transaction type enum for filtering
+export const TransactionTypeEnum = z.enum(['income', 'expense', 'transfer'])
+export type TransactionType = z.infer<typeof TransactionTypeEnum>
+
+// Sort options
+export const SortByEnum = z.enum(['date', 'amount', 'createdAt'])
+export const SortOrderEnum = z.enum(['asc', 'desc'])
+
+// Query filters schema for GET /api/transactions
+export const getTransactionsQuerySchema = z.object({
+    // Date range
+    dateFrom: z.iso.datetime().optional(),
+    dateTo: z.iso.datetime().optional(),
+    
+    // Account filtering
+    accountIds: z.array(z.cuid()).optional(),
+    
+    // Amount range
+    minAmount: z.number().positive().optional(),
+    maxAmount: z.number().positive().optional(),
+    
+    // Transaction type
+    type: TransactionTypeEnum.optional(),
+    
+    // Search
+    search: z.string().optional(),
+    
+    // Pagination
+    page: z.number().int().positive().default(1),
+    limit: z.number().int().positive().max(200).default(50),
+    
+    // Sorting
+    sortBy: SortByEnum.default('date'),
+    sortOrder: SortOrderEnum.default('desc'),
+})
+
+export type GetTransactionsQuerySchema = z.infer<typeof getTransactionsQuerySchema>
+
+/**
+ * Determine transaction type based on account types
+ * @param fromAccountType - Type of the FROM account
+ * @param toAccountType - Type of the TO account
+ * @returns Transaction type (income, expense, or transfer)
+ */
+export function determineTransactionType(
+    fromAccountType: AccountType,
+    toAccountType: AccountType
+): TransactionType {
+    // Income: Money coming from income account to asset account
+    if (fromAccountType === 'income' && toAccountType === 'asset') {
+        return 'income'
+    }
+    
+    // Expense: Money going from asset account to expense account
+    if (fromAccountType === 'asset' && toAccountType === 'expense') {
+        return 'expense'
+    }
+    
+    // Transfer: Money moving between asset accounts (or any other combination)
+    return 'transfer'
+}

@@ -122,6 +122,9 @@ model Transaction {
   @@index([fromAccountId])
   @@index([toAccountId])
   @@index([userId])
+  @@index([userId, date(sort: Desc)])
+  @@index([userId, deletedAt, date(sort: Desc)])
+  @@index([description])
   // Map
   @@map("transactions")
 }

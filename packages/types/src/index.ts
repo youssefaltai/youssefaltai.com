@@ -7,4 +7,4 @@
 export type { AuthUser, JWTPayload } from './auth'
 
 // API types
-export type { ApiResponse } from './api'
+export type { ApiResponse, PaginatedResponse } from './api'

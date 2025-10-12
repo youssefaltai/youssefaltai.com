@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { Transaction } from '@repo/db'
+import type { PaginatedResponse } from '@repo/types'
 
 interface TransactionFilters {
   dateFrom?: string
@@ -11,6 +12,10 @@ interface TransactionFilters {
   maxAmount?: number
   type?: 'income' | 'expense' | 'transfer'
   search?: string
+  page?: number
+  limit?: number
+  sortBy?: 'date' | 'amount' | 'createdAt'
+  sortOrder?: 'asc' | 'desc'
 }
 
 interface CreateTransactionData {
@@ -34,12 +39,12 @@ interface UpdateTransactionData {
 }
 
 /**
- * Fetch transactions with optional filters
+ * Fetch transactions with optional filters and pagination
  */
 export function useTransactions(filters?: TransactionFilters) {
   const queryKey = ['transactions', filters]
 
-  return useQuery<Transaction[]>({
+  return useQuery<PaginatedResponse<Transaction>>({
     queryKey,
     queryFn: async () => {
       const params = new URLSearchParams()
@@ -53,6 +58,10 @@ export function useTransactions(filters?: TransactionFilters) {
       if (filters?.maxAmount !== undefined) params.append('maxAmount', filters.maxAmount.toString())
       if (filters?.type) params.append('type', filters.type)
       if (filters?.search) params.append('search', filters.search)
+      if (filters?.page !== undefined) params.append('page', filters.page.toString())
+      if (filters?.limit !== undefined) params.append('limit', filters.limit.toString())
+      if (filters?.sortBy) params.append('sortBy', filters.sortBy)
+      if (filters?.sortOrder) params.append('sortOrder', filters.sortOrder)
 
       const response = await fetch(`/api/transactions?${params.toString()}`)
       if (!response.ok) {

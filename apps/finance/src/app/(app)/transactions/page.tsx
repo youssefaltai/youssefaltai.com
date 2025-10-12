@@ -20,6 +20,10 @@ interface TransactionFilters {
   maxAmount?: number
   type?: 'income' | 'expense' | 'transfer'
   search?: string
+  page?: number
+  limit?: number
+  sortBy?: 'date' | 'amount' | 'createdAt'
+  sortOrder?: 'asc' | 'desc'
 }
 
 export default function TransactionsPage() {
@@ -33,7 +37,9 @@ export default function TransactionsPage() {
     dateTo: defaultEnd,
   })
 
-  const { data: transactions = [], isLoading } = useTransactions(filters)
+  const { data: transactionData, isLoading } = useTransactions(filters)
+  const transactions = transactionData?.data || []
+  const pagination = transactionData?.pagination
   const createTransaction = useCreateTransaction()
   const updateTransaction = useUpdateTransaction()
   const deleteTransaction = useDeleteTransaction()
@@ -135,6 +141,31 @@ export default function TransactionsPage() {
               </GroupedList>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Pagination Controls */}
+      {pagination && pagination.pages > 1 && (
+        <div className="flex items-center justify-between mt-6 px-2">
+          <button
+            onClick={() => setFilters({ ...filters, page: Math.max(1, (filters.page || 1) - 1) })}
+            disabled={!pagination.hasMore || (filters.page || 1) === 1}
+            className="px-4 py-2 text-ios-blue font-semibold disabled:text-ios-gray-2 disabled:cursor-not-allowed"
+          >
+            Previous
+          </button>
+          
+          <span className="text-ios-body text-ios-gray-1">
+            Page {pagination.page} of {pagination.pages}
+          </span>
+          
+          <button
+            onClick={() => setFilters({ ...filters, page: (filters.page || 1) + 1 })}
+            disabled={!pagination.hasMore}
+            className="px-4 py-2 text-ios-blue font-semibold disabled:text-ios-gray-2 disabled:cursor-not-allowed"
+          >
+            Next
+          </button>
         </div>
       )}
 

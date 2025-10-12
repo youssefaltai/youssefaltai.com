@@ -1,7 +1,7 @@
 import deleteTransaction from "@/features/transactions/api/delete-transaction"
 import updateTransaction from "@/features/transactions/api/update-transaction"
 import { BadRequestResponse, getJsonInput, SuccessResponse, UnauthorizedResponse } from "@/shared/utils/api"
-import { verifyAuth } from "@repo/auth"
+import { verifyAuth } from "@repo/auth/verify-auth"
 import { TTransaction } from "@repo/db"
 import { ApiResponse } from "@repo/types"
 import { NextRequest, NextResponse } from "next/server"

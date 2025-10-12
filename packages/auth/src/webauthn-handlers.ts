@@ -26,7 +26,7 @@ function getRPID(origin: string): string {
   const url = new URL(origin)
   // For production: use root domain (youssefaltai.com)
   // For localhost: use 'localhost'
-  return url.hostname === 'localhost' ? 'localhost' : 'youssefaltai.com'
+  return url.hostname === 'youssefaltai.local' ? 'youssefaltai.local' : 'youssefaltai.com'
 }
 
 // Get origin from request
@@ -86,9 +86,9 @@ export async function registrationOptionsHandler(request: NextRequest) {
         transports: cred.transports as any[],
       })),
       authenticatorSelection: {
-        residentKey: 'preferred',
-        userVerification: 'preferred',
-        authenticatorAttachment: 'platform', // Prefer built-in Face ID/Touch ID
+        residentKey: 'required', // Ensure credential is stored on device
+        userVerification: 'required', // Force biometric verification (Touch ID/Face ID)
+        authenticatorAttachment: 'platform', // Force platform authenticator only
       },
     })
 
@@ -153,7 +153,7 @@ export async function registrationVerificationHandler(request: NextRequest) {
         credentialId: Buffer.from(webAuthnCredential.id),
         publicKey: Buffer.from(webAuthnCredential.publicKey),
         counter: BigInt(webAuthnCredential.counter),
-        transports: credential.response.transports || [],
+        transports: credential.response.transports || ['internal'], // Default to internal for platform authenticators
         deviceName: deviceName || 'Biometric Device',
       },
     })
@@ -214,11 +214,11 @@ export async function authenticationOptionsHandler(request: NextRequest) {
       rpID: rpID,
       allowCredentials: user.credentials.map((cred) => ({
         id: bufferToBase64url(cred.credentialId as Buffer),
-        // Force 'internal' only (platform authenticator - no QR codes)
-        // Even if credential has 'hybrid', we only want Face ID/Touch ID
-        transports: ['internal'] as any[],
+        type: 'public-key' as const,
+        // Force platform authenticator discovery
+        transports: ['internal'] as const,
       })),
-      userVerification: 'preferred',  // Prefer biometric but don't force
+      userVerification: 'required',  // Force biometric verification (Touch ID/Face ID)
     })
 
     // Store challenge in Redis with automatic expiration

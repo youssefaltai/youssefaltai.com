@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 
 import { ApiResponse } from "@repo/types"
 import { BadRequestResponse, getJsonInput, SuccessResponse, UnauthorizedResponse } from "@/shared/utils/api"
-import { verifyAuth } from "@repo/auth"
+import { verifyAuth } from "@repo/auth/verify-auth"
 
 import { getLoan, updateLoan, deleteLoan } from "@/features/accounts/loan"
 import { TAccount } from "@repo/db"

@@ -34,10 +34,45 @@ export function useDashboardSummary() {
       const totalBalance = calculateTotalBalance(allAccounts, 'asset')
       const netWorth = calculateNetWorth(allAccounts)
 
-      // TODO: Implement proper income/expense calculation based on account types
-      // For now, just return 0 until we have the full transaction data with account types
-      const thisMonthIncome = 0
-      const thisMonthExpenses = 0
+      // Calculate current month date range
+      const now = new Date()
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
+      const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999).toISOString()
+
+      // Fetch this month's transactions
+      const params = new URLSearchParams({
+        dateFrom: monthStart,
+        dateTo: monthEnd,
+        limit: '1000', // Get all transactions for the month
+      })
+
+      const response = await fetch(`/api/transactions?${params.toString()}`)
+      if (!response.ok) {
+        throw new Error('Failed to fetch transactions for dashboard')
+      }
+      
+      const transactionData = await response.json()
+      const transactions = transactionData.data?.data || []
+
+      // Calculate income and expenses based on transaction types
+      let thisMonthIncome = 0
+      let thisMonthExpenses = 0
+
+      transactions.forEach((transaction: any) => {
+        const amount = Number(transaction.amount)
+        const fromType = transaction.fromAccount?.type
+        const toType = transaction.toAccount?.type
+
+        // Income: FROM income account TO asset account
+        if (fromType === 'income' && toType === 'asset') {
+          thisMonthIncome += amount
+        }
+        
+        // Expense: FROM asset account TO expense account
+        if (fromType === 'asset' && toType === 'expense') {
+          thisMonthExpenses += amount
+        }
+      })
 
       return {
         totalBalance,
@@ -57,12 +92,13 @@ export function useRecentTransactions(limit: number = 5) {
   return useQuery({
     queryKey: ['dashboard', 'recent-transactions', limit],
     queryFn: async () => {
-      const response = await fetch(`/api/transactions?limit=${limit}`)
+      const response = await fetch(`/api/transactions?limit=${limit}&sortBy=date&sortOrder=desc`)
       if (!response.ok) {
         throw new Error('Failed to fetch recent transactions')
       }
       const data = await response.json()
-      return data.data
+      // Extract transactions array from paginated response
+      return data.data?.data || []
     },
   })
 }

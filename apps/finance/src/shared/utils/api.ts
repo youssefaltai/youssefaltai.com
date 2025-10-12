@@ -1,5 +1,6 @@
 import { ApiResponse } from "@repo/types"
 import { NextRequest, NextResponse } from "next/server"
+import { COOKIE_NAME } from "@repo/auth"  // Edge-safe export
 
 export async function getJsonInput(request: NextRequest) {
     try {
@@ -34,7 +35,22 @@ export function getPathParamsInput(request: NextRequest) {
 }
 
 export function UnauthorizedResponse<T>(userId: string | null | undefined): NextResponse<ApiResponse<T>> {
-    return NextResponse.json({ success: false, data: null, message: "Unauthorized", error: { userId } }, { status: 401 })
+    const response = NextResponse.json(
+        { success: false as const, data: null, message: "Unauthorized", error: { userId } }, 
+        { status: 401 }
+    )
+    
+    // Clear invalid auth cookie
+    response.cookies.set(COOKIE_NAME, '', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        domain: process.env.NODE_ENV === 'production' ? '.youssefaltai.com' : undefined,
+        path: '/',
+        maxAge: 0, // Immediate expiration
+    })
+    
+    return response as NextResponse<ApiResponse<T>>
 }
 
 export function BadRequestResponse<T>(error?: any): NextResponse<ApiResponse<T>> {

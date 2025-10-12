@@ -5,6 +5,19 @@ export interface Pagination {
     totalPages: number
 }
 
+export interface PaginationMeta {
+    page: number
+    limit: number
+    total: number
+    pages: number
+    hasMore: boolean
+}
+
+export interface PaginatedResponse<T> {
+    data: T[]
+    pagination: PaginationMeta
+}
+
 export interface BaseApiResponse<T> {
     success: boolean
     data: T | null
