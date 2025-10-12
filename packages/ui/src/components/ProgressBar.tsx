@@ -1,7 +1,7 @@
 import { cn } from '@repo/utils'
 
 interface ProgressBarProps {
-  percentage: number
+  value: number
   color?: 'blue' | 'green' | 'orange' | 'red'
   height?: 'sm' | 'md' | 'lg'
   className?: string
@@ -12,7 +12,7 @@ interface ProgressBarProps {
  * Follows Apple HIG for progress indicators
  */
 export function ProgressBar({
-  percentage,
+  value,
   color = 'blue',
   height = 'sm',
   className,
@@ -30,15 +30,15 @@ export function ProgressBar({
     lg: 'h-4',
   }
 
-  const clampedPercentage = Math.min(Math.max(percentage, 0), 100)
+  const clampedValue = Math.min(Math.max(value, 0), 100)
 
   return (
     <div className={cn('w-full bg-ios-gray-5 rounded-full overflow-hidden', heights[height], className)}>
       <div
         className={cn('h-full transition-all duration-300', colors[color])}
-        style={{ width: `${clampedPercentage}%` }}
+        style={{ width: `${clampedValue}%` }}
         role="progressbar"
-        aria-valuenow={clampedPercentage}
+        aria-valuenow={clampedValue}
         aria-valuemin={0}
         aria-valuemax={100}
       />

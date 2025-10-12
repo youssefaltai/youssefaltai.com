@@ -20,12 +20,18 @@ export default async function getTransactions(userId: string): Promise<TTransact
                 select: {
                     id: true,
                     name: true,
+                    description: true,
+                    currency: true,
+                    balance: true,
                 },
             },
             toAccount: {
                 select: {
                     id: true,
                     name: true,
+                    description: true,
+                    currency: true,
+                    balance: true,
                 },
             },
         },

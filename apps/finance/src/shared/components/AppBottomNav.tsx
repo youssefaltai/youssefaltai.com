@@ -1,13 +1,13 @@
 'use client'
 
-import { BarChart3, BottomNav, CreditCard, Home, NavItem, Target, User } from "@repo/ui"
+import { BarChart3, BottomNav, CreditCard, Home, NavItem, Target, MoreHorizontal } from "@repo/ui"
 
 const navItems: NavItem[] = [
   { name: 'Home', href: '/', icon: Home },
   { name: 'Transactions', href: '/transactions', icon: CreditCard },
-  { name: 'Budgets', href: '/budgets', icon: BarChart3 },
   { name: 'Goals', href: '/goals', icon: Target },
-  { name: 'Profile', href: '/profile', icon: User },
+  { name: 'Budgets', href: '/budgets', icon: BarChart3 },
+  { name: 'More', href: '/more', icon: MoreHorizontal },
 ]
 
 /**

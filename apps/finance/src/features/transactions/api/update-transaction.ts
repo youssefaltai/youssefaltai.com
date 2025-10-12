@@ -164,6 +164,7 @@ export default async function updateTransaction(userId: string, transactionId: s
                         name: true,
                         currency: true,
                         balance: true,
+                        description: true,
                     },
                 },
                 toAccount: {
@@ -172,6 +173,7 @@ export default async function updateTransaction(userId: string, transactionId: s
                         name: true,
                         currency: true,
                         balance: true,
+                        description: true,
                     },
                 },
             },

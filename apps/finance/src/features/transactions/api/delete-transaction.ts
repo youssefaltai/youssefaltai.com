@@ -1,4 +1,4 @@
-import { prisma, Transaction } from "@repo/db"
+import { prisma, TTransaction } from "@repo/db"
 import { reverseCurrencyConversion } from "../../../shared/finance-utils"
 
 /**
@@ -12,7 +12,7 @@ import { reverseCurrencyConversion } from "../../../shared/finance-utils"
  * @returns The deleted transaction
  * @throws Error if transaction not found or user unauthorized
  */
-export default async function deleteTransaction(userId: string, transactionId: string): Promise<Transaction> {
+export default async function deleteTransaction(userId: string, transactionId: string): Promise<TTransaction> {
     // Fetch and validate ownership
     const transaction = await prisma.transaction.findUnique({
         where: {
@@ -90,6 +90,7 @@ export default async function deleteTransaction(userId: string, transactionId: s
                     select: {
                         id: true,
                         name: true,
+                        description: true,
                         currency: true,
                         balance: true,
                     }
@@ -98,6 +99,7 @@ export default async function deleteTransaction(userId: string, transactionId: s
                     select: {
                         id: true,
                         name: true,
+                        description: true,
                         currency: true,
                         balance: true,
                     },

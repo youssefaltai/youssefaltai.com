@@ -1,28 +1,134 @@
 'use client'
 
-export default function Home() {
+import { ChevronRight } from '@repo/ui'
+import { useRouter } from 'next/navigation'
+import { TransactionItem } from '../../components/transactions/TransactionItem'
+import { useDashboardSummary, useRecentTransactions, useActiveGoals } from '../../hooks/use-dashboard'
+import { TTransaction } from '@repo/db'
+import { formatCurrency } from '../../utils/format'
+import { calculateGoalProgress } from '../../utils/calculations'
+import { cn } from '@repo/utils'
+import { ProgressBar } from '@repo/ui'
+
+export default function HomePage() {
+  const router = useRouter()
+  const { data: summary } = useDashboardSummary()
+  const { data: recentTransactions = [] } = useRecentTransactions(5)
+  const { data: activeGoals = [] } = useActiveGoals()
+
   return (
-    <div className="min-h-screen flex items-center justify-center p-6">
-      <div className="max-w-md text-center">
-        <h1 className="text-2xl font-bold mb-4">Finance Backend Complete</h1>
-        <p className="text-gray-600 mb-6">
-          The backend has been redesigned and all API endpoints are ready for testing.
-        </p>
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-left">
-          <h2 className="font-semibold mb-2">✅ Backend Features:</h2>
-          <ul className="text-sm space-y-1 text-gray-700">
-            <li>• Multi-account tracking</li>
-            <li>• Recurring transactions</li>
-            <li>• Tags system</li>
-            <li>• Envelope budgeting (YNAB)</li>
-            <li>• Asset tracking</li>
-            <li>• Transfers between accounts</li>
-          </ul>
+    <div className="pb-24">
+      {/* Hero Section - Net Worth */}
+      <div className="px-4 pt-8 pb-6">
+        <h1 className="text-ios-title-1 font-bold text-ios-label-primary mb-8">
+          Finance
+        </h1>
+        
+        <div className="bg-white rounded-ios-lg p-6 shadow-ios-lg border border-ios-gray-5">
+          <p className="text-ios-callout text-ios-gray-1 mb-1">Net Worth</p>
+          <p className="text-5xl font-bold text-ios-label-primary mb-4">
+            {summary ? `EGP ${summary.netWorth.toLocaleString()}` : '—'}
+          </p>
+          
+          <div className="grid grid-cols-2 gap-4 pt-4 border-t border-ios-gray-5">
+            <div>
+              <p className="text-ios-caption text-ios-gray-2 mb-1">Income</p>
+              <p className="text-ios-body font-semibold text-ios-green">
+                {summary ? `${summary.thisMonthIncome.toLocaleString()}` : '—'}
+              </p>
+            </div>
+            <div>
+              <p className="text-ios-caption text-ios-gray-2 mb-1">Expenses</p>
+              <p className="text-ios-body font-semibold text-ios-red">
+                {summary ? `${summary.thisMonthExpenses.toLocaleString()}` : '—'}
+              </p>
+            </div>
+          </div>
         </div>
-        <p className="text-sm text-gray-500 mt-6">
-          Frontend will be rebuilt after backend testing is complete.
-        </p>
       </div>
+
+      {/* Goals Progress */}
+      {activeGoals.length > 0 && (
+        <div className="px-4 pb-6">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-ios-title-3 font-semibold text-ios-label-primary">
+              Your Goals
+            </h2>
+            <button
+              onClick={() => router.push('/goals')}
+              className="flex items-center gap-1 text-ios-blue text-ios-body hover:opacity-70 transition-opacity"
+            >
+              <span>See All</span>
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+          
+          <div className="bg-white rounded-ios border border-ios-gray-5 shadow-ios-sm overflow-hidden">
+            {activeGoals.slice(0, 3).map((goal, index) => {
+              const progress = goal.target
+                ? calculateGoalProgress(Number(goal.balance), Number(goal.target))
+                : 0
+
+              return (
+                <button
+                  key={goal.id}
+                  onClick={() => router.push('/goals')}
+                  className={cn(
+                    'w-full p-4 text-left hover:bg-ios-gray-6 active:bg-ios-gray-5 transition-colors',
+                    index < activeGoals.length - 1 && 'border-b border-ios-gray-5'
+                  )}
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <h3 className="text-ios-body font-semibold text-ios-label-primary">
+                      {goal.name}
+                    </h3>
+                    <span className="text-ios-body text-ios-blue font-semibold">
+                      {Math.round(progress)}%
+                    </span>
+                  </div>
+                  
+                  <ProgressBar value={progress} className="mb-2" />
+                  
+                  <p className="text-ios-footnote text-ios-gray-1">
+                    {formatCurrency(Number(goal.balance), goal.currency)} of{' '}
+                    {formatCurrency(Number(goal.target), goal.currency)}
+                  </p>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Recent Transactions */}
+      {recentTransactions.length > 0 && (
+        <div className="px-4 pb-6">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-ios-title-3 font-semibold text-ios-label-primary">
+              Recent Activity
+            </h2>
+            <button
+              onClick={() => router.push('/transactions')}
+              className="flex items-center gap-1 text-ios-blue text-ios-body hover:opacity-70 transition-opacity"
+            >
+              <span>See All</span>
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+          
+          <div className="bg-white rounded-ios border border-ios-gray-5 shadow-ios-sm overflow-hidden">
+            {recentTransactions.slice(0, 5).map((transaction: TTransaction, index: number) => (
+              <TransactionItem
+                key={transaction.id}
+                transaction={transaction}
+                onClick={() => router.push('/transactions')}
+                isFirst={index === 0}
+                isLast={index === recentTransactions.slice(0, 5).length - 1}
+              />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

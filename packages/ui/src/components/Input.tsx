@@ -26,20 +26,21 @@ export function Input({
       )}
       <input
         className={cn(
-          // Base styles
-          'w-full min-h-[44px]',
-          'px-4 py-3',
+          // Base styles - iOS-style input
+          'w-full h-11',
+          'px-4',
           'bg-ios-gray-6',
-          'border border-ios-gray-3',
-          'rounded-ios-sm',
+          'rounded-ios',
           'text-ios-body text-ios-label-primary',
           'placeholder:text-ios-gray-2',
-          // Focus state
-          'focus:outline-none focus:ring-2 focus:ring-ios-blue focus:border-transparent',
+          // Focus state - transitions to white
+          'focus:outline-none focus:ring-2 focus:ring-ios-blue focus:bg-white',
           // Error state
-          error && 'border-ios-red focus:ring-ios-red',
+          error && 'ring-2 ring-ios-red focus:ring-ios-red',
           // Disabled state
           'disabled:opacity-40 disabled:cursor-not-allowed',
+          // Smooth transitions
+          'transition-all',
           className
         )}
         {...props}
@@ -77,17 +78,23 @@ export function Textarea({
       )}
       <textarea
         className={cn(
+          // Base styles - iOS-style textarea
           'w-full min-h-[88px]',
           'px-4 py-3',
           'bg-ios-gray-6',
-          'border border-ios-gray-3',
-          'rounded-ios-sm',
+          'rounded-ios',
           'text-ios-body text-ios-label-primary',
           'placeholder:text-ios-gray-2',
-          'focus:outline-none focus:ring-2 focus:ring-ios-blue focus:border-transparent',
+          // Focus state - transitions to white
+          'focus:outline-none focus:ring-2 focus:ring-ios-blue focus:bg-white',
+          // Resize
           'resize-none',
-          error && 'border-ios-red focus:ring-ios-red',
+          // Error state
+          error && 'ring-2 ring-ios-red focus:ring-ios-red',
+          // Disabled state
           'disabled:opacity-40 disabled:cursor-not-allowed',
+          // Smooth transitions
+          'transition-all',
           className
         )}
         {...props}
@@ -105,14 +112,14 @@ export function Textarea({
 interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   label?: string
   error?: string
-  options: Array<{ value: string; label: string }>
+  children?: React.ReactNode
 }
 
 export function Select({
   label,
   error,
-  options,
   className,
+  children,
   ...props
 }: SelectProps) {
   return (
@@ -124,24 +131,25 @@ export function Select({
       )}
       <select
         className={cn(
-          'w-full min-h-[44px]',
-          'px-4 py-3',
+          // Base styles - iOS-style select
+          'w-full h-11',
+          'px-4',
           'bg-ios-gray-6',
-          'border border-ios-gray-3',
-          'rounded-ios-sm',
+          'rounded-ios',
           'text-ios-body text-ios-label-primary',
-          'focus:outline-none focus:ring-2 focus:ring-ios-blue focus:border-transparent',
-          error && 'border-ios-red focus:ring-ios-red',
+          // Focus state - transitions to white
+          'focus:outline-none focus:ring-2 focus:ring-ios-blue focus:bg-white',
+          // Error state
+          error && 'ring-2 ring-ios-red focus:ring-ios-red',
+          // Disabled state
           'disabled:opacity-40 disabled:cursor-not-allowed',
+          // Smooth transitions
+          'transition-all',
           className
         )}
         {...props}
       >
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
+        {children}
       </select>
       {error && (
         <p className="text-ios-footnote text-ios-red">{error}</p>

@@ -96,6 +96,7 @@ export default async function createTransaction(userId: string, input: CreateTra
                         name: true,
                         currency: true,
                         balance: true,
+                        description: true,
                     },
                 },
                 toAccount: {
@@ -104,6 +105,7 @@ export default async function createTransaction(userId: string, input: CreateTra
                         name: true,
                         currency: true,
                         balance: true,
+                        description: true,
                     },
                 }
             },
