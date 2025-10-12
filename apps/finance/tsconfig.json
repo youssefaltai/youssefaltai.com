@@ -2,14 +2,27 @@
   "extends": "@repo/tsconfig/nextjs.json",
   "compilerOptions": {
     "paths": {
-      "@/*": ["./src/*"],
-      "@repo/ui": ["../../packages/ui/src"],
-      "@repo/utils": ["../../packages/utils/src"],
-      "@repo/auth": ["../../packages/auth/src"],
-      "@repo/auth/webauthn-handlers": ["../../packages/auth/src/webauthn-handlers.ts"],
-      "@repo/auth/api-middleware": ["../../packages/auth/src/api-middleware.ts"]
+      "@/*": [
+        "./src/*"
+      ],
+      "@repo/ui": [
+        "../../packages/ui/src"
+      ],
+      "@repo/utils": [
+        "../../packages/utils/src"
+      ],
+      "@repo/auth": [
+        "../../packages/auth/src"
+      ],
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

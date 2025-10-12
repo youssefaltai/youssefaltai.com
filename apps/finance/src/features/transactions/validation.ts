@@ -1,54 +1,42 @@
-/**
- * Transaction validation schemas
- * Using Zod for runtime type validation
- */
-import { z } from 'zod'
+import { Currency } from "@repo/db"
+import { z } from "zod"
+import {
+    differentAccountsRefinement,
+    currencyRequiredWithExchangeRateRefinement,
+} from "../../shared/validation-refinements"
 
-// Transaction type enum
-export const TransactionTypeSchema = z.enum(['income', 'expense'])
-
-// Currency code validation (EGP, USD, GOLD_G)
-export const CurrencyCodeSchema = z.enum(['EGP', 'USD', 'GOLD_G'])
-
-// Date validation schema
-export const DateTimeSchema = z.string().datetime('Invalid datetime format')
-
-// Create transaction schema
-export const CreateTransactionSchema = z.object({
-  amount: z.number().positive('Amount must be positive'),
-  currency: CurrencyCodeSchema,
-  exchangeRate: z.number().positive('Exchange rate must be positive').optional(),
-  type: TransactionTypeSchema,
-  category: z.string().min(1, 'Category is required'),
-  description: z.string().optional(),
-  date: DateTimeSchema,
+export const createTransactionSchema = z.object({
+    description: z.string().min(1),
+    fromAccountId: z.cuid(),
+    toAccountId: z.cuid(),
+    amount: z.number().positive(),
+    currency: z.enum(Currency).optional(),
+    exchangeRate: z.number().positive().optional(),
+    date: z.iso.datetime(),
+}).refine(differentAccountsRefinement(false), {
+    message: "From and to accounts must be different",
+    path: ["toAccountId"],
+}).refine(currencyRequiredWithExchangeRateRefinement(), {
+    message: "Currency is required when exchange rate is provided",
+    path: ["currency"],
 })
 
-// Update transaction schema (all fields optional except id)
-export const UpdateTransactionSchema = z.object({
-  amount: z.number().positive('Amount must be positive').optional(),
-  currency: CurrencyCodeSchema.optional(),
-  exchangeRate: z.number().positive('Exchange rate must be positive').optional(),
-  type: TransactionTypeSchema.optional(),
-  category: z.string().min(1, 'Category is required').optional(),
-  description: z.string().optional(),
-  date: DateTimeSchema.optional(),
+export type CreateTransactionSchema = z.infer<typeof createTransactionSchema>
+
+export const updateTransactionSchema = z.object({
+    description: z.string().min(1).optional(),
+    fromAccountId: z.cuid().optional(),
+    toAccountId: z.cuid().optional(),
+    amount: z.number().positive().optional(),
+    currency: z.enum(Currency).optional(),
+    exchangeRate: z.number().positive().optional(),
+    date: z.iso.datetime().optional(),
+}).refine(differentAccountsRefinement(true), {
+    message: "From and to accounts must be different",
+    path: ["toAccountId"],
+}).refine(currencyRequiredWithExchangeRateRefinement(), {
+    message: "Currency is required when exchange rate is provided",
+    path: ["currency"],
 })
 
-// Transaction filters schema
-export const TransactionFiltersSchema = z.object({
-  type: TransactionTypeSchema.optional(),
-  category: z.string().optional(),
-  currency: CurrencyCodeSchema.optional(),
-  dateFrom: DateTimeSchema.optional(),
-  dateTo: DateTimeSchema.optional(),
-  page: z.number().int().positive().default(1).optional(),
-  limit: z.number().int().positive().max(100).default(50).optional(),
-})
-
-// Type exports for TypeScript
-export type CreateTransactionInput = z.infer<typeof CreateTransactionSchema>
-export type UpdateTransactionInput = z.infer<typeof UpdateTransactionSchema>
-export type TransactionFilters = z.infer<typeof TransactionFiltersSchema>
-export type TransactionType = z.infer<typeof TransactionTypeSchema>
-
+export type UpdateTransactionSchema = z.infer<typeof updateTransactionSchema>

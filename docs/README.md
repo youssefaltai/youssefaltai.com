@@ -14,11 +14,16 @@ Welcome to the youssefaltai.com monorepo documentation! This directory contains 
 - 🏗️ [Monorepo Architecture](architecture/monorepo-architecture.md) - Turborepo + PNPM design decisions
 - 📊 [Project Summary](architecture/project-summary.md) - Complete project overview and current status
 
+### Finance App Documentation
+- 📖 [Finance App Overview](finance/README.md) - Complete finance app documentation
+- 💡 [Core Concepts](finance/core-concepts.md) - Double-entry bookkeeping explained
+- 💱 [Multi-Currency System](finance/multi-currency.md) - Currency conversion and exchange rates
+- 🏗️ [Architecture](finance/architecture.md) - Code organization and patterns
+- 📋 [API Reference](finance/api-reference.md) - Complete API documentation
+
 ### Research Documents
-- 💰 [Finance Multi-Currency](research/finance-multi-currency.md) - Multi-currency implementation strategy
 - 📅 [Date & Time Handling](research/date-time-handling.md) - Full timestamp storage with date-fns
 - 🍎 [Apple Design System](research/apple-design-system.md) - iOS-inspired design implementation
-- 💵 [Money Formatting](research/money-formatting.md) - Currency formatting with Intl.NumberFormat
 - 🔄 [State Management](research/state-management.md) - TanStack Query + Zustand architecture
 
 ### Deployment Guides
@@ -36,15 +41,18 @@ docs/
 ├── README.md                          # This file
 ├── architecture/                      # System architecture and design
 │   ├── monorepo-status.md            # Current state, metrics, health
-│   ├── finance-architecture.md       # Finance app structure
 │   ├── monorepo-architecture.md      # Turborepo structure and decisions
 │   └── project-summary.md            # Project status and overview
+├── finance/                           # Finance app documentation
+│   ├── README.md                     # Finance overview
+│   ├── core-concepts.md              # Double-entry bookkeeping
+│   ├── multi-currency.md             # Currency handling
+│   ├── architecture.md               # Code organization
+│   └── api-reference.md              # API endpoints
 ├── research/                          # Feature research and decisions
 │   ├── state-management.md           # TanStack Query + Zustand
-│   ├── finance-multi-currency.md     # Multi-currency implementation
 │   ├── date-time-handling.md         # Date/time storage and formatting
-│   ├── apple-design-system.md        # iOS design patterns
-│   └── money-formatting.md           # Currency formatting approach
+│   └── apple-design-system.md        # iOS design patterns
 ├── deployment/                        # Deployment and operations
 │   ├── vps-deployment.md             # Full deployment guide
 │   ├── vps-checklist.md              # Quick reference checklist
@@ -97,11 +105,16 @@ This documentation follows these principles:
 - Monorepo structure → [Monorepo Architecture](architecture/monorepo-architecture.md)
 - Project overview → [Project Summary](architecture/project-summary.md)
 
+**Finance App:**
+- Finance overview → [Finance App](finance/README.md)
+- Double-entry system → [Core Concepts](finance/core-concepts.md)
+- Currency handling → [Multi-Currency System](finance/multi-currency.md)
+- Code patterns → [Architecture](finance/architecture.md)
+- API endpoints → [API Reference](finance/api-reference.md)
+
 **Feature Implementation:**
-- Finance app → [Finance Multi-Currency](research/finance-multi-currency.md)
 - Date handling → [Date & Time Handling](research/date-time-handling.md)
 - UI design → [Apple Design System](research/apple-design-system.md)
-- Money display → [Money Formatting](research/money-formatting.md)
 - State management → [State Management](research/state-management.md)
 
 **Deployment & Operations:**
@@ -188,7 +201,7 @@ All research documents follow this format:
 | 🚀 Getting Started | [Main README](../README.md) | Project overview |
 | 📋 Standards | [Development Standards](development/standards.md) | Coding guidelines |
 | 🏗️ Architecture | [Monorepo Architecture](architecture/monorepo-architecture.md) | System design |
-| 💰 Finance | [Finance Multi-Currency](research/finance-multi-currency.md) | Currency handling |
+| 💰 Finance | [Finance App](finance/README.md) | Finance documentation |
 | 🚀 Deploy | [VPS Deployment](deployment/vps-deployment.md) | Deployment guide |
 | ✅ Quick Deploy | [VPS Checklist](deployment/vps-checklist.md) | Deploy checklist |
 

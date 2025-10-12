@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers'
 
-const COOKIE_NAME = 'auth_token'
+export const COOKIE_NAME = 'auth_token'
 
 /**
  * Get cookie domain based on environment

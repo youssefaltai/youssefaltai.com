@@ -37,7 +37,7 @@ export async function generateToken(
  * @returns Decoded payload if valid
  * @throws Error if token is invalid or expired
  */
-export async function verifyToken(token: string): Promise<JWTPayload> {
+export async function verifyToken(token: string): Promise<JWTPayload | never> {
   const secret = getSecret()
 
   try {

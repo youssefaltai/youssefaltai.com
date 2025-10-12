@@ -1,53 +1,43 @@
-/**
- * Get transactions API handler
- */
-import { prisma, Prisma } from '@repo/db'
-import { TransactionFiltersSchema, type TransactionFilters } from '../validation'
+import { prisma, TTransaction } from "@repo/db"
+import { TRANSACTION_OMIT_FIELDS } from "../../../shared/omit-fields"
 
-export async function getTransactions(userId: string, filters: Partial<TransactionFilters>) {
-  // Validate filters
-  const validatedFilters = TransactionFiltersSchema.parse(filters)
+export default async function getTransactions(userId: string): Promise<TTransaction[]> {
+    const transactions = await prisma.transaction.findMany({
+        where: {
+            userId,
+            deletedAt: null,
+            fromAccount: {
+                deletedAt: null,
+                userId,
+            },
+            toAccount: {
+                deletedAt: null,
+                userId,
+            },
+        },
+        include: {
+            fromAccount: {
+                select: {
+                    id: true,
+                    name: true,
+                },
+            },
+            toAccount: {
+                select: {
+                    id: true,
+                    name: true,
+                },
+            },
+        },
+        omit: {
+            ...TRANSACTION_OMIT_FIELDS,
+            fromAccountId: true,
+            toAccountId: true,
+        },
+        orderBy: {
+            createdAt: "desc",
+        },
+    })
 
-  // Build query conditions
-  const where: Prisma.TransactionWhereInput = {
-    userId,
-    ...(validatedFilters.type && { type: validatedFilters.type }),
-    ...(validatedFilters.category && { category: validatedFilters.category }),
-    ...(validatedFilters.currency && { currency: validatedFilters.currency }),
-    ...(validatedFilters.dateFrom || validatedFilters.dateTo
-      ? {
-          date: {
-            ...(validatedFilters.dateFrom && { gte: new Date(validatedFilters.dateFrom) }),
-            ...(validatedFilters.dateTo && { lte: new Date(validatedFilters.dateTo) }),
-          },
-        }
-      : {}),
-  }
-
-  // Calculate pagination
-  const page = validatedFilters.page || 1
-  const limit = validatedFilters.limit || 50
-  const skip = (page - 1) * limit
-
-  // Fetch transactions
-  const [transactions, total] = await Promise.all([
-    prisma.transaction.findMany({
-      where,
-      orderBy: { date: 'desc' },
-      skip,
-      take: limit,
-    }),
-    prisma.transaction.count({ where }),
-  ])
-
-  return {
-    transactions,
-    pagination: {
-      page,
-      limit,
-      total,
-      pages: Math.ceil(total / limit),
-    },
-  }
+    return transactions
 }
-

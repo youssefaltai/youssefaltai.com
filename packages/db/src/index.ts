@@ -21,4 +21,4 @@ if (process.env.NODE_ENV !== 'production') {
 
 // Re-export Prisma types for convenience
 export * from '../generated/prisma'
-
+export * from './types/finance'

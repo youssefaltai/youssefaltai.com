@@ -37,11 +37,10 @@ export async function authMiddleware(request: NextRequest): Promise<NextResponse
     const payload = await verifyToken(token)
 
     // Add user info to headers for downstream consumption
-    const response = NextResponse.next()
-    response.headers.set('x-user-id', payload.id)
-    response.headers.set('x-user-email', payload.email)
+    request.headers.set('x-user-id', payload.id)
+    request.headers.set('x-user-email', payload.email)
 
-    return response
+    return NextResponse.next()
   } catch {
     // Invalid token - redirect to login
     const loginUrl = getLoginUrl(request)

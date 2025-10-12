@@ -1,4 +1,4 @@
-import { AppBottomNav } from './components/AppBottomNav'
+import { AppBottomNav } from '../../shared/components/AppBottomNav'
 
 /**
  * Layout for authenticated app pages

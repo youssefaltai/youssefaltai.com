@@ -1,64 +1,43 @@
-/**
- * Transaction [id] API Routes
- * Thin wrapper around feature handlers
- */
-import { NextRequest, NextResponse } from 'next/server'
-import { withAuth, errorResponse, validationError } from '@repo/auth/api-middleware'
-import { updateTransaction } from '@/features/transactions/api/update-transaction'
-import { deleteTransaction } from '@/features/transactions/api/delete-transaction'
+import deleteTransaction from "@/features/transactions/api/delete-transaction"
+import updateTransaction from "@/features/transactions/api/update-transaction"
+import { BadRequestResponse, getJsonInput, SuccessResponse, UnauthorizedResponse } from "@/shared/utils/api"
+import { verifyAuth } from "@repo/auth"
+import { TTransaction } from "@repo/db"
+import { ApiResponse } from "@repo/types"
+import { NextRequest, NextResponse } from "next/server"
 
-/**
- * PATCH /api/transactions/[id]
- * Update an existing transaction
- */
-export const PATCH = withAuth(
-  async (request: NextRequest, userId: string, context?: { params: Promise<{ id: string }> }) => {
+interface RouteContext {
+    params: Promise<{ id: string }>
+}
+
+export async function PATCH(request: NextRequest, { params }: RouteContext): Promise<NextResponse<ApiResponse<TTransaction>>> {
+    const { authenticated, userId } = await verifyAuth(request)
+    if (!authenticated) return UnauthorizedResponse(userId)
+
+    const { id: transactionId } = await params;
+    const jsonInput = await getJsonInput(request);
+    if (!jsonInput) return BadRequestResponse(null)
+
     try {
-      const { id } = await context!.params
-      const body = await request.json()
-
-      // Call feature handler
-      const transaction = await updateTransaction(userId, id, body)
-
-      return NextResponse.json({ transaction })
+        const response = await updateTransaction(userId, transactionId, jsonInput);
+        return SuccessResponse(response)
     } catch (error) {
-      console.error('Error in PATCH /api/transactions/[id]:', error)
-
-      if (error instanceof Error && error.message === 'Transaction not found or unauthorized') {
-        return NextResponse.json({ message: error.message }, { status: 404 })
-      }
-
-      // Zod validation errors
-      if (error && typeof error === 'object' && 'issues' in error) {
-        return validationError(error)
-      }
-
-      return errorResponse('Failed to update transaction', 500, error)
+        console.error('Error updating transaction:', error)
+        return BadRequestResponse<TTransaction>(error instanceof Error ? error.message : 'Failed to update transaction')
     }
-  }
-)
+}
 
-/**
- * DELETE /api/transactions/[id]
- * Delete a transaction
- */
-export const DELETE = withAuth(
-  async (_request: NextRequest, userId: string, context?: { params: Promise<{ id: string }> }) => {
+export async function DELETE(request: NextRequest, { params }: RouteContext): Promise<NextResponse<ApiResponse<TTransaction>>> {
+    const { authenticated, userId } = await verifyAuth(request)
+    if (!authenticated) return UnauthorizedResponse(userId)
+
+    const { id: transactionId } = await params;
+
     try {
-      const { id } = await context!.params
-
-      // Call feature handler
-      await deleteTransaction(userId, id)
-
-      return NextResponse.json({ message: 'Transaction deleted successfully' })
+        const response = await deleteTransaction(userId, transactionId);
+        return SuccessResponse(response)
     } catch (error) {
-      console.error('Error in DELETE /api/transactions/[id]:', error)
-
-      if (error instanceof Error && error.message === 'Transaction not found or unauthorized') {
-        return NextResponse.json({ message: error.message }, { status: 404 })
-      }
-
-      return errorResponse('Failed to delete transaction', 500, error)
+        console.error('Error deleting transaction:', error)
+        return BadRequestResponse<TTransaction>(error instanceof Error ? error.message : 'Failed to delete transaction')
     }
-  }
-)
+}
