@@ -69,12 +69,12 @@ services:
       context: .
       dockerfile: apps/finance/Dockerfile
     container_name: finance-app
+    env_file:
+      - .env                        # Shared defaults
+      - .env.production             # Production database URLs
+      - apps/finance/.env.production # App-specific production
     environment:
-      - NODE_ENV=production
-      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD:-166288}@postgres:5432/youssefaltai?schema=public
-      - REDIS_URL=redis://redis:6379
-      - GOLD_API_KEY=${GOLD_API_KEY}
-      - RESEND_API_KEY=${RESEND_API_KEY}
+      - NODE_ENV=production         # Ensures .env.production is used
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.finance.rule=Host(`finance.youssefaltai.com`) || Host(`finance.localhost`)"
@@ -96,11 +96,12 @@ services:
       context: .
       dockerfile: apps/fitness/Dockerfile
     container_name: fitness-app
+    env_file:
+      - .env                        # Shared defaults
+      - .env.production             # Production database URLs
+      - apps/fitness/.env.production # App-specific production
     environment:
-      - NODE_ENV=production
-      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD:-166288}@postgres:5432/youssefaltai?schema=public
-      - REDIS_URL=redis://redis:6379
-      - RESEND_API_KEY=${RESEND_API_KEY}
+      - NODE_ENV=production         # Ensures .env.production is used
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.fitness.rule=Host(`fitness.youssefaltai.com`) || Host(`fitness.localhost`)"
@@ -122,11 +123,12 @@ services:
       context: .
       dockerfile: apps/dashboard/Dockerfile
     container_name: dashboard-app
+    env_file:
+      - .env                        # Shared defaults
+      - .env.production             # Production database URLs
+      - apps/dashboard/.env.production # App-specific production
     environment:
-      - NODE_ENV=production
-      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD:-166288}@postgres:5432/youssefaltai?schema=public
-      - REDIS_URL=redis://redis:6379
-      - RESEND_API_KEY=${RESEND_API_KEY}
+      - NODE_ENV=production         # Ensures .env.production is used
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.dashboard.rule=Host(`dashboard.youssefaltai.com`) || Host(`dashboard.localhost`)"
