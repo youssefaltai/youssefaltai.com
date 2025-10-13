@@ -4,7 +4,7 @@ import { finishRegistration } from '@repo/auth/passkey-handlers'
 export async function POST(request: Request) {
   try {
     const { userId, userName, userDisplayName, credential, deviceInfo, managementOptions } = await request.json()
-    const result = await finishRegistration(userId, credential, request, {
+    const result = await finishRegistration(userId, credential, {
       userName,
       userDisplayName,
       deviceInfo,

@@ -4,7 +4,7 @@ import { startAuthentication } from '@repo/auth/passkey-handlers'
 export async function POST(request: Request) {
   try {
     const { userId } = await request.json()
-    const result = await startAuthentication(userId, request)
+    const result = await startAuthentication(userId)
     return NextResponse.json(result)
   } catch (error) {
     console.error('Error in startAuthentication:', error)

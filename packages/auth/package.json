@@ -14,8 +14,7 @@
     "./lib/passkey-endpoints": "./src/lib/passkey-endpoints.ts",
     "./lib/session-simple": "./src/lib/session-simple.ts",
     "./lib/email": "./src/lib/email.ts",
-    "./lib/auth-helper": "./src/lib/auth-helper.ts",
-    "./lib/domain-utils": "./src/lib/domain-utils.ts"
+    "./lib/auth-helper": "./src/lib/auth-helper.ts"
   },
   "dependencies": {
     "@react-email/render": "^1.3.2",

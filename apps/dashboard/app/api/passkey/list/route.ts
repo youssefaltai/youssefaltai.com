@@ -12,7 +12,7 @@ export async function POST(request: Request) {
       return authResult
     }
     
-    const passkeys = await listPasskeys(userId, request)
+    const passkeys = await listPasskeys(userId)
     return NextResponse.json({ passkeys })
   } catch (error) {
     return NextResponse.json({ error: 'Failed to list passkeys' }, { status: 400 })

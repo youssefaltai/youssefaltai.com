@@ -1,21 +1,23 @@
 import { Resend } from 'resend'
-import { getNormalizedOrigin } from './domain-utils'
 
 export async function sendDeviceVerificationEmail(
   email: string,
   token: string,
   appName: string,
-  request: Request
 ) {
   if (!process.env.RESEND_API_KEY) {
     throw new Error('RESEND_API_KEY environment variable is not set')
   }
 
-  const resend = new Resend(process.env.RESEND_API_KEY)
+  const resend = new Resend(process.env.RESEND_API_KEY!)
+
+  if (!process.env.APP_URL) {
+    throw new Error('APP_URL environment variable is not set')
+  }
 
   // Get normalized origin from request (works for all environments!)
-  const origin = getNormalizedOrigin(request.url)
-    
+  const origin = process.env.APP_URL!
+
   const verifyUrl = `${origin}/verify-device?token=${token}&email=${encodeURIComponent(email)}`
 
   await resend.emails.send({

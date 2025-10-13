@@ -14,7 +14,7 @@ export async function POST(request: Request) {
     })
     
     try {
-      await sendDeviceVerificationEmail(email, token, 'Dashboard', request)
+      await sendDeviceVerificationEmail(email, token, 'Dashboard')
     } catch (emailError) {
       console.error('Failed to send verification email:', emailError)
       return NextResponse.json({ 

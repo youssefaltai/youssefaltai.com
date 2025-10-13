@@ -12,7 +12,7 @@ export async function POST(request: Request) {
       return authResult
     }
     
-    await deletePasskey(userId, credentialId, request)
+    await deletePasskey(userId, credentialId)
     return NextResponse.json({ success: true })
   } catch (error) {
     return NextResponse.json({ error: 'Delete failed' }, { status: 400 })
