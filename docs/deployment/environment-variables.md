@@ -52,8 +52,6 @@ Edit with your values:
 
 **`.env` (shared defaults):**
 ```bash
-JWT_SECRET="generate-with-openssl-rand-base64-32"
-NODE_ENV="development"
 POSTGRES_USER="postgres"
 POSTGRES_PASSWORD="YOUR_PASSWORD"
 POSTGRES_DB="youssefaltai"
@@ -63,12 +61,14 @@ POSTGRES_DB="youssefaltai"
 ```bash
 DATABASE_URL="postgresql://postgres:YOUR_PASSWORD@localhost:5432/youssefaltai?schema=public"
 REDIS_URL="redis://localhost:6379"
+PASSKEY_DOMAIN="youssefaltai.local"  # Root domain for passkeys to work across all apps
 ```
 
 **`.env.production` (production/Docker):**
 ```bash
 DATABASE_URL="postgresql://postgres:YOUR_PASSWORD@postgres:5432/youssefaltai?schema=public"
 REDIS_URL="redis://redis:6379"
+PASSKEY_DOMAIN="youssefaltai.com"  # Root domain for passkeys to work across all apps
 ```
 
 ### 2. App-Specific Environment Variables (Production Only)
@@ -106,6 +106,7 @@ NODE_ENV="development"
 POSTGRES_USER="postgres"
 POSTGRES_PASSWORD="166288"
 POSTGRES_DB="youssefaltai"
+PASSKEY_DOMAIN="localhost"  # Use localhost for dev, youssefaltai.com for production
 ```
 
 **Root `.env.development` (local connections):**
@@ -128,6 +129,7 @@ NODE_ENV="production"
 POSTGRES_USER="postgres"
 POSTGRES_PASSWORD="166288"
 POSTGRES_DB="youssefaltai"
+PASSKEY_DOMAIN="youssefaltai.com"  # Root domain for passkeys to work across all apps
 ```
 
 **Root `.env.production` (Docker service names):**
@@ -156,6 +158,22 @@ RESEND_API_KEY="your-production-key"
 APP_URL="https://dashboard.youssefaltai.com"
 RESEND_API_KEY="your-production-key"
 ```
+
+---
+
+## 🔐 **Passkey Domain Configuration**
+
+**Critical for multi-app passkeys:**
+
+The `PASSKEY_DOMAIN` environment variable ensures passkeys work across all your apps (finance, fitness, dashboard).
+
+- **Development:** Set to `localhost`
+- **Production:** Set to root domain `youssefaltai.com` (not subdomains)
+- **Why root domain?** Passkeys created with `youssefaltai.com` work on all subdomains (`finance.youssefaltai.com`, `dashboard.youssefaltai.com`, etc.)
+- **Wrong:** Setting it to `finance.youssefaltai.com` would only work on Finance app
+- **Right:** Setting it to `youssefaltai.com` works on all apps
+
+**This is a required environment variable.** The app will not start without it.
 
 ---
 

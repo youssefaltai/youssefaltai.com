@@ -42,14 +42,18 @@ export async function createPasskeyConfig(): Promise<ServerOptions> {
   }
 
   // Extract normalized domain information
-  // Extracts the domain (host) from APP_URL without schema or port
+  // For passkeys to work across all apps, we must use the root domain
+  // not the app-specific subdomain (e.g., youssefaltai.com not finance.youssefaltai.com)
   if (!process.env.APP_URL) {
     throw new Error('APP_URL environment variable is not set')
   }
 
+  if (!process.env.PASSKEY_DOMAIN) {
+    throw new Error('PASSKEY_DOMAIN environment variable is not set. Set it to your root domain (e.g., youssefaltai.com or localhost for development)')
+  }
+
   const APP_URL = process.env.APP_URL!;
-  const { hostname } = new URL(APP_URL);
-  const rpID = hostname;
+  const rpID = process.env.PASSKEY_DOMAIN;
   const expectedOrigin = APP_URL;
 
   const rpConfig = {
