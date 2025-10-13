@@ -66,7 +66,7 @@ type TransactionWithAccounts = Awaited<ReturnType<typeof fetchTransactionsWithAc
  * - Savings rate
  */
 export async function GET(request: NextRequest): Promise<NextResponse<ApiResponse<DashboardAnalytics>>> {
-  const { authenticated, userId } = await verifyAuth(request)
+  const { authenticated, userId } = await verifyAuth()
   if (!authenticated) return UnauthorizedResponse(userId)
 
   try {

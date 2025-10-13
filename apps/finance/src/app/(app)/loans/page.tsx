@@ -1,11 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { FloatingActionButton, Modal, Plus, Landmark } from '@repo/ui'
+import { FloatingActionButton, Modal, Plus, Landmark, PageLayout, EntityList, LoadingSkeleton } from '@repo/ui'
 import { useLoans, useCreateLoan, useUpdateLoan, useDeleteLoan } from '../../../hooks/use-loans'
 import { LoanCard } from '../../../components/loans/LoanCard'
 import { LoanForm } from '../../../components/forms/LoanForm'
-import { PageLayout, EntityList, LoadingSkeleton } from '@repo/ui'
 import type { Account } from '@repo/db'
 import type { CreateLoanSchema, UpdateLoanSchema } from '../../../features/accounts/loan/validation'
 

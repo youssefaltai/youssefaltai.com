@@ -11,7 +11,7 @@ interface RouteContext {
 }
 
 export async function PATCH(request: NextRequest, { params }: RouteContext): Promise<NextResponse<ApiResponse<TTransaction>>> {
-    const { authenticated, userId } = await verifyAuth(request)
+    const { authenticated, userId } = await verifyAuth()
     if (!authenticated) return UnauthorizedResponse(userId)
 
     const { id: transactionId } = await params;
@@ -27,8 +27,8 @@ export async function PATCH(request: NextRequest, { params }: RouteContext): Pro
     }
 }
 
-export async function DELETE(request: NextRequest, { params }: RouteContext): Promise<NextResponse<ApiResponse<TTransaction>>> {
-    const { authenticated, userId } = await verifyAuth(request)
+export async function DELETE(_request: NextRequest, { params }: RouteContext): Promise<NextResponse<ApiResponse<TTransaction>>> {
+    const { authenticated, userId } = await verifyAuth()
     if (!authenticated) return UnauthorizedResponse(userId)
 
     const { id: transactionId } = await params;

@@ -25,7 +25,7 @@ import getTransactionsSummary, { TransactionSummary } from "@/features/transacti
  * - transferCount: Number of transfer transactions
  */
 export async function GET(request: NextRequest): Promise<NextResponse<ApiResponse<TransactionSummary>>> {
-    const { authenticated, userId } = await verifyAuth(request)
+    const { authenticated, userId } = await verifyAuth()
     if (!authenticated) return UnauthorizedResponse(userId)
 
     try {

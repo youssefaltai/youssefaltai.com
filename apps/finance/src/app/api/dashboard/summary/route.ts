@@ -22,7 +22,7 @@ interface DashboardSummary {
  * - This month's income and expenses (converted to base currency)
  */
 export async function GET(request: NextRequest): Promise<NextResponse<ApiResponse<DashboardSummary>>> {
-  const { authenticated, userId } = await verifyAuth(request)
+  const { authenticated, userId } = await verifyAuth()
   if (!authenticated) return UnauthorizedResponse(userId)
 
   try {

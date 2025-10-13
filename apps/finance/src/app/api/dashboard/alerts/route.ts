@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server"
+import { NextResponse } from "next/server"
 import { verifyAuth } from "@repo/auth/verify-auth"
 import { ApiResponse } from "@repo/types"
 import { UnauthorizedResponse, SuccessResponse, InternalServerErrorResponse } from "@/shared/utils/api"
@@ -27,8 +27,8 @@ export interface Alert {
  * - Overdue payments
  * - Goals approaching deadline
  */
-export async function GET(request: NextRequest): Promise<NextResponse<ApiResponse<Alert[]>>> {
-  const { authenticated, userId } = await verifyAuth(request)
+export async function GET(): Promise<NextResponse<ApiResponse<Alert[]>>> {
+  const { authenticated, userId } = await verifyAuth()
   if (!authenticated) return UnauthorizedResponse(userId)
 
   try {

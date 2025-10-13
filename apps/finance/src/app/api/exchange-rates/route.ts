@@ -15,7 +15,7 @@ import setExchangeRate from "@/features/exchange-rates/api/set-exchange-rate"
  * - toCurrency (optional): Filter by target currency
  */
 export async function GET(request: NextRequest): Promise<NextResponse<ApiResponse<ExchangeRate[]>>> {
-    const { authenticated, userId } = await verifyAuth(request)
+    const { authenticated, userId } = await verifyAuth()
     if (!authenticated) return UnauthorizedResponse(userId)
 
     try {
@@ -48,7 +48,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<ApiRespons
  * - rate: Exchange rate (positive number)
  */
 export async function PUT(request: NextRequest): Promise<NextResponse<ApiResponse<ExchangeRate>>> {
-    const { authenticated, userId } = await verifyAuth(request)
+    const { authenticated, userId } = await verifyAuth()
     if (!authenticated) return UnauthorizedResponse(userId)
 
     const jsonInput = await getJsonInput(request)

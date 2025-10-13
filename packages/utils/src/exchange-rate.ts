@@ -163,7 +163,7 @@ export const COMMON_CURRENCIES = [
  * Gold price API for fetching current gold prices
  * Using GoldAPI.io (free tier: 100 requests/month)
  */
-const GOLD_API_KEY = process.env.GOLD_API_KEY || '' // Optional: add if you want real-time prices
+const GOLD_API_KEY = process.env.GOLD_API_KEY || ''
 const GOLD_API_BASE = 'https://www.goldapi.io/api'
 
 /**

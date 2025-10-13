@@ -1,80 +1,33 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { verifyToken } from './lib/jwt'
-import { COOKIE_NAME } from './lib/cookies'
 
-/**
- * Authentication middleware for Next.js
- * Validates JWT token from cookies and protects routes
- * 
- * Usage in app middleware.ts:
- * ```typescript
- * import { authMiddleware } from '@repo/auth'
- * export const middleware = authMiddleware
- * export const config = { matcher: ['/dashboard/:path*', '/api/:path*'] }
- * ```
- */
+const SESSION_COOKIE = 'passkey_session'
+
 export async function authMiddleware(request: NextRequest): Promise<NextResponse> {
-  const token = request.cookies.get(COOKIE_NAME)?.value
+  const sessionId = request.cookies.get(SESSION_COOKIE)?.value
 
-  // Allow access to login and public routes
+  // Skip auth for public routes
   if (
     request.nextUrl.pathname.startsWith('/login') ||
+    request.nextUrl.pathname.startsWith('/verify-device') ||
     request.nextUrl.pathname.startsWith('/register') ||
     request.nextUrl.pathname.startsWith('/_next') ||
-    request.nextUrl.pathname.startsWith('/api/auth')
+    request.nextUrl.pathname.startsWith('/api/') ||
+    request.nextUrl.pathname.includes('/icon-') ||
+    request.nextUrl.pathname.includes('/apple-icon') ||
+    request.nextUrl.pathname === '/manifest.webmanifest'
   ) {
     return NextResponse.next()
   }
 
-  // Redirect to login if no token
-  if (!token) {
-    const loginUrl = getLoginUrl(request)
+  // No session cookie - redirect to login
+  if (!sessionId) {
+    const loginUrl = new URL('/login', request.url)
+    loginUrl.searchParams.set('redirect', request.nextUrl.pathname)
     return NextResponse.redirect(loginUrl)
   }
 
-  try {
-    // Verify token (signature, expiration, format)
-    const payload = await verifyToken(token)
-
-    // Note: We cannot check database in middleware (Edge Runtime doesn't support Prisma)
-    // Database validation happens in API routes via verifyAuth()
-
-    // Add user info to headers for downstream consumption
-    request.headers.set('x-user-id', payload.id)
-    request.headers.set('x-user-email', payload.email)
-
-    return NextResponse.next()
-  } catch {
-    // Invalid token - clear cookie and redirect to login
-    const loginUrl = getLoginUrl(request)
-    const response = NextResponse.redirect(loginUrl)
-    clearCookieInResponse(response)
-    return response
-  }
-}
-
-function getLoginUrl(request: NextRequest): URL {
-  const loginUrl = new URL('/login', request.url)
-  loginUrl.searchParams.set('redirect', request.nextUrl.pathname)
-  return loginUrl
-}
-
-/**
- * Clear authentication cookie in middleware response
- * Handles both production (with domain) and development
- */
-function clearCookieInResponse(response: NextResponse): void {
-  const isProduction = process.env.NODE_ENV === 'production'
-  const domain = isProduction ? '.youssefaltai.com' : undefined
-  
-  // Set cookie with immediate expiration
-  response.cookies.set(COOKIE_NAME, '', {
-    httpOnly: true,
-    secure: isProduction,
-    sameSite: 'lax',
-    domain,
-    path: '/',
-    maxAge: 0, // Immediate expiration
-  })
+  // Cookie exists - let it through
+  // Actual validation happens in API routes via verifyAuth()
+  return NextResponse.next()
 }

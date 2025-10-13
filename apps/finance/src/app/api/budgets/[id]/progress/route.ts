@@ -8,10 +8,10 @@ import { getBudgetProgress, BudgetProgress } from "@/features/budgets"
  * GET /api/budgets/[id]/progress - Get budget progress (spending calculation)
  */
 export async function GET(
-    request: NextRequest,
+    _request: NextRequest,
     context: { params: Promise<{ id: string }> }
 ): Promise<NextResponse<ApiResponse<BudgetProgress>>> {
-    const { authenticated, userId } = await verifyAuth(request)
+    const { authenticated, userId } = await verifyAuth()
     if (!authenticated) return UnauthorizedResponse(userId)
 
     const { id } = await context.params

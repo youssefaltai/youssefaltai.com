@@ -17,10 +17,10 @@ type BudgetDeleteResponse = Awaited<ReturnType<typeof deleteBudget>>
  * GET /api/budgets/[id] - Get a budget by ID
  */
 export async function GET(
-    request: NextRequest,
+    _request: NextRequest,
     context: { params: Promise<{ id: string }> }
 ): Promise<NextResponse<ApiResponse<BudgetResponse>>> {
-    const { authenticated, userId } = await verifyAuth(request)
+    const { authenticated, userId } = await verifyAuth()
     if (!authenticated) return UnauthorizedResponse(userId)
 
     const { id } = await context.params
@@ -43,7 +43,7 @@ export async function PATCH(
     request: NextRequest,
     context: { params: Promise<{ id: string }> }
 ): Promise<NextResponse<ApiResponse<BudgetUpdateResponse>>> {
-    const { authenticated, userId } = await verifyAuth(request)
+    const { authenticated, userId } = await verifyAuth()
     if (!authenticated) return UnauthorizedResponse(userId)
 
     const { id } = await context.params
@@ -66,10 +66,10 @@ export async function PATCH(
  * DELETE /api/budgets/[id] - Delete a budget
  */
 export async function DELETE(
-    request: NextRequest,
+    _request: NextRequest,
     context: { params: Promise<{ id: string }> }
 ): Promise<NextResponse<ApiResponse<BudgetDeleteResponse>>> {
-    const { authenticated, userId } = await verifyAuth(request)
+    const { authenticated, userId } = await verifyAuth()
     if (!authenticated) return UnauthorizedResponse(userId)
 
     const { id } = await context.params

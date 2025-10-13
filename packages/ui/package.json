@@ -32,13 +32,13 @@
   },
   "dependencies": {
     "@repo/tailwind-config": "workspace:*",
-    "@repo/utils": "workspace:*",
     "@repo/types": "workspace:*",
-    "@simplewebauthn/browser": "^13.2.2",
+    "@repo/utils": "workspace:*",
     "@tailwindcss/cli": "^4.1.14",
     "@tailwindcss/postcss": "^4.1.14",
     "autoprefixer": "^10.4.21",
     "lucide-react": "^0.545.0",
+    "next-passkey-webauthn": "^0.2.1",
     "tailwindcss": "^4.1.14",
     "types:workspace:*": "link:@repo/types:workspace:*"
   }

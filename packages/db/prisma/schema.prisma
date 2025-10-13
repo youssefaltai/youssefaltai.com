@@ -35,7 +35,7 @@ model User {
   deletedAt DateTime?
 
   // Relations
-  credentials       Credential[]       @relation("UserCredentials")
+  passkeys          Passkey[]          @relation("UserPasskeys")
   transactions      Transaction[]      @relation("UserTransactions")
   accounts          Account[]          @relation("UserAccounts")
   exchangeRates     ExchangeRate[]     @relation("UserExchangeRates")
@@ -48,28 +48,41 @@ model User {
   @@map("users")
 }
 
-// WebAuthn credential storage
-model Credential {
-  id           String   @id @default(cuid())
-  userId       String
-  credentialId Bytes    @unique
-  publicKey    Bytes
-  counter      BigInt
-  transports   String[] // e.g., ["internal", "hybrid"]
-  deviceName   String?  @db.VarChar(100) // e.g., "Face ID", "Touch ID"
+model Passkey {
+  id                      String    @id @default(cuid())
+  userId                  String
+  credentialId            String    @unique
+  publicKey               String
+  counter                 Int       @default(0)
+  transports              String[]  @default([])
+  userName                String?
+  userDisplayName         String?
+  authenticatorAttachment String?
+  deviceInfo              Json?     @default("{}")
+  backupEligible          Boolean   @default(false)
+  backupState             Boolean   @default(false)
+  lastUsedAt              DateTime?
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
 
-  // Timestamps
-  createdAt  DateTime  @default(now())
-  lastUsedAt DateTime  @default(now())
-  deletedAt  DateTime? // Soft delete
+  user User @relation("UserPasskeys", fields: [userId], references: [id], onDelete: Cascade)
 
-  // Relationships
-  user User @relation("UserCredentials", fields: [userId], references: [id], onDelete: Cascade)
-
-  // Indexes
   @@index([userId])
-  // Map
-  @@map("credentials")
+  @@index([credentialId])
+  @@map("passkeys")
+}
+
+model PasskeyChallenge {
+  id        String   @id
+  userId    String
+  flow      String
+  challenge String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("passkey_challenges")
 }
 
 model Account {
@@ -232,4 +245,18 @@ model BudgetAccount {
   @@id([budgetId, accountId])
   // Map
   @@map("budget_accounts")
+}
+
+model DeviceVerification {
+  id        String   @id @default(cuid())
+  userId    String
+  email     String
+  token     String   @unique
+  expiresAt DateTime
+  verified  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([token])
+  @@index([userId])
+  @@map("device_verifications")
 }

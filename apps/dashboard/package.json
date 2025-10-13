@@ -11,11 +11,13 @@
   },
   "dependencies": {
     "@repo/auth": "workspace:*",
+    "@repo/db": "workspace:*",
     "@repo/tailwind-config": "workspace:*",
     "@repo/tsconfig": "workspace:*",
     "@repo/ui": "workspace:*",
     "@repo/utils": "workspace:*",
     "next": "15.5.4",
+    "next-passkey-webauthn": "^0.2.1",
     "react": "19.1.0",
     "react-dom": "19.1.0"
   },

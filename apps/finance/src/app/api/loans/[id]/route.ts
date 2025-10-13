@@ -11,8 +11,8 @@ interface RouteContext {
     params: Promise<{ id: string }>
 }
 
-export async function GET(request: NextRequest, { params }: RouteContext): Promise<NextResponse<ApiResponse<TAccount>>> {
-    const { authenticated, userId } = await verifyAuth(request)
+export async function GET(_request: NextRequest, { params }: RouteContext): Promise<NextResponse<ApiResponse<TAccount>>> {
+    const { authenticated, userId } = await verifyAuth()
     if (!authenticated) return UnauthorizedResponse(userId)
 
     const { id: accountId } = await params
@@ -27,7 +27,7 @@ export async function GET(request: NextRequest, { params }: RouteContext): Promi
 }
 
 export async function PATCH(request: NextRequest, { params }: RouteContext): Promise<NextResponse<ApiResponse<TAccount>>> {
-    const { authenticated, userId } = await verifyAuth(request)
+    const { authenticated, userId } = await verifyAuth()
     if (!authenticated) return UnauthorizedResponse(userId)
 
     const { id: accountId } = await params
@@ -43,8 +43,8 @@ export async function PATCH(request: NextRequest, { params }: RouteContext): Pro
     }
 }
 
-export async function DELETE(request: NextRequest, { params }: RouteContext): Promise<NextResponse<ApiResponse<{ message: string }>>> {
-    const { authenticated, userId } = await verifyAuth(request)
+export async function DELETE(_request: NextRequest, { params }: RouteContext): Promise<NextResponse<ApiResponse<{ message: string }>>> {
+    const { authenticated, userId } = await verifyAuth()
     if (!authenticated) return UnauthorizedResponse(userId)
 
     const { id: accountId } = await params

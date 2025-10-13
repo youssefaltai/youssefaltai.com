@@ -9,7 +9,7 @@ import getTransactions from "@/features/transactions/api/get-transactions"
 import { getTransactionsQuerySchema } from "@/features/transactions/validation"
 
 export async function POST(request: NextRequest): Promise<NextResponse<ApiResponse<TTransaction>>> {
-    const { authenticated, userId } = await verifyAuth(request)
+    const { authenticated, userId } = await verifyAuth()
     if (!authenticated) return UnauthorizedResponse(userId)
 
     const jsonInput = await getJsonInput(request)
@@ -25,7 +25,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
 }
 
 export async function GET(request: NextRequest): Promise<NextResponse<ApiResponse<PaginatedResponse<TTransaction>>>> {
-    const { authenticated, userId } = await verifyAuth(request)
+    const { authenticated, userId } = await verifyAuth()
     if (!authenticated) return UnauthorizedResponse(userId)
 
     try {

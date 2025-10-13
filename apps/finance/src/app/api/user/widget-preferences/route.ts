@@ -25,8 +25,8 @@ const UpdateWidgetPreferencesSchema = z.array(
  * Fetch user's widget visibility and order preferences
  * Returns default preferences if none exist
  */
-export async function GET(request: NextRequest): Promise<NextResponse<ApiResponse<WidgetPreference[]>>> {
-  const { authenticated, userId } = await verifyAuth(request)
+export async function GET(): Promise<NextResponse<ApiResponse<WidgetPreference[]>>> {
+  const { authenticated, userId } = await verifyAuth()
   if (!authenticated) return UnauthorizedResponse(userId)
 
   try {
@@ -65,7 +65,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<ApiRespons
  * Creates or updates preferences for all provided widgets
  */
 export async function PUT(request: NextRequest): Promise<NextResponse<ApiResponse<WidgetPreference[]>>> {
-  const { authenticated, userId } = await verifyAuth(request)
+  const { authenticated, userId } = await verifyAuth()
   if (!authenticated) return UnauthorizedResponse(userId)
 
   try {

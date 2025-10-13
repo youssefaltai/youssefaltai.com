@@ -15,7 +15,7 @@ type BudgetResponse = Awaited<ReturnType<typeof createBudget>>
  * POST /api/budgets - Create a new budget
  */
 export async function POST(request: NextRequest): Promise<NextResponse<ApiResponse<BudgetResponse>>> {
-    const { authenticated, userId } = await verifyAuth(request)
+    const { authenticated, userId } = await verifyAuth()
     if (!authenticated) return UnauthorizedResponse(userId)
 
     const jsonInput = await getJsonInput(request)
@@ -35,8 +35,8 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
 /**
  * GET /api/budgets - Get all budgets
  */
-export async function GET(request: NextRequest): Promise<NextResponse<ApiResponse<BudgetResponse[]>>> {
-    const { authenticated, userId } = await verifyAuth(request)
+export async function GET(): Promise<NextResponse<ApiResponse<BudgetResponse[]>>> {
+    const { authenticated, userId } = await verifyAuth()
     if (!authenticated) return UnauthorizedResponse(userId)
 
     try {

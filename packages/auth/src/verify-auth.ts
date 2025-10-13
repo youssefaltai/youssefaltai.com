@@ -1,11 +1,4 @@
-/**
- * API Middleware Utilities
- * Shared authentication and error handling for API routes
- */
-import { NextRequest } from 'next/server'
-import { verifyToken } from './lib/jwt'
-import { COOKIE_NAME } from './lib/cookies'
-import { prisma } from '@repo/db'
+import { getSession } from './lib/session-simple'
 
 type VerifyAuthResponse = {
   authenticated: true
@@ -15,33 +8,13 @@ type VerifyAuthResponse = {
   userId: null
 }
 
-export async function verifyAuth(request: NextRequest): Promise<VerifyAuthResponse> {
-  const token = request.cookies.get(COOKIE_NAME)?.value
-  if (!token) {
-    return { authenticated: false, userId: null }
-  }
+export async function verifyAuth(): Promise<VerifyAuthResponse> {
   try {
-    const payload = await verifyToken(token)
-    
-    // Verify user still exists in database
-    const user = await prisma.user.findUnique({
-      where: { id: payload.id },
-      select: { id: true }
-    })
-
-    if (!user) {
-      console.warn('Auth verification failed: User not found in database', {
-        userId: payload.id,
-      })
-      return { authenticated: false, userId: null }
-    }
-
-    return { authenticated: true, userId: payload.id }
+    const userId = await getSession()
+    if (!userId) return { authenticated: false, userId: null }
+    return { authenticated: true, userId }
   } catch (error) {
-    console.warn('Auth verification failed:', {
-      reason: error instanceof Error ? error.message : 'Unknown',
-      hasToken: !!token,
-    })
+    console.warn('Session verification failed:', error)
     return { authenticated: false, userId: null }
   }
 }

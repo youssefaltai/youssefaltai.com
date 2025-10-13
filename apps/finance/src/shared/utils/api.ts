@@ -1,6 +1,7 @@
 import { ApiResponse } from "@repo/types"
 import { NextRequest, NextResponse } from "next/server"
-import { COOKIE_NAME } from "@repo/auth"  // Edge-safe export
+
+const SESSION_COOKIE = 'passkey_session'
 
 export async function getJsonInput(request: NextRequest) {
     try {
@@ -40,14 +41,13 @@ export function UnauthorizedResponse<T>(userId: string | null | undefined): Next
         { status: 401 }
     )
     
-    // Clear invalid auth cookie
-    response.cookies.set(COOKIE_NAME, '', {
+    response.cookies.set(SESSION_COOKIE, '', {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
         domain: process.env.NODE_ENV === 'production' ? '.youssefaltai.com' : undefined,
         path: '/',
-        maxAge: 0, // Immediate expiration
+        maxAge: 0,
     })
     
     return response as NextResponse<ApiResponse<T>>
@@ -84,7 +84,7 @@ export function createAccountRouteHandlers<T>(config: {
   const { createFn, getAllFn } = config
 
   async function POST(request: NextRequest): Promise<NextResponse<ApiResponse<T>>> {
-    const { authenticated, userId } = await verifyAuth(request)
+    const { authenticated, userId } = await verifyAuth()
     if (!authenticated) return UnauthorizedResponse(userId)
 
     const jsonInput = await getJsonInput(request)
@@ -99,8 +99,8 @@ export function createAccountRouteHandlers<T>(config: {
     }
   }
 
-  async function GET(request: NextRequest): Promise<NextResponse<ApiResponse<T[]>>> {
-    const { authenticated, userId } = await verifyAuth(request)
+  async function GET(): Promise<NextResponse<ApiResponse<T[]>>> {
+    const { authenticated, userId } = await verifyAuth()
     if (!authenticated) return UnauthorizedResponse(userId)
 
     try {

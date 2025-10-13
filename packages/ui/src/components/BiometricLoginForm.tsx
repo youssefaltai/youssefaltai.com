@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { startRegistration, startAuthentication } from '@simplewebauthn/browser'
+import { useAuthenticatePasskey } from 'next-passkey-webauthn/client'
 import { Button } from './Button'
 import { Input } from './Input'
 import { Card } from './Card'
@@ -10,142 +10,142 @@ interface BiometricLoginFormProps {
   appName: string
 }
 
+const endpoints = {
+  registerStart: '/api/passkey/register/start',
+  registerFinish: '/api/passkey/register/finish',
+  authenticateStart: '/api/passkey/authenticate/start',
+  authenticateFinish: '/api/passkey/authenticate/finish',
+  deletePasskey: '/api/passkey/delete',
+  listPasskeys: '/api/passkey/list',
+}
+
 export function BiometricLoginForm({ appName }: BiometricLoginFormProps) {
   const [email, setEmail] = useState('')
-  const [name, setName] = useState('')
-  const [error, setError] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [isNewUser, setIsNewUser] = useState(false)
+  const [error, setError] = useState('')
+  const [verificationSent, setVerificationSent] = useState(false)
   const [mounted, setMounted] = useState(false)
   const router = useRouter()
 
-  // Prevent hydration mismatch
+  const { authenticate, loading: authLoading, error: authError } = useAuthenticatePasskey({ endpoints })
+
   useEffect(() => {
     setMounted(true)
   }, [])
 
-  // Check if WebAuthn is supported (only on client)
-  const isWebAuthnSupported = mounted && typeof globalThis !== 'undefined' &&
-    'PublicKeyCredential' in globalThis
+  const isSupported = mounted && 'PublicKeyCredential' in globalThis
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError(null)
-    setLoading(true)
+    setError('')
 
     try {
-      // Step 1: Get authentication options
-      const optionsRes = await fetch('/api/auth/webauthn/login/options', {
+      const findRes = await fetch('/api/user/find', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
       })
 
-      if (!optionsRes.ok) {
-        if (optionsRes.status === 404) {
-          // User doesn't exist, switch to registration mode
-          setIsNewUser(true)
-          setError('No account found. Please register with Face ID / Touch ID.')
-          setLoading(false)
-          return
+      if (!findRes.ok) {
+        setError('User not found. Contact administrator.')
+        return
+      }
+
+      const { userId } = await findRes.json()
+
+      try {
+        // Call start authentication API directly to get proper error codes
+        const startRes = await fetch('/api/passkey/authenticate/start', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId }),
+        })
+
+        if (!startRes.ok) {
+          const errorData = await startRes.json()
+          
+          // Check for specific error codes
+          if (errorData?.code === 'CREDENTIAL_NOT_FOUND') {
+            // No passkey on this device - send email verification
+          } else {
+            setError(errorData?.error || 'Authentication failed. Please try again.')
+            return
+          }
+        } else {
+          // Start was successful, now call the client library authenticate
+          const result = await authenticate(userId)
+          if (result.verified) {
+            router.push('/')
+            return
+          }
         }
-        throw new Error('Failed to get authentication options')
+      } catch (err: unknown) {
+        // Handle any other errors from the authenticate call
+        const errorData = err as any
+        setError(errorData?.error || 'Authentication failed. Please try again.')
+        return
       }
 
-      const { options, userId } = await optionsRes.json() as { options: any; userId: string }
-
-      // Step 2: Start biometric authentication
-      const credential = await startAuthentication(options)
-
-      // Step 3: Verify authentication
-      const verifyRes = await fetch('/api/auth/webauthn/login/verify', {
+      // Only reach here if no passkey exists
+      const sendRes = await fetch('/api/device/verify/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, credential }),
+        body: JSON.stringify({ userId, email }),
       })
 
-      if (!verifyRes.ok) {
-        throw new Error('Authentication failed')
+      if (!sendRes.ok) {
+        const errorData = await sendRes.json()
+        setError(errorData.error || 'Failed to send verification email. Please try again.')
+        return
       }
 
-      // Success - redirect
-      router.push('/')
-    } catch (err: any) {
-      console.error('Login error:', err)
-      setError(err.message || 'Authentication failed. Please try again.')
-    } finally {
-      setLoading(false)
+      setVerificationSent(true)
+    } catch (err) {
+      setError(authError || (err instanceof Error ? err.message : 'Login failed'))
     }
   }
 
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError(null)
-    setLoading(true)
+  if (!mounted) return null
 
-    try {
-      // Step 1: Get registration options
-      const optionsRes = await fetch('/api/auth/webauthn/register/options', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, name }),
-      })
-
-      if (!optionsRes.ok) {
-        throw new Error('Failed to get registration options')
-      }
-
-      const { options, userId } = await optionsRes.json() as { options: any; userId: string }
-
-      // Step 2: Start biometric registration
-      const credential = await startRegistration(options)
-
-      // Step 3: Verify registration
-      const verifyRes = await fetch('/api/auth/webauthn/register/verify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId,
-          credential,
-          deviceName: 'Face ID / Touch ID',
-        }),
-      })
-
-      if (!verifyRes.ok) {
-        throw new Error('Registration failed')
-      }
-
-      // Success - redirect
-      router.push('/')
-    } catch (err: any) {
-      console.error('Registration error:', err)
-      setError(err.message || 'Registration failed. Please try again.')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  if (!isWebAuthnSupported) {
+  if (!isSupported) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-ios-gray-6 px-4">
         <div className="max-w-md w-full text-center">
           <h2 className="text-ios-title-1 font-bold text-ios-label-primary mb-2">{appName}</h2>
-          <p className="text-ios-body text-ios-red">
-            Your browser doesn't support Face ID / Touch ID authentication.
-            Please use a modern browser like Chrome, Safari, or Edge.
-          </p>
+          <p className="text-ios-body text-ios-red">WebAuthn not supported. Please use a modern browser.</p>
         </div>
       </div>
     )
   }
 
-  // Prevent hydration mismatch - don't render until mounted
-  if (!mounted) {
+  if (verificationSent) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-ios-gray-6 px-4">
-        <div className="max-w-md w-full text-center">
-          <h2 className="text-ios-title-1 font-bold text-ios-label-primary mb-2">{appName}</h2>
-          <p className="text-ios-body text-ios-gray-1">Loading...</p>
+        <div className="max-w-md w-full">
+          <div className="text-center mb-8">
+            <h2 className="text-ios-title-1 font-bold text-ios-label-primary">{appName}</h2>
+          </div>
+
+          <Card padding='lg'>
+            <h3 className="text-ios-title-3 font-bold text-ios-label-primary mb-4">
+              Check Your Email
+            </h3>
+            <p className="text-ios-body text-ios-gray-1 mb-4">
+              We've sent a verification link to <strong>{email}</strong>
+            </p>
+            <p className="text-ios-callout text-ios-gray-2 mb-6">
+              Click the link in the email to register this device with biometrics.
+            </p>
+            <Button
+              onClick={() => {
+                setVerificationSent(false)
+                setError('')
+              }}
+              variant="secondary"
+              className="w-full"
+            >
+              Back to Login
+            </Button>
+          </Card>
         </div>
       </div>
     )
@@ -156,13 +156,11 @@ export function BiometricLoginForm({ appName }: BiometricLoginFormProps) {
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
           <h2 className="text-ios-title-1 font-bold text-ios-label-primary">{appName}</h2>
-          <p className="mt-2 text-ios-body text-ios-gray-1">
-            {isNewUser ? 'Register with Face ID / Touch ID' : 'Sign in with Face ID / Touch ID'}
-          </p>
+          <p className="mt-2 text-ios-body text-ios-gray-1">Sign in with biometrics</p>
         </div>
 
         <Card padding='lg'>
-          <form className="space-y-4" onSubmit={isNewUser ? handleRegister : handleLogin}>
+          <form className="space-y-4" onSubmit={handleSubmit}>
             <Input
               id="email"
               type="email"
@@ -170,19 +168,8 @@ export function BiometricLoginForm({ appName }: BiometricLoginFormProps) {
               required
               value={email}
               onChange={(e) => setEmail((e.target as HTMLInputElement).value)}
-              disabled={loading}
+              disabled={authLoading}
             />
-
-            {isNewUser && (
-              <Input
-                id="name"
-                type="text"
-                label="Name (optional)"
-                value={name}
-                onChange={(e) => setName((e.target as HTMLInputElement).value)}
-                disabled={loading}
-              />
-            )}
 
             {error && (
               <div className="bg-ios-red/10 border border-ios-red text-ios-red px-4 py-3 rounded-ios text-ios-callout">
@@ -190,40 +177,16 @@ export function BiometricLoginForm({ appName }: BiometricLoginFormProps) {
               </div>
             )}
 
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? '...' : isNewUser ? '🔒 Register with Face ID / Touch ID' : '🔒 Sign in with Face ID / Touch ID'}
+            <Button type="submit" className="w-full" disabled={authLoading}>
+              {authLoading ? '...' : '🔒 Sign in'}
             </Button>
-
-            {!isNewUser && (
-              <button
-                type="button"
-                className="w-full text-ios-callout text-ios-blue hover:text-ios-blue/80"
-                onClick={() => setIsNewUser(true)}
-              >
-                New user? Register with Face ID / Touch ID
-              </button>
-            )}
-
-            {isNewUser && (
-              <button
-                type="button"
-                className="w-full text-ios-callout text-ios-blue hover:text-ios-blue/80"
-                onClick={() => {
-                  setIsNewUser(false)
-                  setError(null)
-                }}
-              >
-                Already have an account? Sign in
-              </button>
-            )}
           </form>
         </Card>
 
         <p className="text-ios-caption text-ios-gray-1 text-center mt-6">
-          This app uses your device's Face ID or Touch ID for secure, password-free authentication.
+          Secure, password-free authentication.
         </p>
       </div>
     </div>
   )
 }
-

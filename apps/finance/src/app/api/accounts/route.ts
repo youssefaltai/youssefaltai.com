@@ -13,7 +13,7 @@ import { TAccount, AccountType } from "@repo/db"
  * Supports optional ?type=<AccountType> query parameter to filter by type
  */
 export async function GET(request: NextRequest): Promise<NextResponse<ApiResponse<TAccount[]>>> {
-    const { authenticated, userId } = await verifyAuth(request)
+    const { authenticated, userId } = await verifyAuth()
     if (!authenticated) return UnauthorizedResponse(userId)
 
     try {
