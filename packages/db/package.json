@@ -23,11 +23,11 @@
   "scripts": {
     "lint": "eslint .",
     "type-check": "tsc --noEmit",
-    "db:generate": "dotenv -e ../../.env.production -e ../../.env.development -- prisma generate",
-    "db:push": "dotenv -e ../../.env.production -e ../../.env.development -- prisma db push",
-    "db:migrate": "dotenv -e ../../.env.production -e ../../.env.development -- prisma migrate dev",
-    "db:studio": "dotenv -e ../../.env.production -e ../../.env.development -- prisma studio",
-    "db:seed": "dotenv -e ../../.env.production -e ../../.env.development -- tsx prisma/seed.ts"
+    "db:generate": "dotenv -e ../../.env.development -- prisma generate",
+    "db:push": "dotenv -e ../../.env.development -- prisma db push",
+    "db:migrate": "dotenv -e ../../.env.development -- prisma migrate dev",
+    "db:studio": "dotenv -e ../../.env.development -- prisma studio",
+    "db:seed": "dotenv -e ../../.env.development -- tsx prisma/seed.ts"
   },
   "exports": {
     ".": "./src/index.ts"
