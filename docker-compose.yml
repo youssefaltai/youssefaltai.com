@@ -100,6 +100,7 @@ services:
       - NODE_ENV=production
       - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD:-166288}@postgres:5432/youssefaltai?schema=public
       - REDIS_URL=redis://redis:6379
+      - RESEND_API_KEY=${RESEND_API_KEY}
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.fitness.rule=Host(`fitness.youssefaltai.com`) || Host(`fitness.localhost`)"
@@ -125,6 +126,7 @@ services:
       - NODE_ENV=production
       - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD:-166288}@postgres:5432/youssefaltai?schema=public
       - REDIS_URL=redis://redis:6379
+      - RESEND_API_KEY=${RESEND_API_KEY}
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.dashboard.rule=Host(`dashboard.youssefaltai.com`) || Host(`dashboard.localhost`)"
