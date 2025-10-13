@@ -71,9 +71,10 @@ services:
     container_name: finance-app
     environment:
       - NODE_ENV=production
-      - JWT_SECRET=${JWT_SECRET}
       - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD:-166288}@postgres:5432/youssefaltai?schema=public
       - REDIS_URL=redis://redis:6379
+      - GOLD_API_KEY=${GOLD_API_KEY}
+      - RESEND_API_KEY=${RESEND_API_KEY}
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.finance.rule=Host(`finance.youssefaltai.com`) || Host(`finance.localhost`)"
@@ -97,7 +98,6 @@ services:
     container_name: fitness-app
     environment:
       - NODE_ENV=production
-      - JWT_SECRET=${JWT_SECRET}
       - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD:-166288}@postgres:5432/youssefaltai?schema=public
       - REDIS_URL=redis://redis:6379
     labels:
@@ -123,7 +123,6 @@ services:
     container_name: dashboard-app
     environment:
       - NODE_ENV=production
-      - JWT_SECRET=${JWT_SECRET}
       - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD:-166288}@postgres:5432/youssefaltai?schema=public
       - REDIS_URL=redis://redis:6379
     labels:
