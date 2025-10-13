@@ -21,20 +21,37 @@ docker compose logs -f postgres redis
 
 ### **2. Setup Environment Variables**
 
-```bash
-# Copy example env file
-cp .env.example .env
+This monorepo uses environment-specific configuration files. See [environment-variables.md](../deployment/environment-variables.md) for details.
 
-# Edit .env with your values (optional, defaults work for local dev)
+**Quick Setup:**
+
+```bash
+# 1. Copy root environment files
+cp .env.example .env
+cp .env.development.example .env.development
+
+# 2. Edit with your values (optional, defaults work for local dev)
 ```
 
-**Required Environment Variables:**
+**Root `.env` (shared defaults):**
+```env
+JWT_SECRET="your-super-secret-jwt-key"
+NODE_ENV="development"
+POSTGRES_USER="postgres"
+POSTGRES_PASSWORD="166288"
+POSTGRES_DB="youssefaltai"
+```
+
+**Root `.env.development` (local connections):**
 ```env
 DATABASE_URL="postgresql://postgres:166288@localhost:5432/youssefaltai?schema=public"
 REDIS_URL="redis://localhost:6379"
-JWT_SECRET="your-super-secret-jwt-key"
-NODE_ENV=development
 ```
+
+**App `.env` files (optional for local dev):**
+- Not needed for basic local development
+- API keys can be set in app-level files if testing external services
+- See [environment-variables.md](../deployment/environment-variables.md) for production setup
 
 ### **3. Push Database Schema**
 
@@ -354,7 +371,8 @@ pnpm db:generate
 
 Before starting development:
 - [ ] Docker Desktop is installed and running
-- [ ] `.env` file exists with correct values
+- [ ] Root `.env` file exists: `cp .env.example .env`
+- [ ] Root `.env.development` exists: `cp .env.development.example .env.development`
 - [ ] PostgreSQL is running: `docker compose ps postgres`
 - [ ] Redis is running: `docker compose ps redis`
 - [ ] Schema is pushed: `pnpm db:push`

@@ -4,9 +4,9 @@
   "description": "Turborepo monorepo with multiple Next.js apps and shared packages",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "dotenv -e .env -- turbo dev",
-    "dev:https": "dotenv -e .env -- turbo dev:https",
-    "build": "dotenv -e .env -- turbo build",
+    "dev": "turbo dev",
+    "dev:https": "turbo dev:https",
+    "build": "turbo build",
     "lint": "turbo lint",
     "type-check": "turbo type-check",
     "clean": "turbo clean",
@@ -22,7 +22,7 @@
   "license": "ISC",
   "packageManager": "pnpm@10.17.1",
   "devDependencies": {
-    "dotenv-cli": "^10.0.0",
+    "dotenv": "^17.2.3",
     "prettier": "^3.6.2",
     "turbo": "^2.5.8",
     "typescript": "^5.9.3"

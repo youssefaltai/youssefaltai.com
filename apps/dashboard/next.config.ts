@@ -1,5 +1,14 @@
 import type { NextConfig } from "next";
 import path from "path";
+import dotenv from "dotenv";
+
+// Load root .env files (Next.js will load app-level ones automatically)
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+if (!!process.env.NODE_ENV) {
+  dotenv.config({
+    path: path.resolve(__dirname, `../../.env.${process.env.NODE_ENV}`)
+  });
+}
 
 const nextConfig: NextConfig = {
   output: 'standalone',
