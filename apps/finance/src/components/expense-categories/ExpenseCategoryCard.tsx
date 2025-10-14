@@ -1,8 +1,8 @@
 'use client'
 
-import { TrendingDown } from '@repo/ui'
+import { TrendingDown } from 'lucide-react'
+import { UnstyledButton, Group, Text } from '@mantine/core'
 import type { Account } from '@repo/db'
-import { EntityListItem } from '@repo/ui'
 
 interface ExpenseCategoryCardProps {
   expenseCategory: Account
@@ -14,17 +14,26 @@ interface ExpenseCategoryCardProps {
 /**
  * Display item for an expense category in a grouped list
  */
-export function ExpenseCategoryCard({ expenseCategory, onClick, isFirst, isLast }: ExpenseCategoryCardProps) {
+export function ExpenseCategoryCard({ expenseCategory, onClick, isFirst: _isFirst, isLast }: ExpenseCategoryCardProps) {
   return (
-    <EntityListItem
-      icon={TrendingDown}
-      iconColor="neutral"
-      title={expenseCategory.name}
-      subtitle={expenseCategory.description || undefined}
-      rightContent={null}
-      onClick={onClick}
-      isFirst={isFirst}
-      isLast={isLast}
-    />
+    <UnstyledButton onClick={onClick} style={{ width: '100%' }}>
+      <Group
+        p="md"
+        justify="space-between"
+        style={{
+          borderBottom: !isLast ? '1px solid var(--mantine-color-gray-3)' : 'none',
+        }}
+      >
+        <Group gap="sm" style={{ flex: 1 }}>
+          <TrendingDown size={20} style={{ opacity: 0.6 }} />
+          <div>
+            <Text fw={500}>{expenseCategory.name}</Text>
+            {expenseCategory.description && (
+              <Text size="xs" c="dimmed">{expenseCategory.description}</Text>
+            )}
+          </div>
+        </Group>
+      </Group>
+    </UnstyledButton>
   )
 }

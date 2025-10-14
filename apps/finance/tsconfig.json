@@ -5,9 +5,6 @@
       "@/*": [
         "./src/*"
       ],
-      "@repo/ui": [
-        "../../packages/ui/src"
-      ],
       "@repo/utils": [
         "../../packages/utils/src"
       ],

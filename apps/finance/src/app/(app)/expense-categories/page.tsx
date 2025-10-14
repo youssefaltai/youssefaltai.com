@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { FloatingActionButton, Modal, Plus, TrendingDown, PageLayout, EntityList, LoadingSkeleton } from '@repo/ui'
+import { Plus, TrendingDown } from 'lucide-react'
+import { Container, Stack, ActionIcon, Modal, Title, Text, Group, Paper, Skeleton, Button } from '@mantine/core'
 import { useExpenseCategories, useCreateExpenseCategory, useUpdateExpenseCategory, useDeleteExpenseCategory } from '../../../hooks/use-expense-categories'
 import { ExpenseCategoryCard } from '../../../components/expense-categories/ExpenseCategoryCard'
 import { ExpenseCategoryForm } from '../../../components/forms/ExpenseCategoryForm'
@@ -36,39 +37,76 @@ export default function ExpenseCategoriesPage() {
   }
 
   if (isLoading) {
-    return <LoadingSkeleton title="Expense Categories" subtitle="Manage your spending categories" />
+    return (
+      <Container size="lg" py="md" px="md" pb={96}>
+        <Stack gap="md">
+          <Skeleton height={80} radius="md" />
+          <Skeleton height={80} radius="md" />
+          <Skeleton height={80} radius="md" />
+        </Stack>
+      </Container>
+    )
   }
 
   return (
-    <PageLayout title="Expense Categories" subtitle="Manage your spending categories">
-      <EntityList
-        items={expenseCategories}
-        emptyIcon={TrendingDown}
-        emptyTitle="No Expense Categories Created"
-        emptyDescription="Add your first expense category"
-        renderItem={(category, index) => (
-          <ExpenseCategoryCard
-            key={category.id}
-            expenseCategory={category}
-            onClick={() => setEditingCategory(category)}
-            isFirst={index === 0}
-            isLast={index === expenseCategories.length - 1}
-          />
+    <Container size="lg" py="md" px="md" pb={96}>
+      <Stack gap="md">
+        <Group justify="space-between" align="flex-start">
+          <div>
+            <Title order={1} size="h2">Expense Categories</Title>
+            <Text c="dimmed" size="sm">Manage your spending categories</Text>
+          </div>
+        </Group>
+
+        {expenseCategories.length === 0 ? (
+          <Stack align="center" gap="md" py="xl" style={{ textAlign: 'center' }}>
+            <TrendingDown size={64} style={{ opacity: 0.3 }} />
+            <Title order={3} size="h4">No Expense Categories Created</Title>
+            <Text c="dimmed">Add your first expense category</Text>
+          </Stack>
+        ) : (
+          <Paper withBorder radius="md">
+            <Stack gap={0}>
+              {expenseCategories.map((category, index) => (
+                <ExpenseCategoryCard
+                  key={category.id}
+                  expenseCategory={category}
+                  onClick={() => setEditingCategory(category)}
+                  isFirst={index === 0}
+                  isLast={index === expenseCategories.length - 1}
+                />
+              ))}
+            </Stack>
+          </Paper>
         )}
-      />
+      </Stack>
 
-      <FloatingActionButton 
-        icon={Plus} 
-        label="Add Category"
+      <ActionIcon
         onClick={() => setIsCreateModalOpen(true)}
-        className="fixed bottom-20 right-4"
-      />
+        size="xl"
+        radius="xl"
+        variant="filled"
+        color="blue"
+        aria-label="Add Expense Category"
+        style={{
+          position: 'fixed',
+          bottom: '5rem',
+          right: '1rem',
+          width: '56px',
+          height: '56px',
+          zIndex: 100,
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+        }}
+      >
+        <Plus size={24} />
+      </ActionIcon>
 
-      {/* Create Modal */}
       <Modal
-        isOpen={isCreateModalOpen}
+        opened={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         title="Add Expense Category"
+        centered
+        size="md"
       >
         <ExpenseCategoryForm
           onSubmit={handleCreate}
@@ -76,31 +114,35 @@ export default function ExpenseCategoriesPage() {
         />
       </Modal>
 
-      {/* Edit Modal */}
       <Modal
-        isOpen={!!editingCategory}
+        opened={!!editingCategory}
         onClose={() => setEditingCategory(null)}
         title="Edit Expense Category"
+        centered
+        size="md"
       >
         {editingCategory && (
-          <div className="space-y-4">
+          <Stack gap="md">
             <ExpenseCategoryForm
               initialData={{
                 ...editingCategory,
                 description: editingCategory.description || undefined,
+                openingBalance: Number(editingCategory.balance),
               }}
               onSubmit={handleUpdate}
               onCancel={() => setEditingCategory(null)}
             />
-            <button
+            <Button
               onClick={handleDelete}
-              className="w-full py-3 text-ios-red font-semibold hover:bg-ios-red/10 rounded-ios transition-colors"
+              color="red"
+              variant="light"
+              fullWidth
             >
               Delete Expense Category
-            </button>
-          </div>
+            </Button>
+          </Stack>
         )}
       </Modal>
-    </PageLayout>
+    </Container>
   )
 }

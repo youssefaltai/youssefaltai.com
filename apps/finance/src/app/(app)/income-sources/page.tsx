@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { FloatingActionButton, Modal, Plus, TrendingUp, PageLayout, EntityList, LoadingSkeleton } from '@repo/ui'
+import { Plus, TrendingUp } from 'lucide-react'
+import { Container, Stack, ActionIcon, Modal, Title, Text, Group, Paper, Skeleton, Button } from '@mantine/core'
 import { useIncomeSources, useCreateIncomeSource, useUpdateIncomeSource, useDeleteIncomeSource } from '../../../hooks/use-income-sources'
 import { IncomeSourceCard } from '../../../components/income-sources/IncomeSourceCard'
 import { IncomeSourceForm } from '../../../components/forms/IncomeSourceForm'
@@ -36,39 +37,76 @@ export default function IncomeSourcesPage() {
   }
 
   if (isLoading) {
-    return <LoadingSkeleton title="Income Sources" subtitle="Manage your income sources" />
+    return (
+      <Container size="lg" py="md" px="md" pb={96}>
+        <Stack gap="md">
+          <Skeleton height={80} radius="md" />
+          <Skeleton height={80} radius="md" />
+          <Skeleton height={80} radius="md" />
+        </Stack>
+      </Container>
+    )
   }
 
   return (
-    <PageLayout title="Income Sources" subtitle="Manage your income sources">
-      <EntityList
-        items={incomeSources}
-        emptyIcon={TrendingUp}
-        emptyTitle="No Income Sources Added"
-        emptyDescription="Add your first income source"
-        renderItem={(source, index) => (
-          <IncomeSourceCard
-            key={source.id}
-            incomeSource={source}
-            onClick={() => setEditingSource(source)}
-            isFirst={index === 0}
-            isLast={index === incomeSources.length - 1}
-          />
+    <Container size="lg" py="md" px="md" pb={96}>
+      <Stack gap="md">
+        <Group justify="space-between" align="flex-start">
+          <div>
+            <Title order={1} size="h2">Income Sources</Title>
+            <Text c="dimmed" size="sm">Manage your income sources</Text>
+          </div>
+        </Group>
+
+        {incomeSources.length === 0 ? (
+          <Stack align="center" gap="md" py="xl" style={{ textAlign: 'center' }}>
+            <TrendingUp size={64} style={{ opacity: 0.3 }} />
+            <Title order={3} size="h4">No Income Sources Created</Title>
+            <Text c="dimmed">Add your first income source</Text>
+          </Stack>
+        ) : (
+          <Paper withBorder radius="md">
+            <Stack gap={0}>
+              {incomeSources.map((source, index) => (
+                <IncomeSourceCard
+                  key={source.id}
+                  incomeSource={source}
+                  onClick={() => setEditingSource(source)}
+                  isFirst={index === 0}
+                  isLast={index === incomeSources.length - 1}
+                />
+              ))}
+            </Stack>
+          </Paper>
         )}
-      />
+      </Stack>
 
-      <FloatingActionButton 
-        icon={Plus} 
-        label="Add Income Source"
+      <ActionIcon
         onClick={() => setIsCreateModalOpen(true)}
-        className="fixed bottom-20 right-4"
-      />
+        size="xl"
+        radius="xl"
+        variant="filled"
+        color="blue"
+        aria-label="Add Income Source"
+        style={{
+          position: 'fixed',
+          bottom: '5rem',
+          right: '1rem',
+          width: '56px',
+          height: '56px',
+          zIndex: 100,
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+        }}
+      >
+        <Plus size={24} />
+      </ActionIcon>
 
-      {/* Create Modal */}
       <Modal
-        isOpen={isCreateModalOpen}
+        opened={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         title="Add Income Source"
+        centered
+        size="md"
       >
         <IncomeSourceForm
           onSubmit={handleCreate}
@@ -76,31 +114,35 @@ export default function IncomeSourcesPage() {
         />
       </Modal>
 
-      {/* Edit Modal */}
       <Modal
-        isOpen={!!editingSource}
+        opened={!!editingSource}
         onClose={() => setEditingSource(null)}
         title="Edit Income Source"
+        centered
+        size="md"
       >
         {editingSource && (
-          <div className="space-y-4">
+          <Stack gap="md">
             <IncomeSourceForm
               initialData={{
                 ...editingSource,
                 description: editingSource.description || undefined,
+                openingBalance: Number(editingSource.balance),
               }}
               onSubmit={handleUpdate}
               onCancel={() => setEditingSource(null)}
             />
-            <button
+            <Button
               onClick={handleDelete}
-              className="w-full py-3 text-ios-red font-semibold hover:bg-ios-red/10 rounded-ios transition-colors"
+              color="red"
+              variant="light"
+              fullWidth
             >
               Delete Income Source
-            </button>
-          </div>
+            </Button>
+          </Stack>
         )}
       </Modal>
-    </PageLayout>
+    </Container>
   )
 }

@@ -1,15 +1,14 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Search, Button, Input, SegmentedControl, ChipSelect } from '@repo/ui'
-import type { SegmentedControlOption, ChipSelectOption } from '@repo/ui'
-import { cn } from '@repo/utils'
+import { Search } from 'lucide-react'
+import { TextInput, Button, SegmentedControl, Chip, Group, Stack, SimpleGrid, NumberInput, Text } from '@mantine/core'
 import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, parseISO, isSameDay } from '@repo/utils'
 import { useAccounts } from '../../hooks/use-accounts'
 
 type TransactionType = 'all' | 'income' | 'expense' | 'transfer'
 
-const TRANSACTION_TYPE_OPTIONS: SegmentedControlOption<TransactionType>[] = [
+const TRANSACTION_TYPE_OPTIONS = [
   { value: 'all', label: 'All' },
   { value: 'income', label: 'Income' },
   { value: 'expense', label: 'Expense' },
@@ -48,72 +47,41 @@ export function TransactionFilters({
   // Fetch accounts
   const { data: allAccounts = [] } = useAccounts()
 
-  // Transform accounts to chip options
-  const accountOptions: ChipSelectOption[] = allAccounts.map(account => ({
-    id: account.id,
-    label: account.name,
-  }))
-
   // Filter accounts based on selected transaction type
-  const getFromAccountOptions = (): ChipSelectOption[] => {
+  const getFromAccountOptions = () => {
     const selectedType = draftFilters.type
     
     if (!selectedType) {
-      return accountOptions // Show all when no type selected
+      return allAccounts // Show all when no type selected
     }
     
     switch (selectedType) {
       case 'income':
-        // Income transactions: FROM income accounts
-        return accountOptions.filter(opt => {
-          const account = allAccounts.find(a => a.id === opt.id)
-          return account?.type === 'income'
-        })
+        return allAccounts.filter(a => a.type === 'income')
       case 'expense':
-        // Expense transactions: FROM asset accounts
-        return accountOptions.filter(opt => {
-          const account = allAccounts.find(a => a.id === opt.id)
-          return account?.type === 'asset'
-        })
       case 'transfer':
-        // Transfer transactions: FROM asset accounts
-        return accountOptions.filter(opt => {
-          const account = allAccounts.find(a => a.id === opt.id)
-          return account?.type === 'asset'
-        })
+        return allAccounts.filter(a => a.type === 'asset')
       default:
-        return accountOptions
+        return allAccounts
     }
   }
 
-  const getToAccountOptions = (): ChipSelectOption[] => {
+  const getToAccountOptions = () => {
     const selectedType = draftFilters.type
     
     if (!selectedType) {
-      return accountOptions // Show all when no type selected
+      return allAccounts // Show all when no type selected
     }
     
     switch (selectedType) {
       case 'income':
-        // Income transactions: TO asset accounts
-        return accountOptions.filter(opt => {
-          const account = allAccounts.find(a => a.id === opt.id)
-          return account?.type === 'asset'
-        })
+        return allAccounts.filter(a => a.type === 'asset')
       case 'expense':
-        // Expense transactions: TO expense accounts
-        return accountOptions.filter(opt => {
-          const account = allAccounts.find(a => a.id === opt.id)
-          return account?.type === 'expense'
-        })
+        return allAccounts.filter(a => a.type === 'expense')
       case 'transfer':
-        // Transfer transactions: TO asset accounts
-        return accountOptions.filter(opt => {
-          const account = allAccounts.find(a => a.id === opt.id)
-          return account?.type === 'asset'
-        })
+        return allAccounts.filter(a => a.type === 'asset')
       default:
-        return accountOptions
+        return allAccounts
     }
   }
 
@@ -121,28 +89,6 @@ export function TransactionFilters({
   useEffect(() => {
     setDraftFilters(filters)
   }, [filters])
-
-  const handleFromAccountToggle = (accountId: string) => {
-    const current = draftFilters.fromAccountIds || []
-    const updated = current.includes(accountId)
-      ? current.filter(id => id !== accountId)
-      : [...current, accountId]
-    setDraftFilters({
-      ...draftFilters,
-      fromAccountIds: updated.length > 0 ? updated : undefined
-    })
-  }
-
-  const handleToAccountToggle = (accountId: string) => {
-    const current = draftFilters.toAccountIds || []
-    const updated = current.includes(accountId)
-      ? current.filter(id => id !== accountId)
-      : [...current, accountId]
-    setDraftFilters({
-      ...draftFilters,
-      toAccountIds: updated.length > 0 ? updated : undefined
-    })
-  }
 
   const handleDatePreset = (preset: 'today' | 'week' | 'month' | 'all') => {
     const now = new Date()
@@ -185,17 +131,14 @@ export function TransactionFilters({
     const start = parseISO(draftFilters.dateFrom)
     const end = parseISO(draftFilters.dateTo)
     
-    // Check if it's today
     if (isSameDay(start, startOfDay(now)) && isSameDay(end, endOfDay(now))) {
       return 'today'
     }
     
-    // Check if it's this week
     if (isSameDay(start, startOfWeek(now)) && isSameDay(end, endOfWeek(now))) {
       return 'week'
     }
     
-    // Check if it's this month
     if (isSameDay(start, startOfMonth(now)) && isSameDay(end, endOfMonth(now))) {
       return 'month'
     }
@@ -229,183 +172,150 @@ export function TransactionFilters({
   }
 
   return (
-    <div className="space-y-6">
+    <Stack gap="lg">
       {/* Search */}
       <div>
-        <label className="text-ios-callout font-semibold text-ios-label-primary block mb-3">
-          Search
-        </label>
-        <div className="relative">
-          <div className="absolute left-3 top-3 pointer-events-none z-10">
-            <Search className="w-5 h-5 text-ios-gray-2" />
-          </div>
-          <input
-            type="text"
-            value={draftFilters.search || ''}
-            onChange={(e) =>
-              setDraftFilters({ ...draftFilters, search: e.target.value || undefined })
-            }
-            placeholder="Search descriptions..."
-            className="w-full h-11 pl-10 pr-4 bg-ios-gray-6 rounded-ios text-ios-body text-ios-label-primary placeholder:text-ios-gray-2 focus:outline-none focus:ring-2 focus:ring-ios-blue focus:bg-white transition-all"
-          />
-        </div>
+        <Text fw={600} size="sm" mb="sm">Search</Text>
+        <TextInput
+          value={draftFilters.search || ''}
+          onChange={(e) =>
+            setDraftFilters({ ...draftFilters, search: e.target.value || undefined })
+          }
+          placeholder="Search descriptions..."
+          leftSection={<Search size={16} />}
+        />
       </div>
 
       {/* Date Range */}
       <div>
-        <label className="text-ios-callout font-semibold text-ios-label-primary block mb-3">
-          Date Range
-        </label>
-        <div className="grid grid-cols-2 gap-2">
-          <button
+        <Text fw={600} size="sm" mb="sm">Date Range</Text>
+        <SimpleGrid cols={2} spacing="xs">
+          <Button
             onClick={() => handleDatePreset('today')}
-            className={cn(
-              'py-3 rounded-ios font-semibold text-ios-callout transition-all active:scale-95',
-              currentPreset === 'today'
-                ? 'bg-ios-blue text-white shadow-ios'
-                : 'bg-ios-gray-6 text-ios-label-primary'
-            )}
+            variant={currentPreset === 'today' ? 'filled' : 'light'}
           >
             Today
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={() => handleDatePreset('week')}
-            className={cn(
-              'py-3 rounded-ios font-semibold text-ios-callout transition-all active:scale-95',
-              currentPreset === 'week'
-                ? 'bg-ios-blue text-white shadow-ios'
-                : 'bg-ios-gray-6 text-ios-label-primary'
-            )}
+            variant={currentPreset === 'week' ? 'filled' : 'light'}
           >
             This Week
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={() => handleDatePreset('month')}
-            className={cn(
-              'py-3 rounded-ios font-semibold text-ios-callout transition-all active:scale-95',
-              currentPreset === 'month'
-                ? 'bg-ios-blue text-white shadow-ios'
-                : 'bg-ios-gray-6 text-ios-label-primary'
-            )}
+            variant={currentPreset === 'month' ? 'filled' : 'light'}
           >
             This Month
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={() => handleDatePreset('all')}
-            className={cn(
-              'py-3 rounded-ios font-semibold text-ios-callout transition-all active:scale-95',
-              currentPreset === 'all'
-                ? 'bg-ios-blue text-white shadow-ios'
-                : 'bg-ios-gray-6 text-ios-label-primary'
-            )}
+            variant={currentPreset === 'all' ? 'filled' : 'light'}
           >
             All Time
-          </button>
-        </div>
+          </Button>
+        </SimpleGrid>
       </div>
 
       {/* Transaction Type */}
       <div>
-        <label className="text-ios-callout font-semibold text-ios-label-primary block mb-3">
-          Type
-        </label>
+        <Text fw={600} size="sm" mb="sm">Type</Text>
         <SegmentedControl
-          options={TRANSACTION_TYPE_OPTIONS}
           value={(draftFilters.type || 'all') as TransactionType}
           onChange={(value) =>
             setDraftFilters({
               ...draftFilters,
-              type: value === 'all' ? undefined : value,
+              type: value === 'all' ? undefined : (value as 'income' | 'expense' | 'transfer'),
             })
           }
+          data={TRANSACTION_TYPE_OPTIONS}
+          fullWidth
         />
       </div>
 
       {/* From Accounts */}
       <div>
-        <label className="text-ios-callout font-semibold text-ios-label-primary block mb-3">
-          From Accounts
-        </label>
-        <ChipSelect
-          options={getFromAccountOptions()}
-          selectedIds={draftFilters.fromAccountIds || []}
-          onToggle={handleFromAccountToggle}
-          emptyMessage="No accounts available"
-        />
+        <Text fw={600} size="sm" mb="sm">From Accounts</Text>
+        {getFromAccountOptions().length === 0 ? (
+          <Text size="sm" c="dimmed">No accounts available</Text>
+        ) : (
+          <Chip.Group
+            multiple
+            value={draftFilters.fromAccountIds || []}
+            onChange={(value) => setDraftFilters({ ...draftFilters, fromAccountIds: value.length > 0 ? value : undefined })}
+          >
+            <Group gap="xs">
+              {getFromAccountOptions().map((account) => (
+                <Chip key={account.id} value={account.id}>{account.name}</Chip>
+              ))}
+            </Group>
+          </Chip.Group>
+        )}
       </div>
 
       {/* To Accounts */}
       <div>
-        <label className="text-ios-callout font-semibold text-ios-label-primary block mb-3">
-          To Accounts
-        </label>
-        <ChipSelect
-          options={getToAccountOptions()}
-          selectedIds={draftFilters.toAccountIds || []}
-          onToggle={handleToAccountToggle}
-          emptyMessage="No accounts available"
-        />
+        <Text fw={600} size="sm" mb="sm">To Accounts</Text>
+        {getToAccountOptions().length === 0 ? (
+          <Text size="sm" c="dimmed">No accounts available</Text>
+        ) : (
+          <Chip.Group
+            multiple
+            value={draftFilters.toAccountIds || []}
+            onChange={(value) => setDraftFilters({ ...draftFilters, toAccountIds: value.length > 0 ? value : undefined })}
+          >
+            <Group gap="xs">
+              {getToAccountOptions().map((account) => (
+                <Chip key={account.id} value={account.id}>{account.name}</Chip>
+              ))}
+            </Group>
+          </Chip.Group>
+        )}
       </div>
 
       {/* Amount Range */}
       <div>
-        <label className="text-ios-callout font-semibold text-ios-label-primary block mb-3">
-          Amount Range
-        </label>
-        <div className="grid grid-cols-2 gap-3">
-          <Input
-            type="number"
-            value={draftFilters.minAmount || ''}
-            onChange={(e) =>
+        <Text fw={600} size="sm" mb="sm">Amount Range</Text>
+        <Group grow>
+          <NumberInput
+            value={draftFilters.minAmount}
+            onChange={(val) =>
               setDraftFilters({
                 ...draftFilters,
-                minAmount: e.target.value ? parseFloat(e.target.value) : undefined,
+                minAmount: val ? Number(val) : undefined,
               })
             }
             placeholder="Min"
-            step="0.01"
+            decimalScale={2}
           />
-          <Input
-            type="number"
-            value={draftFilters.maxAmount || ''}
-            onChange={(e) =>
+          <NumberInput
+            value={draftFilters.maxAmount}
+            onChange={(val) =>
               setDraftFilters({
                 ...draftFilters,
-                maxAmount: e.target.value ? parseFloat(e.target.value) : undefined,
+                maxAmount: val ? Number(val) : undefined,
               })
             }
             placeholder="Max"
-            step="0.01"
+            decimalScale={2}
           />
-        </div>
+        </Group>
       </div>
 
       {/* Actions */}
-      <div className="flex gap-3 pt-2">
-        <Button
-          variant="secondary"
-          onClick={onCancel}
-          className="flex-1"
-        >
+      <Group justify="flex-end">
+        <Button variant="default" onClick={onCancel}>
           Cancel
         </Button>
         {hasActiveFilters && (
-          <Button
-            variant="plain"
-            onClick={handleClearAll}
-            className="flex-1"
-          >
+          <Button variant="light" onClick={handleClearAll}>
             Clear All
           </Button>
         )}
-        <Button
-          variant="primary"
-          onClick={handleApply}
-          className="flex-1"
-        >
+        <Button onClick={handleApply}>
           Done
         </Button>
-      </div>
-    </div>
+      </Group>
+    </Stack>
   )
 }

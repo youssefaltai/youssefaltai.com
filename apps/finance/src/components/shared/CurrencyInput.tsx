@@ -1,6 +1,7 @@
 'use client'
 
-import { NumberInput, Money } from '@repo/ui'
+import { NumberInput, Text } from '@mantine/core'
+import { Money } from './Money'
 import { Currency } from '@repo/db'
 
 interface CurrencyInputProps {
@@ -41,22 +42,22 @@ export function CurrencyInput({
   }
 
   return (
-    <div className="space-y-1">
+    <div>
       <NumberInput
         value={value}
-        onChange={onChange}
+        onChange={(val) => onChange(Number(val))}
         suffix={getCurrencySymbol()}
         placeholder={placeholder}
         label={label}
         error={error}
         disabled={disabled}
-        formatOnBlur={true}
-        decimalPlaces={2}
+        decimalScale={2}
+        fixedDecimalScale
       />
       {!error && value > 0 && (
-        <p className="text-ios-footnote text-ios-gray-2">
+        <Text size="xs" c="dimmed" mt={4}>
           <Money amount={value} currency={currency} />
-        </p>
+        </Text>
       )}
     </div>
   )

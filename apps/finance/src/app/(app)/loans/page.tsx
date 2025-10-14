@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { FloatingActionButton, Modal, Plus, Landmark, PageLayout, EntityList, LoadingSkeleton } from '@repo/ui'
+import { Plus, Landmark } from 'lucide-react'
+import { Container, Stack, ActionIcon, Modal, Title, Text, Group, Paper, Skeleton, Button } from '@mantine/core'
 import { useLoans, useCreateLoan, useUpdateLoan, useDeleteLoan } from '../../../hooks/use-loans'
 import { LoanCard } from '../../../components/loans/LoanCard'
 import { LoanForm } from '../../../components/forms/LoanForm'
@@ -36,39 +37,76 @@ export default function LoansPage() {
   }
 
   if (isLoading) {
-    return <LoadingSkeleton title="Loans" subtitle="Track debts and payments" />
+    return (
+      <Container size="lg" py="md" px="md" pb={96}>
+        <Stack gap="md">
+          <Skeleton height={80} radius="md" />
+          <Skeleton height={80} radius="md" />
+          <Skeleton height={80} radius="md" />
+        </Stack>
+      </Container>
+    )
   }
 
   return (
-    <PageLayout title="Loans" subtitle="Track debts and payments">
-      <EntityList
-        items={loans}
-        emptyIcon={Landmark}
-        emptyTitle="No Loans Tracked"
-        emptyDescription="Add a loan to track payments"
-        renderItem={(loan, index) => (
-          <LoanCard
-            key={loan.id}
-            loan={loan}
-            onClick={() => setEditingLoan(loan)}
-            isFirst={index === 0}
-            isLast={index === loans.length - 1}
-          />
+    <Container size="lg" py="md" px="md" pb={96}>
+      <Stack gap="md">
+        <Group justify="space-between" align="flex-start">
+          <div>
+            <Title order={1} size="h2">Loans</Title>
+            <Text c="dimmed" size="sm">Track debts and payments</Text>
+          </div>
+        </Group>
+
+        {loans.length === 0 ? (
+          <Stack align="center" gap="md" py="xl" style={{ textAlign: 'center' }}>
+            <Landmark size={64} style={{ opacity: 0.3 }} />
+            <Title order={3} size="h4">No Loans Tracked</Title>
+            <Text c="dimmed">Add your first loan</Text>
+          </Stack>
+        ) : (
+          <Paper withBorder radius="md">
+            <Stack gap={0}>
+              {loans.map((loan, index) => (
+                <LoanCard
+                  key={loan.id}
+                  loan={loan}
+                  onClick={() => setEditingLoan(loan)}
+                  isFirst={index === 0}
+                  isLast={index === loans.length - 1}
+                />
+              ))}
+            </Stack>
+          </Paper>
         )}
-      />
+      </Stack>
 
-      <FloatingActionButton 
-        icon={Plus} 
-        label="Add Loan"
+      <ActionIcon
         onClick={() => setIsCreateModalOpen(true)}
-        className="fixed bottom-20 right-4"
-      />
+        size="xl"
+        radius="xl"
+        variant="filled"
+        color="blue"
+        aria-label="Add Loan"
+        style={{
+          position: 'fixed',
+          bottom: '5rem',
+          right: '1rem',
+          width: '56px',
+          height: '56px',
+          zIndex: 100,
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+        }}
+      >
+        <Plus size={24} />
+      </ActionIcon>
 
-      {/* Create Modal */}
       <Modal
-        isOpen={isCreateModalOpen}
+        opened={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         title="Add Loan"
+        centered
+        size="md"
       >
         <LoanForm
           onSubmit={handleCreate}
@@ -76,33 +114,41 @@ export default function LoansPage() {
         />
       </Modal>
 
-      {/* Edit Modal */}
       <Modal
-        isOpen={!!editingLoan}
+        opened={!!editingLoan}
         onClose={() => setEditingLoan(null)}
         title="Edit Loan"
+        centered
+        size="md"
       >
         {editingLoan && (
-          <div className="space-y-4">
+          <Stack gap="md">
             <LoanForm
               initialData={{
-                ...editingLoan,
+                name: editingLoan.name,
+                currency: editingLoan.currency,
+                dueDate: typeof editingLoan.dueDate === 'string' 
+                  ? editingLoan.dueDate 
+                  : editingLoan.dueDate 
+                    ? new Date(editingLoan.dueDate).toISOString()
+                    : new Date().toISOString(),
                 description: editingLoan.description || undefined,
                 openingBalance: Number(editingLoan.balance),
-                dueDate: editingLoan.dueDate?.toISOString(),
               }}
               onSubmit={handleUpdate}
               onCancel={() => setEditingLoan(null)}
             />
-            <button
+            <Button
               onClick={handleDelete}
-              className="w-full py-3 text-ios-red font-semibold hover:bg-ios-red/10 rounded-ios transition-colors"
+              color="red"
+              variant="light"
+              fullWidth
             >
               Delete Loan
-            </button>
-          </div>
+            </Button>
+          </Stack>
         )}
       </Modal>
-    </PageLayout>
+    </Container>
   )
 }

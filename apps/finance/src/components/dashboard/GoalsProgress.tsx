@@ -1,8 +1,10 @@
 'use client'
 
-import { Card, ProgressBar, ChevronRight, Money } from '@repo/ui'
+import { ChevronRight } from 'lucide-react'
+import { Paper, Stack, Group, Text, Progress, Title, UnstyledButton } from '@mantine/core'
 import { calculateGoalProgress } from '../../utils/calculations'
 import { useRouter } from 'next/navigation'
+import { Money } from '../shared/Money'
 import type { Account } from '@repo/db'
 
 interface GoalsProgressProps {
@@ -24,59 +26,53 @@ export function GoalsProgress({ goals }: GoalsProgressProps) {
   }
 
   return (
-    <div className="space-y-3">
+    <Stack gap="sm">
       {/* Header */}
-      <div className="flex items-center justify-between px-2">
-        <h2 className="text-ios-title-3 font-semibold text-ios-label-primary">
+      <Group justify="space-between">
+        <Title order={3} size="h4">
           Your Goals
-        </h2>
-        <button
-          onClick={() => router.push('/goals')}
-          className="flex items-center gap-1 text-ios-blue text-ios-body hover:opacity-70 transition-opacity"
-        >
-          <span>View All</span>
-          <ChevronRight className="w-4 h-4" />
-        </button>
-      </div>
+        </Title>
+        <UnstyledButton onClick={() => router.push('/goals')}>
+          <Group gap="xs" c="blue">
+            <Text size="sm">View All</Text>
+            <ChevronRight size={16} />
+          </Group>
+        </UnstyledButton>
+      </Group>
 
       {/* Goals List */}
-      <Card padding="none">
-        {topGoals.map((goal, index) => {
-          const progress = goal.target
-            ? calculateGoalProgress(Number(goal.balance), Number(goal.target))
-            : 0
+      <Paper withBorder>
+        <Stack gap={0}>
+          {topGoals.map((goal, index) => {
+            const progress = goal.target
+              ? calculateGoalProgress(Number(goal.balance), Number(goal.target))
+              : 0
 
-          return (
-            <div
-              key={goal.id}
-              className={cn(
-                'p-4',
-                index < topGoals.length - 1 && 'border-b border-ios-gray-5'
-              )}
-            >
-              <div className="flex items-start justify-between mb-2">
-                <h3 className="text-ios-body font-semibold text-ios-label-primary">
-                  {goal.name}
-                </h3>
-                <span className="text-ios-body text-ios-blue font-semibold">
-                  {Math.round(progress)}%
-                </span>
+            return (
+              <div
+                key={goal.id}
+                style={{
+                  padding: '1rem',
+                  borderBottom: index < topGoals.length - 1 ? '1px solid var(--mantine-color-gray-3)' : 'none'
+                }}
+              >
+                <Group justify="space-between" mb="xs">
+                  <Text fw={600}>{goal.name}</Text>
+                  <Text fw={600} c="blue">{Math.round(progress)}%</Text>
+                </Group>
+
+                <Progress value={progress} size="sm" mb="xs" />
+
+                <Text size="xs" c="dimmed">
+                  <Money amount={Number(goal.balance)} currency={goal.currency} /> of{' '}
+                  <Money amount={Number(goal.target)} currency={goal.currency} />
+                </Text>
               </div>
-
-              <ProgressBar value={progress} className="mb-2" />
-
-              <p className="text-ios-footnote text-ios-gray-1">
-                <Money amount={Number(goal.balance)} currency={goal.currency} /> of{' '}
-                <Money amount={Number(goal.target)} currency={goal.currency} />
-              </p>
-            </div>
-          )
-        })}
-      </Card>
-    </div>
+            )
+          })}
+        </Stack>
+      </Paper>
+    </Stack>
   )
 }
-
-// Helper import
-import { cn } from '@repo/utils'
 

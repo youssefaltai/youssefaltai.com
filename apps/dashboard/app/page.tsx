@@ -1,7 +1,7 @@
 'use client'
 
-import { PageLayout, ActionGrid, StatCard, DashboardWidget, Section } from '@repo/ui'
-import { TrendingUp, Dumbbell, Settings as SettingsIcon, CreditCard, Target } from '@repo/ui'
+import { Container, Title, Text, Paper, SimpleGrid, Stack, Group, UnstyledButton } from '@mantine/core'
+import { TrendingUp, Dumbbell, Settings as SettingsIcon, CreditCard, Target } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 export default function DashboardHome() {
@@ -12,69 +12,83 @@ export default function DashboardHome() {
       icon: CreditCard,
       label: 'Finance',
       onClick: () => router.push('/finance'),
-      color: 'blue' as const,
     },
     {
       icon: Dumbbell,
       label: 'Fitness',
       onClick: () => router.push('/fitness'),
-      color: 'blue' as const,
     },
     {
       icon: Target,
       label: 'Goals',
       onClick: () => {},
-      color: 'neutral' as const,
     },
     {
       icon: SettingsIcon,
       label: 'Settings',
       onClick: () => {},
-      color: 'neutral' as const,
     },
   ]
 
   return (
-    <PageLayout
-      title="Dashboard"
-      subtitle="Your personal hub"
-    >
-      <div className="space-y-6">
+    <Container size="lg" py="xl">
+      <Stack gap="xl">
+        {/* Header */}
+        <div>
+          <Title order={1} size="h2">Dashboard</Title>
+          <Text c="dimmed">Your personal hub</Text>
+        </div>
+
         {/* Quick Stats */}
-        <Section title="Quick Stats">
-          <div className="grid grid-cols-2 gap-3">
-            <StatCard
-              title="Net Worth"
-              value="$0"
-              icon={TrendingUp}
-              color="blue"
-            />
-            <StatCard
-              title="Active Goals"
-              value="0"
-              icon={Target}
-              color="neutral"
-            />
-          </div>
-        </Section>
+        <div>
+          <Title order={2} size="h4" mb="md">Quick Stats</Title>
+          <SimpleGrid cols={{ base: 2, sm: 2 }} spacing="md">
+            <Paper p="lg" withBorder>
+              <Group gap="sm" mb="xs">
+                <TrendingUp size={24} />
+                <Text size="sm" c="dimmed">Net Worth</Text>
+              </Group>
+              <Text size="xl" fw={700}>$0</Text>
+            </Paper>
+            <Paper p="lg" withBorder>
+              <Group gap="sm" mb="xs">
+                <Target size={24} />
+                <Text size="sm" c="dimmed">Active Goals</Text>
+              </Group>
+              <Text size="xl" fw={700}>0</Text>
+            </Paper>
+          </SimpleGrid>
+        </div>
 
         {/* App Launcher */}
-        <ActionGrid
-          title="My Apps"
-          actions={actions}
-          columns={2}
-        />
+        <div>
+          <Title order={2} size="h4" mb="md">My Apps</Title>
+          <SimpleGrid cols={{ base: 2, sm: 2 }} spacing="md">
+            {actions.map((action) => {
+              const Icon = action.icon
+              return (
+                <UnstyledButton key={action.label} onClick={action.onClick}>
+                  <Paper p="lg" withBorder style={{ cursor: 'pointer', transition: 'all 0.2s' }} 
+                    onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
+                    onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
+                    <Stack align="center" gap="sm">
+                      <Icon size={32} />
+                      <Text fw={500}>{action.label}</Text>
+                    </Stack>
+                  </Paper>
+                </UnstyledButton>
+              )
+            })}
+          </SimpleGrid>
+        </div>
 
-        {/* Recent Activity Widget */}
-        <DashboardWidget
-          title="Recent Activity"
-          subtitle="Across all apps"
-          isEmpty={true}
-          emptyMessage="No recent activity"
-        >
-          <div />
-        </DashboardWidget>
-      </div>
-    </PageLayout>
+        {/* Recent Activity */}
+        <Paper p="lg" withBorder>
+          <Title order={2} size="h4" mb="sm">Recent Activity</Title>
+          <Text c="dimmed" size="sm" mb="md">Across all apps</Text>
+          <Text c="dimmed" ta="center" py="xl">No recent activity</Text>
+        </Paper>
+      </Stack>
+    </Container>
   )
 }

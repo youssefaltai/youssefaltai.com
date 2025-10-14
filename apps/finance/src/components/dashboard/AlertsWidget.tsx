@@ -1,10 +1,9 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { DashboardWidget } from './DashboardWidget'
+import { CreditCard, Calendar, AlertTriangle, Target, ChevronRight } from 'lucide-react'
+import { Stack, Group, Text, UnstyledButton, Paper, Title, Skeleton } from '@mantine/core'
 import { useDashboardAlerts } from '../../hooks/use-dashboard-alerts'
-import { CreditCard, Calendar, AlertTriangle, Target, ChevronRight } from '@repo/ui'
-import { cn } from '@repo/utils'
 import type { Alert, AlertSeverity } from '../../app/api/dashboard/alerts/route'
 
 /**
@@ -18,36 +17,25 @@ export function AlertsWidget() {
   const getAlertIcon = (type: Alert['type']) => {
     switch (type) {
       case 'credit-utilization':
-        return <CreditCard className="w-5 h-5" />
+        return <CreditCard size={20} />
       case 'due-date':
       case 'overdue':
-        return <Calendar className="w-5 h-5" />
+        return <Calendar size={20} />
       case 'goal-deadline':
-        return <Target className="w-5 h-5" />
+        return <Target size={20} />
       default:
-        return <AlertTriangle className="w-5 h-5" />
+        return <AlertTriangle size={20} />
     }
   }
 
   const getSeverityColor = (severity: AlertSeverity) => {
     switch (severity) {
       case 'high':
-        return 'text-ios-red'
+        return 'red'
       case 'medium':
-        return 'text-ios-orange'
+        return 'orange'
       case 'low':
-        return 'text-ios-blue'
-    }
-  }
-
-  const getSeverityBg = (severity: AlertSeverity) => {
-    switch (severity) {
-      case 'high':
-        return 'bg-red-50'
-      case 'medium':
-        return 'bg-orange-50'
-      case 'low':
-        return 'bg-blue-50'
+        return 'blue'
     }
   }
 
@@ -57,44 +45,72 @@ export function AlertsWidget() {
   }
 
   return (
-    <DashboardWidget
-      title="Alerts"
-      subtitle={`${alerts?.length || 0} active ${alerts?.length === 1 ? 'alert' : 'alerts'}`}
-      loading={isLoading}
-      error={error instanceof Error ? error.message : null}
-      isEmpty={!alerts || alerts.length === 0}
-      emptyMessage="No alerts - everything looks good!"
-      emptyIcon={<AlertTriangle className="w-12 h-12" />}
-    >
-      <div className="space-y-2">
-        {alerts?.map((alert) => (
-          <button
-            key={alert.id}
-            onClick={() => alert.actionUrl && router.push(alert.actionUrl)}
-            className={cn(
-              'w-full p-3 rounded-ios border transition-colors text-left',
-              getSeverityBg(alert.severity),
-              'border-transparent hover:border-ios-gray-4 active:scale-[0.98]'
-            )}
-          >
-            <div className="flex items-start gap-3">
-              <div className={cn('flex-shrink-0 mt-0.5', getSeverityColor(alert.severity))}>
-                {getAlertIcon(alert.type)}
-              </div>
-              <div className="flex-1 min-w-0">
-                <h4 className="text-ios-body font-semibold text-ios-label-primary mb-0.5">
-                  {alert.title}
-                </h4>
-                <p className="text-ios-callout text-ios-gray-1">{alert.message}</p>
-              </div>
-              {alert.actionUrl && (
-                <ChevronRight className="flex-shrink-0 w-5 h-5 text-ios-gray-2 mt-0.5" />
-              )}
+    <Paper withBorder shadow="sm">
+      {/* Header */}
+      <Group justify="space-between" p="md" style={{ borderBottom: '1px solid var(--mantine-color-gray-3)' }}>
+        <div>
+          <Title order={3} size="h4">Alerts</Title>
+          <Text size="xs" c="dimmed" mt={2}>
+            {alerts?.length || 0} active {alerts?.length === 1 ? 'alert' : 'alerts'}
+          </Text>
+        </div>
+      </Group>
+
+      {/* Content */}
+      <div style={{ padding: '1rem' }}>
+        {error ? (
+          <Text c="red" ta="center" py="xl">
+            {error instanceof Error ? error.message : 'Failed to load alerts'}
+          </Text>
+        ) : isLoading ? (
+          <Stack gap="sm">
+            <Skeleton height={16} />
+            <Skeleton height={16} width="75%" />
+            <Skeleton height={16} width="50%" />
+          </Stack>
+        ) : !alerts || alerts.length === 0 ? (
+          <Stack align="center" gap="sm" py="xl">
+            <div style={{ opacity: 0.5 }}>
+              <AlertTriangle size={48} />
             </div>
-          </button>
-        ))}
+            <Text c="dimmed">No alerts - everything looks good!</Text>
+          </Stack>
+        ) : (
+          <Stack gap="xs">
+            {alerts.map((alert) => (
+              <UnstyledButton
+                key={alert.id}
+                onClick={() => alert.actionUrl && router.push(alert.actionUrl)}
+                style={{ width: '100%' }}
+              >
+                <Group
+                  p="md"
+                  gap="sm"
+                  align="flex-start"
+                  style={{ 
+                    borderRadius: 'var(--mantine-radius-md)',
+                    backgroundColor: `var(--mantine-color-${getSeverityColor(alert.severity)}-0)`,
+                    border: '1px solid transparent'
+                  }}
+                >
+                  <div style={{ color: `var(--mantine-color-${getSeverityColor(alert.severity)}-6)` }}>
+                    {getAlertIcon(alert.type)}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <Text fw={600} size="sm" mb={2}>
+                      {alert.title}
+                    </Text>
+                    <Text size="sm" c="dimmed">{alert.message}</Text>
+                  </div>
+                  {alert.actionUrl && (
+                    <ChevronRight size={20} style={{ opacity: 0.5 }} />
+                  )}
+                </Group>
+              </UnstyledButton>
+            ))}
+          </Stack>
+        )}
       </div>
-    </DashboardWidget>
+    </Paper>
   )
 }
-

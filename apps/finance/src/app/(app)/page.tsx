@@ -1,14 +1,16 @@
 'use client'
 
 import { useState } from 'react'
-import { ChevronRight, PageHeader, ProgressBar, Settings, Money, Modal, GroupedList } from '@repo/ui'
+import { ChevronRight, Settings } from 'lucide-react'
+import { Container, ActionIcon, Paper, Text, Title, SimpleGrid, Progress, Group, UnstyledButton, Stack, Button, Modal } from '@mantine/core'
 import { useRouter } from 'next/navigation'
+import { Money } from '../../components/shared'
 import { TransactionItem } from '../../components/transactions/TransactionItem'
 import { useDashboardSummary, useRecentTransactions, useActiveGoals } from '../../hooks/use-dashboard'
 import { useIsWidgetVisible } from '../../hooks/use-widget-preferences'
 import { TTransaction } from '@repo/db'
 import { calculateGoalProgress } from '../../utils/calculations'
-import { cn, getGreeting, format, parseISO } from '@repo/utils'
+import { getGreeting, format, parseISO } from '@repo/utils'
 import { AlertsWidget } from '../../components/dashboard/AlertsWidget'
 import { FinancialHealthWidget } from '../../components/dashboard/FinancialHealthWidget'
 import { SpendingTrendsChart } from '../../components/dashboard/SpendingTrendsChart'
@@ -54,23 +56,22 @@ export default function HomePage() {
 
   return (
     <>
-      <div className="min-h-screen pb-6">
+      <Container size="lg" p="md" pb={96}>
         {/* Page Header - Always visible */}
-        <div className="px-4 pt-6 pb-4">
-          <PageHeader
-            title={`Good ${getGreeting()}`}
-            subtitle="Track your finances in one place"
-            actions={
-              <button
-                onClick={() => setIsSettingsOpen(true)}
-                className="p-2 rounded-ios bg-ios-gray-6 hover:bg-ios-gray-5 active:bg-ios-gray-4 transition-colors"
-                aria-label="Widget Settings"
-              >
-                <Settings className="text-ios-label-secondary" size={24} />
-              </button>
-            }
-          />
-        </div>
+        <Group justify="space-between" align="flex-start" w="100%" mb="md">
+          <div>
+            <Title order={1} size="h2">Good {getGreeting()}</Title>
+            <Text c="dimmed" size="sm" mt={4}>Track your finances in one place</Text>
+          </div>
+          <ActionIcon
+            onClick={() => setIsSettingsOpen(true)}
+            size="lg"
+            variant="light"
+            aria-label="Widget Settings"
+          >
+            <Settings size={24} />
+          </ActionIcon>
+        </Group>
 
         {/* Month Selector */}
         <MonthSelector 
@@ -80,51 +81,48 @@ export default function HomePage() {
 
         {/* Hero Section - Net Worth */}
         {showNetWorth && (
-          <div className="px-4 pb-6">
-            <div className="bg-white rounded-ios-lg p-6 shadow-ios-lg border border-ios-gray-5">
-              <p className="text-ios-callout text-ios-gray-1 mb-1">Total Net Worth</p>
-              <p className="text-3xl sm:text-4xl md:text-5xl font-bold text-ios-label-primary mb-4">
-                {summary ? <Money amount={summary.netWorth} currency='EGP' /> : '—'}
-              </p>
+          <Paper p="xl" mb="lg" withBorder shadow="sm">
+            <Text size="sm" c="dimmed" mb={4}>Total Net Worth</Text>
+            <Title order={1} size="h1" mb="md">
+              {summary ? <Money amount={summary.netWorth} currency='EGP' /> : '—'}
+            </Title>
 
-              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-ios-gray-5">
-                <div>
-                  <p className="text-ios-caption text-ios-gray-2 mb-1">{displayMonth} Income</p>
-                  <p className="text-ios-callout sm:text-ios-body font-semibold text-ios-label-primary">
-                    {summary ? <Money amount={summary.thisMonthIncome} currency='EGP' /> : '—'}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-ios-caption text-ios-gray-2 mb-1">{displayMonth} Expenses</p>
-                  <p className="text-ios-callout sm:text-ios-body font-semibold text-ios-label-primary">
-                    {summary ? <Money amount={summary.thisMonthExpenses} currency='EGP' /> : '—'}
-                  </p>
-                </div>
+            <SimpleGrid cols={2} spacing="md" style={{ paddingTop: '1rem', borderTop: '1px solid var(--mantine-color-gray-3)' }}>
+              <div>
+                <Text size="xs" c="dimmed" mb={4}>{displayMonth} Income</Text>
+                <Text size="md" fw={600}>
+                  {summary ? <Money amount={summary.thisMonthIncome} currency='EGP' /> : '—'}
+                </Text>
               </div>
-            </div>
-          </div>
+              <div>
+                <Text size="xs" c="dimmed" mb={4}>{displayMonth} Expenses</Text>
+                <Text size="md" fw={600}>
+                  {summary ? <Money amount={summary.thisMonthExpenses} currency='EGP' /> : '—'}
+                </Text>
+              </div>
+            </SimpleGrid>
+          </Paper>
         )}
 
         {/* Dashboard Widgets */}
-        <div className="px-4 space-y-6">
+        <Stack gap="lg">
           {/* Empty state when no widgets are visible */}
           {!hasAnyWidgets && (
-            <div className="bg-white rounded-ios-lg p-8 shadow-ios border border-ios-gray-5 text-center">
-              <Settings className="text-ios-gray-3 mx-auto mb-4" size={64} />
-              <h3 className="text-ios-title-2 font-semibold text-ios-label-primary mb-2">
+            <Paper p="xl" withBorder shadow="sm" style={{ textAlign: 'center' }}>
+              <Settings size={64} style={{ margin: '0 auto', opacity: 0.3, marginBottom: '1rem' }} />
+              <Title order={3} size="h3" mb="sm">
                 No Widgets Enabled
-              </h3>
-              <p className="text-ios-body text-ios-gray-1 mb-4">
+              </Title>
+              <Text c="dimmed" mb="lg">
                 You&apos;ve hidden all dashboard widgets. Enable some widgets to see your financial data.
-              </p>
-              <button
+              </Text>
+              <Button
                 onClick={() => setIsSettingsOpen(true)}
-                className="inline-flex items-center gap-2 py-3 px-6 bg-ios-blue hover:bg-blue-600 text-white rounded-ios font-medium transition-colors"
+                leftSection={<Settings size={20} />}
               >
-                <Settings size={24} />
                 Open Widget Settings
-              </button>
-            </div>
+              </Button>
+            </Paper>
           )}
 
           {/* Alerts Widget */}
@@ -146,53 +144,50 @@ export default function HomePage() {
           {/* Active Goals */}
           {showGoals && activeGoals.length > 0 && (
             <div>
-              <div className="flex items-center justify-between mb-3">
-                <h2 className="text-ios-title-3 font-semibold text-ios-label-primary">
-                  Your Goals
-                </h2>
-                <button
-                  onClick={() => router.push('/goals')}
-                  className="flex items-center gap-1 text-ios-blue text-ios-body hover:opacity-70 transition-opacity"
-                >
-                  <span>See All</span>
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-              </div>
+              <Group justify="space-between" mb="sm">
+                <Title order={3} size="h4">Your Goals</Title>
+                <UnstyledButton onClick={() => router.push('/goals')}>
+                  <Group gap="xs" c="blue">
+                    <Text size="sm">See All</Text>
+                    <ChevronRight size={16} />
+                  </Group>
+                </UnstyledButton>
+              </Group>
 
-              <div className="bg-white rounded-ios-lg shadow-ios border border-ios-gray-5 overflow-hidden">
-                {activeGoals.slice(0, 3).map((goal, index) => {
-                  const progress = goal.target
-                    ? calculateGoalProgress(Number(goal.balance), Number(goal.target))
-                    : 0
+              <Paper withBorder>
+                <Stack gap={0}>
+                  {activeGoals.slice(0, 3).map((goal, index) => {
+                    const progress = goal.target
+                      ? calculateGoalProgress(Number(goal.balance), Number(goal.target))
+                      : 0
 
-                  return (
-                    <button
-                      key={goal.id}
-                      onClick={() => router.push('/goals')}
-                      className={cn(
-                        'w-full p-4 text-left hover:bg-ios-gray-6 active:bg-ios-gray-5 transition-colors',
-                        index < activeGoals.slice(0, 3).length - 1 && 'border-b border-ios-gray-5'
-                      )}
-                    >
-                      <div className="flex items-start justify-between mb-2">
-                        <h3 className="text-ios-body font-semibold text-ios-label-primary">
-                          {goal.name}
-                        </h3>
-                        <span className="text-ios-body text-ios-blue font-semibold">
-                          {Math.round(progress)}%
-                        </span>
-                      </div>
+                    return (
+                      <UnstyledButton
+                        key={goal.id}
+                        onClick={() => router.push('/goals')}
+                        style={{ 
+                          width: '100%',
+                          padding: '1rem',
+                          textAlign: 'left',
+                          borderBottom: index < activeGoals.slice(0, 3).length - 1 ? '1px solid var(--mantine-color-gray-3)' : 'none'
+                        }}
+                      >
+                        <Group justify="space-between" mb="xs">
+                          <Text fw={600}>{goal.name}</Text>
+                          <Text fw={600} c="blue">{Math.round(progress)}%</Text>
+                        </Group>
 
-                      <ProgressBar value={progress} className="mb-2" />
+                        <Progress value={progress} size="sm" mb="xs" />
 
-                      <p className="text-ios-footnote text-ios-gray-1">
-                        {<Money amount={Number(goal.balance)} currency={goal.currency} />} of{' '}
-                        {<Money amount={Number(goal.target)} currency={goal.currency} />}
-                      </p>
-                    </button>
-                  )
-                })}
-              </div>
+                        <Text size="xs" c="dimmed">
+                          <Money amount={Number(goal.balance)} currency={goal.currency} /> of{' '}
+                          <Money amount={Number(goal.target)} currency={goal.currency} />
+                        </Text>
+                      </UnstyledButton>
+                    )
+                  })}
+                </Stack>
+              </Paper>
             </div>
           )}
 
@@ -205,40 +200,41 @@ export default function HomePage() {
           {/* Recent Transactions */}
           {showRecentTransactions && recentTransactions.length > 0 && (
             <div>
-              <div className="flex items-center justify-between mb-3">
-                <h2 className="text-ios-title-3 font-semibold text-ios-label-primary">
-                  Recent Activity
-                </h2>
-                <button
-                  onClick={() => router.push('/transactions')}
-                  className="flex items-center gap-1 text-ios-blue text-ios-body hover:opacity-70 transition-opacity"
-                >
-                  <span>See All</span>
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-              </div>
+              <Group justify="space-between" mb="sm">
+                <Title order={3} size="h4">Recent Activity</Title>
+                <UnstyledButton onClick={() => router.push('/transactions')}>
+                  <Group gap="xs" c="blue">
+                    <Text size="sm">See All</Text>
+                    <ChevronRight size={16} />
+                  </Group>
+                </UnstyledButton>
+              </Group>
 
-              <GroupedList>
-                {recentTransactions.slice(0, 5).map((transaction: TTransaction, index: number) => (
-                  <TransactionItem
-                    key={transaction.id}
-                    transaction={transaction}
-                    onClick={() => router.push('/transactions')}
-                    isFirst={index === 0}
-                    isLast={index === recentTransactions.slice(0, 5).length - 1}
-                  />
-                ))}
-              </GroupedList>
+              <Paper withBorder radius="md">
+                <Stack gap={0}>
+                  {recentTransactions.slice(0, 5).map((transaction: TTransaction, index: number) => (
+                    <TransactionItem
+                      key={transaction.id}
+                      transaction={transaction}
+                      onClick={() => router.push('/transactions')}
+                      isFirst={index === 0}
+                      isLast={index === recentTransactions.slice(0, 5).length - 1}
+                    />
+                  ))}
+                </Stack>
+              </Paper>
             </div>
           )}
-        </div>
-      </div>
+        </Stack>
+      </Container>
 
       {/* Widget Settings Modal */}
       <Modal
-        isOpen={isSettingsOpen}
+        opened={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
         title="Widget Settings"
+        centered
+        size="md"
       >
         <WidgetSettings onClose={() => setIsSettingsOpen(false)} />
       </Modal>

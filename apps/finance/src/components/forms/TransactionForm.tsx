@@ -1,12 +1,10 @@
 'use client'
 
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { Input, CurrencySelect } from '@repo/ui'
+import { useForm } from '@mantine/form'
+import { zodResolver } from 'mantine-form-zod-resolver'
+import { TextInput, Select, NumberInput, Group, Button, Alert, Stack } from '@mantine/core'
+import { DateTimePicker } from '@mantine/dates'
 import { AccountPicker } from '../shared/AccountPicker'
-import { FormActions } from '@repo/ui'
-import { emptyStringToUndefined, emptyNumberToUndefined } from '../../utils/form'
-import { parseISO, format } from '@repo/utils'
 import { CURRENCY_OPTIONS } from '../../utils/currencies'
 import { useFormState } from '../../hooks/use-form-state'
 import { useAccounts } from '../../hooks/use-accounts'
@@ -23,7 +21,7 @@ interface TransactionFormProps {
  * Form for creating/editing transactions
  */
 export function TransactionForm({ initialData, onSubmit, onCancel }: TransactionFormProps) {
-  const { submitError, handleSubmit: handleFormSubmit } = useFormState({
+  const { submitError, handleSubmit: handleFormSubmit, isSubmitting } = useFormState({
     onSubmit,
   })
 
@@ -31,15 +29,9 @@ export function TransactionForm({ initialData, onSubmit, onCancel }: Transaction
   const { data: allAccounts = [] } = useAccounts()
   const { data: exchangeRates = [] } = useExchangeRates()
 
-  const {
-    register,
-    handleSubmit,
-    watch,
-    setValue,
-    formState: { errors, isSubmitting },
-  } = useForm<CreateTransactionSchema>({
-    resolver: zodResolver(createTransactionSchema),
-    defaultValues: {
+  const form = useForm<CreateTransactionSchema>({
+    validate: zodResolver(createTransactionSchema),
+    initialValues: {
       description: initialData?.description || '',
       fromAccountId: initialData?.fromAccountId || '',
       toAccountId: initialData?.toAccountId || '',
@@ -50,9 +42,8 @@ export function TransactionForm({ initialData, onSubmit, onCancel }: Transaction
     },
   })
 
-  const watchedDate = watch('date')
-  const watchedFromAccountId = watch('fromAccountId')
-  const watchedToAccountId = watch('toAccountId')
+  const watchedFromAccountId = form.values.fromAccountId
+  const watchedToAccountId = form.values.toAccountId
 
   // Derive account objects from selected IDs
   const fromAccount = allAccounts.find(a => a.id === watchedFromAccountId)
@@ -83,108 +74,90 @@ export function TransactionForm({ initialData, onSubmit, onCancel }: Transaction
     await handleFormSubmit(data, 'Failed to save transaction')
   }
 
+  // Currency options with empty option
+  const currencyData = [
+    { value: '', label: currencyPlaceholder },
+    ...CURRENCY_OPTIONS
+  ]
 
   return (
-    <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
-      {/* Hidden field to hold the actual date value (ISO string) */}
-      <input type="hidden" {...register('date')} />
-
-      <Input
-        label="Description"
-        {...register('description')}
-        placeholder="e.g., Groceries, Salary"
-        error={errors.description?.message}
-        required
-      />
-
-      <AccountPicker
-        label="From"
-        value={watchedFromAccountId}
-        onChange={(value) => setValue('fromAccountId', value, { shouldValidate: true })}
-        placeholder="Select source..."
-        error={errors.fromAccountId?.message}
-        excludeId={watchedToAccountId}
-      />
-
-      <AccountPicker
-        label="To"
-        value={watchedToAccountId}
-        onChange={(value) => setValue('toAccountId', value, { shouldValidate: true })}
-        placeholder="Select destination..."
-        error={errors.toAccountId?.message}
-        excludeId={watchedFromAccountId}
-      />
-
-      <Input
-        type="number"
-        label="Amount"
-        {...register('amount', { valueAsNumber: true })}
-        placeholder="0.00"
-        error={errors.amount?.message}
-        step="0.01"
-        min="0"
-        required
-      />
-
-      <CurrencySelect
-        label="Currency (optional)"
-        {...register('currency', { setValueAs: emptyStringToUndefined })}
-        currencies={CURRENCY_OPTIONS}
-        error={errors.currency?.message}
-        includeEmpty={true}
-        emptyLabel={currencyPlaceholder}
-      />
-
-      {showExchangeRate && (
-        <Input
-          type="number"
-          label={`Exchange Rate${storedRate ? ' (optional)' : ''}`}
-          {...register('exchangeRate', { setValueAs: emptyNumberToUndefined })}
-          placeholder={exchangeRatePlaceholder}
-          error={errors.exchangeRate?.message}
-          step="0.000001"
-          min="0"
-          required={!storedRate}
-        />
-      )}
-
-      <div className="grid grid-cols-2 gap-3">
-        <Input
-          type="date"
-          label="Date"
-          value={format(parseISO(watchedDate), 'yyyy-MM-dd')}
-          onChange={(e) => {
-            const currentTime = format(parseISO(watchedDate), 'HH:mm')
-            const newIso = parseISO(`${e.target.value}T${currentTime}`).toISOString()
-            setValue('date', newIso, { shouldValidate: true })
-          }}
-          error={errors.date?.message}
+    <form onSubmit={form.onSubmit(onFormSubmit)}>
+      <Stack gap="md">
+        <TextInput
+          label="Description"
+          placeholder="e.g., Groceries, Salary"
           required
+          {...form.getInputProps('description')}
         />
-        <Input
-          type="time"
-          label="Time"
-          value={format(parseISO(watchedDate), 'HH:mm')}
-          onChange={(e) => {
-            const currentDate = format(parseISO(watchedDate), 'yyyy-MM-dd')
-            const newIso = parseISO(`${currentDate}T${e.target.value}`).toISOString()
-            setValue('date', newIso, { shouldValidate: true })
-          }}
-          error={errors.date?.message}
+
+        <AccountPicker
+          label="From"
+          value={watchedFromAccountId}
+          onChange={(value) => form.setFieldValue('fromAccountId', value)}
+          placeholder="Select source..."
+          error={form.errors.fromAccountId as string}
+          excludeId={watchedToAccountId}
+        />
+
+        <AccountPicker
+          label="To"
+          value={watchedToAccountId}
+          onChange={(value) => form.setFieldValue('toAccountId', value)}
+          placeholder="Select destination..."
+          error={form.errors.toAccountId as string}
+          excludeId={watchedFromAccountId}
+        />
+
+        <NumberInput
+          label="Amount"
+          placeholder="0.00"
           required
+          decimalScale={2}
+          min={0}
+          {...form.getInputProps('amount')}
         />
-      </div>
 
-      {submitError && (
-        <p className="text-ios-footnote text-ios-red">{submitError}</p>
-      )}
+        <Select
+          label="Currency (optional)"
+          data={currencyData}
+          placeholder={currencyPlaceholder}
+          {...form.getInputProps('currency')}
+          clearable
+        />
 
-      <FormActions
-        onCancel={onCancel}
-        isSubmitting={isSubmitting}
-        submitLabel={initialData ? 'Update' : 'Create'}
-      />
+        {showExchangeRate && (
+          <NumberInput
+            label={`Exchange Rate${storedRate ? ' (optional)' : ''}`}
+            placeholder={exchangeRatePlaceholder}
+            decimalScale={6}
+            min={0}
+            {...form.getInputProps('exchangeRate')}
+          />
+        )}
+
+        <DateTimePicker
+          label="Date & Time"
+          placeholder="Select date and time"
+          required
+          value={form.values.date ? new Date(form.values.date) : new Date()}
+          onChange={(value) => form.setFieldValue('date', value ? new Date(value).toISOString() : new Date().toISOString())}
+        />
+
+        {submitError && (
+          <Alert color="red" title="Error">
+            {submitError}
+          </Alert>
+        )}
+
+        <Group justify="flex-end">
+          <Button variant="default" onClick={onCancel}>
+            Cancel
+          </Button>
+          <Button type="submit" loading={isSubmitting}>
+            {initialData ? 'Update' : 'Create'}
+          </Button>
+        </Group>
+      </Stack>
     </form>
   )
 }
-

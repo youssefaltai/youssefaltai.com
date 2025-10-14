@@ -1,11 +1,11 @@
 'use client'
 
-import { Money, ProgressBar } from '@repo/ui'
+import { UnstyledButton, Group, Text, Progress, Badge, Stack } from '@mantine/core'
+import { Money } from '../shared/Money'
 import { calculateGoalProgress, formatDueDateStatus } from '../../utils/calculations'
 import { ensureDate } from '@repo/utils'
-import type { Account } from '@repo/db'
-import { cn } from '@repo/utils'
 import { formatDistanceToNow, format, differenceInDays } from '@repo/utils'
+import type { Account } from '@repo/db'
 
 interface GoalCardProps {
   goal: Account
@@ -18,7 +18,7 @@ interface GoalCardProps {
  * Display item for a goal in a grouped list
  * Shows name, progress, target amount, and due date
  */
-export function GoalCard({ goal, onClick, isFirst, isLast }: GoalCardProps) {
+export function GoalCard({ goal, onClick, isFirst: _isFirst, isLast }: GoalCardProps) {
   const progress = goal.target
     ? calculateGoalProgress(Number(goal.balance), Number(goal.target))
     : 0
@@ -26,57 +26,50 @@ export function GoalCard({ goal, onClick, isFirst, isLast }: GoalCardProps) {
   const isCompleted = progress >= 100
 
   return (
-    <button
-      onClick={onClick}
-      className={cn(
-        'w-full px-4 py-3 text-left',
-        'hover:bg-ios-gray-6 active:bg-ios-gray-5 transition-colors',
-        !isLast && 'border-b border-ios-gray-5',
-        isFirst && 'rounded-t-ios',
-        isLast && 'rounded-b-ios'
-      )}
-    >
-      <div className="space-y-3">
+    <UnstyledButton onClick={onClick} style={{ width: '100%' }}>
+      <Stack
+        p="md"
+        gap="sm"
+        style={{
+          borderBottom: !isLast ? '1px solid var(--mantine-color-gray-3)' : 'none',
+        }}
+      >
         {/* Header */}
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <h3 className="text-ios-headline font-semibold text-ios-label-primary">
-              {goal.name}
-            </h3>
+        <Group justify="space-between">
+          <div style={{ flex: 1 }}>
+            <Text fw={600}>{goal.name}</Text>
             {goal.description && (
-              <p className="text-ios-footnote text-ios-gray-1 mt-1">
-                {goal.description}
-              </p>
+              <Text size="xs" c="dimmed">{goal.description}</Text>
             )}
           </div>
           {isCompleted && (
-            <span className="text-ios-blue text-ios-caption font-semibold">
+            <Badge variant="light" color="blue" size="sm">
               COMPLETED
-            </span>
+            </Badge>
           )}
-        </div>
+        </Group>
 
         {/* Progress */}
-        <div className="space-y-2">
-          <ProgressBar value={progress} />
-          <div className="flex items-center justify-between text-ios-footnote">
-            <span className="text-ios-gray-1">
-              {<Money amount={Number(goal.balance)} currency={goal.currency} />} of{' '}
-              {<Money amount={Number(goal.target)} currency={goal.currency} />}
-            </span>
-            <span className="text-ios-label-primary font-semibold">
+        <Stack gap="xs">
+          <Progress value={progress} size="sm" />
+          <Group justify="space-between">
+            <Text size="xs" c="dimmed">
+              <Money amount={Number(goal.balance)} currency={goal.currency} /> of{' '}
+              <Money amount={Number(goal.target)} currency={goal.currency} />
+            </Text>
+            <Text size="xs" fw={600}>
               {Math.round(progress)}%
-            </span>
-          </div>
-        </div>
+            </Text>
+          </Group>
+        </Stack>
 
         {/* Due date */}
         {goal.dueDate && (
-          <div className="flex items-center justify-between pt-2 border-t border-ios-gray-5">
-            <span className="text-ios-footnote text-ios-gray-1">
+          <Group justify="space-between" style={{ paddingTop: '0.5rem', borderTop: '1px solid var(--mantine-color-gray-3)' }}>
+            <Text size="xs" c="dimmed">
               {formatDueDateStatus(goal.dueDate)}
-            </span>
-            <span className="text-ios-footnote text-ios-gray-2">
+            </Text>
+            <Text size="xs" c="dimmed">
               {(() => {
                 const date = ensureDate(goal.dueDate)
                 const daysDiff = differenceInDays(date, new Date())
@@ -87,11 +80,10 @@ export function GoalCard({ goal, onClick, isFirst, isLast }: GoalCardProps) {
                 // Use just date for further out
                 return format(date, 'PP')
               })()}
-            </span>
-          </div>
+            </Text>
+          </Group>
         )}
-      </div>
-    </button>
+      </Stack>
+    </UnstyledButton>
   )
 }
-

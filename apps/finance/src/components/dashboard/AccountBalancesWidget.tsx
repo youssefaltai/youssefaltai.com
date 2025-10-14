@@ -1,9 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { DashboardWidget } from './DashboardWidget'
+import { Wallet, ChevronDown, ChevronUp } from 'lucide-react'
+import { Stack, Group, Text, Button, Paper, Title, Skeleton } from '@mantine/core'
 import { useAccounts } from '../../hooks/use-accounts'
-import { Wallet, ChevronDown, ChevronUp, Money } from '@repo/ui'
+import { Money } from '../shared/Money'
 
 /**
  * Account balances widget
@@ -17,50 +18,75 @@ export function AccountBalancesWidget() {
   const displayAccounts = isExpanded ? assetAccounts : assetAccounts.slice(0, 3)
 
   return (
-    <DashboardWidget
-      title="Account Balances"
-      subtitle={`${assetAccounts.length} ${assetAccounts.length === 1 ? 'account' : 'accounts'}`}
-      loading={isLoading}
-      error={error instanceof Error ? error.message : null}
-      isEmpty={assetAccounts.length === 0}
-      emptyMessage="No accounts yet"
-      emptyIcon={<Wallet className="w-12 h-12" />}
-    >
-      <div className="space-y-3">
-        {displayAccounts.map((account, index) => (
-          <div
-            key={account.id}
-            className={`flex items-center justify-between pb-3 ${index < displayAccounts.length - 1 ? 'border-b border-ios-gray-5' : ''
-              }`}
-          >
-            <div className="flex-1 min-w-0">
-              <p className="text-ios-body font-medium text-ios-label-primary truncate">
-                {account.name}
-              </p>
-              {account.description && (
-                <p className="text-ios-caption text-ios-gray-2 truncate">
-                  {account.description}
-                </p>
-              )}
-            </div>
-            <p className="text-ios-callout sm:text-ios-body font-semibold text-ios-label-primary ml-4">
-              <Money amount={Number(account.balance)} currency={account.currency} />
-            </p>
-          </div>
-        ))}
+    <Paper withBorder shadow="sm">
+      <Group justify="space-between" p="md" style={{ borderBottom: '1px solid var(--mantine-color-gray-3)' }}>
+        <div>
+          <Title order={3} size="h4">Account Balances</Title>
+          <Text size="xs" c="dimmed" mt={2}>
+            {assetAccounts.length} {assetAccounts.length === 1 ? 'account' : 'accounts'}
+          </Text>
+        </div>
+      </Group>
 
-        {/* Expand/Collapse button */}
-        {assetAccounts.length > 3 && (
-          <button
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="w-full flex items-center justify-center gap-2 py-2 text-ios-blue text-ios-body font-medium hover:opacity-70 transition-opacity"
-          >
-            <span>{isExpanded ? 'Show Less' : `Show ${assetAccounts.length - 3} More`}</span>
-            {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-          </button>
+      <div style={{ padding: '1rem' }}>
+        {error ? (
+          <Text c="red" ta="center" py="xl">
+            {error instanceof Error ? error.message : 'Failed to load accounts'}
+          </Text>
+        ) : isLoading ? (
+          <Stack gap="sm">
+            <Skeleton height={16} />
+            <Skeleton height={16} width="75%" />
+            <Skeleton height={16} width="50%" />
+          </Stack>
+        ) : assetAccounts.length === 0 ? (
+          <Stack align="center" gap="sm" py="xl">
+            <div style={{ opacity: 0.5 }}>
+              <Wallet size={48} />
+            </div>
+            <Text c="dimmed">No accounts yet</Text>
+          </Stack>
+        ) : (
+          <Stack gap="md">
+            {displayAccounts.map((account, index) => (
+              <Group
+                key={account.id}
+                justify="space-between"
+                pb="sm"
+                style={{
+                  borderBottom: index < displayAccounts.length - 1 ? '1px solid var(--mantine-color-gray-3)' : 'none'
+                }}
+              >
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <Text fw={500} truncate="end">
+                    {account.name}
+                  </Text>
+                  {account.description && (
+                    <Text size="xs" c="dimmed" truncate="end">
+                      {account.description}
+                    </Text>
+                  )}
+                </div>
+                <Text fw={600} style={{ marginLeft: '1rem' }}>
+                  <Money amount={Number(account.balance)} currency={account.currency} />
+                </Text>
+              </Group>
+            ))}
+
+            {/* Expand/Collapse button */}
+            {assetAccounts.length > 3 && (
+              <Button
+                onClick={() => setIsExpanded(!isExpanded)}
+                variant="subtle"
+                fullWidth
+                rightSection={isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+              >
+                {isExpanded ? 'Show Less' : `Show ${assetAccounts.length - 3} More`}
+              </Button>
+            )}
+          </Stack>
         )}
       </div>
-    </DashboardWidget>
+    </Paper>
   )
 }
-

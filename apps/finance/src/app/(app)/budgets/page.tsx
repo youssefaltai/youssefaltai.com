@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { FloatingActionButton, Modal, Plus, Wallet, PageLayout, EntityList, LoadingSkeleton } from '@repo/ui'
+import { Plus, Wallet } from 'lucide-react'
+import { Container, Stack, ActionIcon, Modal, Title, Text, Group, Paper, Skeleton, Button } from '@mantine/core'
 import { useBudgets, useCreateBudget, useUpdateBudget, useDeleteBudget } from '../../../hooks/use-budgets'
 import { BudgetCard } from '../../../components/budgets/BudgetCard'
 import { BudgetForm } from '../../../components/forms/BudgetForm'
@@ -53,39 +54,76 @@ export default function BudgetsPage() {
   }
 
   if (isLoading) {
-    return <LoadingSkeleton title="Budgets" subtitle="Track your spending limits" itemHeight={40} />
+    return (
+      <Container size="lg" py="md" px="md" pb={96}>
+        <Stack gap="md">
+          <Skeleton height={80} radius="md" />
+          <Skeleton height={80} radius="md" />
+          <Skeleton height={80} radius="md" />
+        </Stack>
+      </Container>
+    )
   }
 
   return (
-    <PageLayout title="Budgets" subtitle="Track your spending limits">
-      <EntityList
-        items={budgets}
-        emptyIcon={Wallet}
-        emptyTitle="No Budgets Yet"
-        emptyDescription="Set your first spending limit!"
-        renderItem={(budget, index) => (
-          <BudgetCard
-            key={budget.id}
-            budget={budget}
-            onClick={() => setEditingBudget(budget)}
-            isFirst={index === 0}
-            isLast={index === budgets.length - 1}
-          />
+    <Container size="lg" py="md" px="md" pb={96}>
+      <Stack gap="md">
+        <Group justify="space-between" align="flex-start">
+          <div>
+            <Title order={1} size="h2">Budgets</Title>
+            <Text c="dimmed" size="sm">Track your spending limits</Text>
+          </div>
+        </Group>
+
+        {budgets.length === 0 ? (
+          <Stack align="center" gap="md" py="xl" style={{ textAlign: 'center' }}>
+            <Wallet size={64} style={{ opacity: 0.3 }} />
+            <Title order={3} size="h4">No Budgets Yet</Title>
+            <Text c="dimmed">Set your first spending limit!</Text>
+          </Stack>
+        ) : (
+          <Paper withBorder radius="md">
+            <Stack gap={0}>
+              {budgets.map((budget, index) => (
+                <BudgetCard
+                  key={budget.id}
+                  budget={budget}
+                  onClick={() => setEditingBudget(budget)}
+                  isFirst={index === 0}
+                  isLast={index === budgets.length - 1}
+                />
+              ))}
+            </Stack>
+          </Paper>
         )}
-      />
+      </Stack>
 
-      <FloatingActionButton
-        icon={Plus}
-        label="Add Budget"
+      <ActionIcon
         onClick={() => setIsCreateModalOpen(true)}
-        className="fixed bottom-20 right-4"
-      />
+        size="xl"
+        radius="xl"
+        variant="filled"
+        color="blue"
+        aria-label="Add Budget"
+        style={{
+          position: 'fixed',
+          bottom: '5rem',
+          right: '1rem',
+          width: '56px',
+          height: '56px',
+          zIndex: 100,
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+        }}
+      >
+        <Plus size={24} />
+      </ActionIcon>
 
-      {/* Create Modal */}
       <Modal
-        isOpen={isCreateModalOpen}
+        opened={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         title="Add Budget"
+        centered
+        size="md"
       >
         <BudgetForm
           onSubmit={handleCreate}
@@ -93,14 +131,15 @@ export default function BudgetsPage() {
         />
       </Modal>
 
-      {/* Edit Modal */}
       <Modal
-        isOpen={!!editingBudget}
+        opened={!!editingBudget}
         onClose={() => setEditingBudget(null)}
         title="Edit Budget"
+        centered
+        size="md"
       >
         {editingBudget && (
-          <div className="space-y-4">
+          <Stack gap="md">
             <BudgetForm
               initialData={{
                 id: editingBudget.id,
@@ -114,15 +153,17 @@ export default function BudgetsPage() {
               onSubmit={handleUpdate}
               onCancel={() => setEditingBudget(null)}
             />
-            <button
+            <Button
               onClick={handleDelete}
-              className="w-full py-3 text-ios-red font-semibold hover:bg-ios-red/10 rounded-ios transition-colors"
+              color="red"
+              variant="light"
+              fullWidth
             >
               Delete Budget
-            </button>
-          </div>
+            </Button>
+          </Stack>
         )}
       </Modal>
-    </PageLayout>
+    </Container>
   )
 }

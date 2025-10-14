@@ -1,3 +1,13 @@
-@import 'tailwindcss';
-@import '@repo/tailwind-config';
-@import '@repo/ui/styles.css';
+@import '@mantine/core/styles.css';
+@import '@mantine/dates/styles.css';
+@import '@mantine/notifications/styles.css';
+@import '@mantine/charts/styles.css';
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

@@ -1,9 +1,10 @@
 'use client'
 
-import { DashboardWidget, WidgetStat } from './DashboardWidget'
+import { SimpleGrid, Paper, Title, Text, Group, Skeleton, Stack } from '@mantine/core'
+import { Wallet, CreditCard, TrendingUp, PiggyBank } from 'lucide-react'
+import { WidgetStat } from './WidgetStat'
 import { useDashboardSummary } from '../../hooks/use-dashboard'
 import { useAccounts } from '../../hooks/use-accounts'
-import { Wallet, CreditCard, TrendingUp, PiggyBank } from '@repo/ui'
 import { convertAmount, ExchangeRateMap } from '../../shared/finance-utils'
 import { useExchangeRates } from '../../hooks/use-exchange-rates'
 import { calculateCreditUtilization } from '../../utils/calculations'
@@ -73,40 +74,52 @@ export function QuickStatsWidget({ selectedMonth }: QuickStatsWidgetProps) {
   const savings = (summary?.thisMonthIncome || 0) - (summary?.thisMonthExpenses || 0)
 
   return (
-    <DashboardWidget
-      title="Quick Stats"
-      subtitle="Key metrics at a glance"
-      loading={isLoading}
-    >
-      <div className="grid grid-cols-2 gap-4">
-        <WidgetStat
-          label="Liquid Assets"
-          value={liquidAssets}
-          currency={baseCurrency}
-          icon={<Wallet className="w-4 h-4" />}
-        />
-        <WidgetStat
-          label="Total Debt"
-          value={totalDebt}
-          currency={baseCurrency}
-          icon={<CreditCard className="w-4 h-4" />}
-        />
-        <WidgetStat
-          label="Credit Utilization"
-          value={avgUtilization}
-          currency='EGP'
-          changeType={avgUtilization > 70 ? 'negative' : avgUtilization < 30 ? 'positive' : 'neutral'}
-          icon={<TrendingUp className="w-4 h-4" />}
-        />
-        <WidgetStat
-          label="Monthly Savings"
-          value={savings}
-          currency={baseCurrency}
-          changeType={savings > 0 ? 'positive' : savings < 0 ? 'negative' : 'neutral'}
-          icon={<PiggyBank className="w-4 h-4" />}
-        />
+    <Paper withBorder shadow="sm">
+      <Group justify="space-between" p="md" style={{ borderBottom: '1px solid var(--mantine-color-gray-3)' }}>
+        <div>
+          <Title order={3} size="h4">Quick Stats</Title>
+          <Text size="xs" c="dimmed" mt={2}>Key metrics at a glance</Text>
+        </div>
+      </Group>
+
+      <div style={{ padding: '1rem' }}>
+        {isLoading ? (
+          <Stack gap="sm">
+            <Skeleton height={16} />
+            <Skeleton height={16} width="75%" />
+            <Skeleton height={16} width="50%" />
+          </Stack>
+        ) : (
+          <SimpleGrid cols={2} spacing="md">
+            <WidgetStat
+              label="Liquid Assets"
+              value={liquidAssets}
+              currency={baseCurrency}
+              icon={<Wallet size={16} />}
+            />
+            <WidgetStat
+              label="Total Debt"
+              value={totalDebt}
+              currency={baseCurrency}
+              icon={<CreditCard size={16} />}
+            />
+            <WidgetStat
+              label="Credit Utilization"
+              value={avgUtilization}
+              currency='EGP'
+              changeType={avgUtilization > 70 ? 'negative' : avgUtilization < 30 ? 'positive' : 'neutral'}
+              icon={<TrendingUp size={16} />}
+            />
+            <WidgetStat
+              label="Monthly Savings"
+              value={savings}
+              currency={baseCurrency}
+              changeType={savings > 0 ? 'positive' : savings < 0 ? 'negative' : 'neutral'}
+              icon={<PiggyBank size={16} />}
+            />
+          </SimpleGrid>
+        )}
       </div>
-    </DashboardWidget>
+    </Paper>
   )
 }
-

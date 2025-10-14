@@ -1,13 +1,11 @@
 'use client'
 
 import { useMemo } from 'react'
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts'
-import { DashboardWidget } from './DashboardWidget'
+import { DonutChart } from '@mantine/charts'
+import { Receipt } from 'lucide-react'
+import { Text, Paper, Title, Group, Skeleton, Stack } from '@mantine/core'
 import { useCategoryBreakdown } from '../../hooks/use-dashboard-analytics'
-import { Receipt, Money } from '@repo/ui'
 import { format, parseISO } from '@repo/utils'
-
-const COLORS = ['#007AFF', '#34C759', '#FF9500', '#FF3B30', '#AF52DE']
 
 interface CategoryBreakdownChartProps {
   selectedMonth?: string
@@ -31,100 +29,59 @@ export function CategoryBreakdownChart({ selectedMonth }: CategoryBreakdownChart
     }, [selectedMonth])
 
     // Format data for chart
-    const chartData = categories.map((cat) => ({
+    const colors = ['blue.6', 'green.6', 'orange.6', 'red.6', 'violet.6'] as const
+    const chartData = categories?.map((cat, index) => ({
         name: cat.category,
         value: cat.amount,
-        percentage: cat.percentage,
-        count: cat.count,
-    }))
+        color: colors[index % colors.length]!,
+    })) || []
 
-    // Custom tooltip
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const CustomTooltip = ({ active, payload }: any) => {
-        if (!active || !payload || !payload.length) return null
-
-        const data = payload[0].payload
-
-        return (
-            <div className="bg-white border border-ios-gray-5 rounded-ios shadow-ios-lg p-3">
-                <p className="text-ios-body font-semibold text-ios-label-primary mb-1">{data.name}</p>
-                <p className="text-ios-callout text-ios-gray-1">
-                    {<Money amount={data.value} currency='EGP' />} ({data.percentage.toFixed(1)}%)
-                </p>
-                <p className="text-ios-caption text-ios-gray-2">{data.count} transactions</p>
-            </div>
-        )
-    }
-
-    // Custom legend
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const renderLegend = (props: any) => {
-        const { payload } = props
-        if (!payload) return null
-        return (
-            <div className="flex flex-col gap-2 mt-4">
-                {payload.map((entry: { color: string; value: string; payload: { percentage: number } }, index: number) => (
-                    <div key={`legend-${index}`} className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                            <div
-                                className="w-3 h-3 rounded-full"
-                                style={{ backgroundColor: entry.color }}
-                            />
-                            <span className="text-ios-callout text-ios-label-primary">{entry.value}</span>
-                        </div>
-                        <span className="text-ios-callout font-semibold text-ios-label-primary">
-                            {entry.payload.percentage.toFixed(1)}%
-                        </span>
-                    </div>
-                ))}
-            </div>
-        )
-    }
+    const totalPercentage = categories?.reduce((sum, cat) => sum + cat.percentage, 0) || 0
 
     return (
-    <DashboardWidget
-      title="Top Expense Categories"
-      subtitle={subtitle}
-      loading={isLoading}
-            error={error instanceof Error ? error.message : null}
-            isEmpty={chartData.length === 0}
-            emptyMessage="No expense transactions this month"
-            emptyIcon={<Receipt className="w-12 h-12" />}
-        >
-            <ResponsiveContainer width="100%" height={350}>
-                <PieChart>
-                    <Pie
-                        data={chartData}
-                        cx="50%"
-                        cy="45%"
-                        labelLine={false}
-                        outerRadius={80}
-                        fill="#8884d8"
-                        dataKey="value"
-                        label={
-                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                            (props: any) => `${props.percent ? (props.percent * 100).toFixed(0) : 0}%`
-                        }
-                    >
-                        {chartData.map((_, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                    </Pie>
-                    <Tooltip content={<CustomTooltip />} />
-                    <Legend content={renderLegend} />
-                </PieChart>
-            </ResponsiveContainer>
+      <Paper withBorder shadow="sm">
+        <Group justify="space-between" p="md" style={{ borderBottom: '1px solid var(--mantine-color-gray-3)' }}>
+          <div>
+            <Title order={3} size="h4">Top Expense Categories</Title>
+            <Text size="xs" c="dimmed" mt={2}>{subtitle}</Text>
+          </div>
+        </Group>
 
-            {/* Summary */}
-            {chartData.length > 0 && (
-                <div className="mt-4 pt-4 border-t border-ios-gray-5">
-                    <p className="text-ios-caption text-ios-gray-2 text-center">
-                        Top {chartData.length} categories account for{' '}
-                        {chartData.reduce((sum, cat) => sum + cat.percentage, 0).toFixed(1)}% of expenses
-                    </p>
-                </div>
-            )}
-        </DashboardWidget>
+        <div style={{ padding: '1rem' }}>
+          {error ? (
+            <Text c="red" ta="center" py="xl">
+              {error instanceof Error ? error.message : 'Failed to load breakdown'}
+            </Text>
+          ) : isLoading ? (
+            <Stack gap="sm">
+              <Skeleton height={16} />
+              <Skeleton height={16} width="75%" />
+              <Skeleton height={16} width="50%" />
+            </Stack>
+          ) : chartData.length === 0 ? (
+            <Stack align="center" gap="sm" py="xl">
+              <div style={{ opacity: 0.5 }}>
+                <Receipt size={48} />
+              </div>
+              <Text c="dimmed">No expense transactions this month</Text>
+            </Stack>
+          ) : (
+            <>
+              <DonutChart
+                  data={chartData}
+                  chartLabel="Categories"
+                  h={300}
+                  withLabelsLine
+                  withLabels
+              />
+
+              {/* Summary */}
+              <Text size="xs" c="dimmed" ta="center" mt="md" pt="md" style={{ borderTop: '1px solid var(--mantine-color-gray-3)' }}>
+                  Top {chartData.length} categories account for {totalPercentage.toFixed(1)}% of expenses
+              </Text>
+            </>
+          )}
+        </div>
+      </Paper>
     )
 }
-

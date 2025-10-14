@@ -1,13 +1,13 @@
 'use client'
 
-import { CardSection, ListItem } from '@repo/ui'
 import { useRouter } from 'next/navigation'
+import { Container, Paper, Text, Stack, Group, Button, UnstyledButton, Title } from '@mantine/core'
+import { ChevronRight } from 'lucide-react'
 import { useAssets } from '../../../hooks/use-assets'
 import { useCreditCards } from '../../../hooks/use-credit-cards'
 import { useLoans } from '../../../hooks/use-loans'
 import { useIncomeSources } from '../../../hooks/use-income-sources'
 import { useExpenseCategories } from '../../../hooks/use-expense-categories'
-import { PageLayout } from '@repo/ui'
 import { ExchangeRatesManager } from '../../../components/settings/ExchangeRatesManager'
 
 export default function MorePage() {
@@ -29,57 +29,93 @@ export default function MorePage() {
   }
 
   return (
-    <PageLayout title="More" subtitle="Settings and preferences">
-      <div className="space-y-6">
-        {/* Financial Entities */}
-        <CardSection title="Financial Management">
-          <ListItem
-            label="Assets"
-            value={assets.length > 0 ? `${assets.length}` : undefined}
-            chevron
-            onClick={() => router.push('/assets')}
-          />
-          <ListItem
-            label="Credit Cards"
-            value={creditCards.length > 0 ? `${creditCards.length}` : undefined}
-            chevron
-            onClick={() => router.push('/credit-cards')}
-          />
-          <ListItem
-            label="Loans"
-            value={loans.length > 0 ? `${loans.length}` : undefined}
-            chevron
-            onClick={() => router.push('/loans')}
-          />
-        </CardSection>
+    <Container size="lg" py="md" px="md" pb={96}>
+      <Stack gap="md">
+        <Group justify="space-between" align="flex-start">
+          <div>
+            <Title order={1} size="h2">More</Title>
+            <Text c="dimmed" size="sm">Settings and preferences</Text>
+          </div>
+        </Group>
 
-        {/* Categories */}
-        <CardSection title="Categories">
-          <ListItem
-            label="Income Sources"
-            value={incomeSources.length > 0 ? `${incomeSources.length}` : undefined}
-            chevron
-            onClick={() => router.push('/income-sources')}
-          />
-          <ListItem
-            label="Expense Categories"
-            value={expenseCategories.length > 0 ? `${expenseCategories.length}` : undefined}
-            chevron
-            onClick={() => router.push('/expense-categories')}
-          />
-        </CardSection>
+        <Stack gap="lg">
+          {/* Financial Entities */}
+          <div>
+            <Text fw={600} size="sm" mb="xs" c="dimmed">Financial Management</Text>
+            <Paper withBorder>
+              <Stack gap={0}>
+                <UnstyledButton onClick={() => router.push('/assets')} style={{ width: '100%' }}>
+                  <Group p="md" justify="space-between" style={{ borderBottom: '1px solid var(--mantine-color-gray-3)' }}>
+                    <Text>Assets</Text>
+                    <Group gap="xs">
+                      {assets.length > 0 && <Text c="dimmed" size="sm">{assets.length}</Text>}
+                      <ChevronRight size={16} />
+                    </Group>
+                  </Group>
+                </UnstyledButton>
+                <UnstyledButton onClick={() => router.push('/credit-cards')} style={{ width: '100%' }}>
+                  <Group p="md" justify="space-between" style={{ borderBottom: '1px solid var(--mantine-color-gray-3)' }}>
+                    <Text>Credit Cards</Text>
+                    <Group gap="xs">
+                      {creditCards.length > 0 && <Text c="dimmed" size="sm">{creditCards.length}</Text>}
+                      <ChevronRight size={16} />
+                    </Group>
+                  </Group>
+                </UnstyledButton>
+                <UnstyledButton onClick={() => router.push('/loans')} style={{ width: '100%' }}>
+                  <Group p="md" justify="space-between">
+                    <Text>Loans</Text>
+                    <Group gap="xs">
+                      {loans.length > 0 && <Text c="dimmed" size="sm">{loans.length}</Text>}
+                      <ChevronRight size={16} />
+                    </Group>
+                  </Group>
+                </UnstyledButton>
+              </Stack>
+            </Paper>
+          </div>
 
-        {/* Exchange Rates */}
-        <ExchangeRatesManager />
+          {/* Categories */}
+          <div>
+            <Text fw={600} size="sm" mb="xs" c="dimmed">Categories</Text>
+            <Paper withBorder>
+              <Stack gap={0}>
+                <UnstyledButton onClick={() => router.push('/income-sources')} style={{ width: '100%' }}>
+                  <Group p="md" justify="space-between" style={{ borderBottom: '1px solid var(--mantine-color-gray-3)' }}>
+                    <Text>Income Sources</Text>
+                    <Group gap="xs">
+                      {incomeSources.length > 0 && <Text c="dimmed" size="sm">{incomeSources.length}</Text>}
+                      <ChevronRight size={16} />
+                    </Group>
+                  </Group>
+                </UnstyledButton>
+                <UnstyledButton onClick={() => router.push('/expense-categories')} style={{ width: '100%' }}>
+                  <Group p="md" justify="space-between">
+                    <Text>Expense Categories</Text>
+                    <Group gap="xs">
+                      {expenseCategories.length > 0 && <Text c="dimmed" size="sm">{expenseCategories.length}</Text>}
+                      <ChevronRight size={16} />
+                    </Group>
+                  </Group>
+                </UnstyledButton>
+              </Stack>
+            </Paper>
+          </div>
 
-        {/* Logout Button */}
-        <button
-          onClick={handleLogout}
-          className="w-full py-3 bg-ios-red text-white rounded-ios font-semibold hover:bg-ios-red/90 active:scale-95 transition-all"
-        >
-          Log Out
-        </button>
-      </div>
-    </PageLayout>
+          {/* Exchange Rates */}
+          <ExchangeRatesManager />
+
+          {/* Logout Button */}
+          <Button
+            onClick={handleLogout}
+            color="red"
+            size="lg"
+            fullWidth
+          >
+            Log Out
+          </Button>
+        </Stack>
+      </Stack>
+    </Container>
   )
 }

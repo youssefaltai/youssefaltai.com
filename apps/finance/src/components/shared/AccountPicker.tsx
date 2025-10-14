@@ -1,7 +1,6 @@
 'use client'
 
-import { GroupedSelect } from '@repo/ui'
-import type { GroupedSelectGroup } from '@repo/ui'
+import { Select } from '@mantine/core'
 import { formatCurrencyCompact } from '@repo/utils'
 import { useAssets } from '../../hooks/use-assets'
 import { useGoals } from '../../hooks/use-goals'
@@ -70,24 +69,24 @@ export function AccountPicker({
     groupedAccountsMap[acc.groupLabel]!.push(acc)
   })
 
-  // Convert to GroupedSelectGroup format
-  const groups: GroupedSelectGroup[] = Object.entries(groupedAccountsMap).map(([label, items]) => ({
-    label,
-    options: items.map(account => ({
+  // Convert to Mantine Select format with groups
+  const selectData = Object.entries(groupedAccountsMap).map(([groupLabel, items]) => ({
+    group: groupLabel,
+    items: items.map(account => ({
       value: account.id,
-      label: account.name,
-      metadata: formatCurrencyCompact(Number(account.balance), account.currency),
+      label: `${account.name} (${formatCurrencyCompact(Number(account.balance), account.currency)})`,
     })),
   }))
 
   return (
-    <GroupedSelect
-      value={value}
-      onChange={onChange}
-      groups={groups}
+    <Select
       label={label}
       placeholder={placeholder}
+      value={value}
+      onChange={(val) => onChange(val || '')}
+      data={selectData}
       error={error}
+      searchable
     />
   )
 }

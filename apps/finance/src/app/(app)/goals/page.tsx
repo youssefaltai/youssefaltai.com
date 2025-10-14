@@ -1,12 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import { FloatingActionButton, Modal, Plus, Target, PageLayout, EntityList, LoadingSkeleton } from '@repo/ui'
+import { Plus, Target } from 'lucide-react'
+import { Container, Stack, ActionIcon, Modal, Title, Text, Group, Paper, Skeleton, Button } from '@mantine/core'
 import { useGoals, useCreateGoal, useUpdateGoal, useDeleteGoal } from '../../../hooks/use-goals'
 import { GoalCard } from '../../../components/goals/GoalCard'
 import { GoalForm } from '../../../components/forms/GoalForm'
 import type { Account } from '@repo/db'
-import { ensureDate } from '@repo/utils'
 import type { CreateGoalSchema, UpdateGoalSchema } from '../../../features/accounts/goal/validation'
 
 export default function GoalsPage() {
@@ -37,39 +37,76 @@ export default function GoalsPage() {
   }
 
   if (isLoading) {
-    return <LoadingSkeleton title="Goals" subtitle="Track your financial goals" itemHeight={32} />
+    return (
+      <Container size="lg" py="md" px="md" pb={96}>
+        <Stack gap="md">
+          <Skeleton height={80} radius="md" />
+          <Skeleton height={80} radius="md" />
+          <Skeleton height={80} radius="md" />
+        </Stack>
+      </Container>
+    )
   }
 
   return (
-    <PageLayout title="Goals" subtitle="Track your financial goals">
-      <EntityList
-        items={goals}
-        emptyIcon={Target}
-        emptyTitle="No Goals Yet"
-        emptyDescription="Set your first financial goal!"
-        renderItem={(goal, index) => (
-          <GoalCard
-            key={goal.id}
-            goal={goal}
-            onClick={() => setEditingGoal(goal)}
-            isFirst={index === 0}
-            isLast={index === goals.length - 1}
-          />
+    <Container size="lg" py="md" px="md" pb={96}>
+      <Stack gap="md">
+        <Group justify="space-between" align="flex-start">
+          <div>
+            <Title order={1} size="h2">Goals</Title>
+            <Text c="dimmed" size="sm">Track your financial goals</Text>
+          </div>
+        </Group>
+
+        {goals.length === 0 ? (
+          <Stack align="center" gap="md" py="xl" style={{ textAlign: 'center' }}>
+            <Target size={64} style={{ opacity: 0.3 }} />
+            <Title order={3} size="h4">No Goals Yet</Title>
+            <Text c="dimmed">Set your first financial goal!</Text>
+          </Stack>
+        ) : (
+          <Paper withBorder radius="md">
+            <Stack gap={0}>
+              {goals.map((goal, index) => (
+                <GoalCard
+                  key={goal.id}
+                  goal={goal}
+                  onClick={() => setEditingGoal(goal)}
+                  isFirst={index === 0}
+                  isLast={index === goals.length - 1}
+                />
+              ))}
+            </Stack>
+          </Paper>
         )}
-      />
+      </Stack>
 
-      <FloatingActionButton
-        icon={Plus}
-        label="Add Goal"
+      <ActionIcon
         onClick={() => setIsCreateModalOpen(true)}
-        className="fixed bottom-20 right-4"
-      />
+        size="xl"
+        radius="xl"
+        variant="filled"
+        color="blue"
+        aria-label="Add Goal"
+        style={{
+          position: 'fixed',
+          bottom: '5rem',
+          right: '1rem',
+          width: '56px',
+          height: '56px',
+          zIndex: 100,
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+        }}
+      >
+        <Plus size={24} />
+      </ActionIcon>
 
-      {/* Create Modal */}
       <Modal
-        isOpen={isCreateModalOpen}
+        opened={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         title="Add Goal"
+        centered
+        size="md"
       >
         <GoalForm
           onSubmit={handleCreate}
@@ -77,34 +114,42 @@ export default function GoalsPage() {
         />
       </Modal>
 
-      {/* Edit Modal */}
       <Modal
-        isOpen={!!editingGoal}
+        opened={!!editingGoal}
         onClose={() => setEditingGoal(null)}
         title="Edit Goal"
+        centered
+        size="md"
       >
         {editingGoal && (
-          <div className="space-y-4">
+          <Stack gap="md">
             <GoalForm
               initialData={{
-                ...editingGoal,
-                description: editingGoal.description || undefined,
+                name: editingGoal.name,
+                currency: editingGoal.currency,
                 target: editingGoal.target ? Number(editingGoal.target) : 0,
+                dueDate: typeof editingGoal.dueDate === 'string' 
+                  ? editingGoal.dueDate 
+                  : editingGoal.dueDate 
+                    ? new Date(editingGoal.dueDate).toISOString()
+                    : new Date().toISOString(),
+                description: editingGoal.description || undefined,
                 openingBalance: Number(editingGoal.balance),
-                dueDate: ensureDate(editingGoal.dueDate || new Date()).toISOString(),
               }}
               onSubmit={handleUpdate}
               onCancel={() => setEditingGoal(null)}
             />
-            <button
+            <Button
               onClick={handleDelete}
-              className="w-full py-3 text-ios-red font-semibold hover:bg-ios-red/10 rounded-ios transition-colors"
+              color="red"
+              variant="light"
+              fullWidth
             >
               Delete Goal
-            </button>
-          </div>
+            </Button>
+          </Stack>
         )}
       </Modal>
-    </PageLayout>
+    </Container>
   )
 }

@@ -17,7 +17,7 @@ const nextConfig: NextConfig = {
     removeConsole: process.env.NODE_ENV === 'production',
   },
   // Monorepo configuration
-  transpilePackages: ['@repo/ui', '@repo/utils', '@repo/auth'],
+  transpilePackages: ['@repo/utils', '@repo/auth'],
   // Explicit workspace root for Turbopack (Next.js 15+ syntax)
   turbopack: {
     root: path.resolve(__dirname, '../..'),

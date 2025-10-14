@@ -5,7 +5,8 @@ export default function manifest() {
     name: 'Fitness App',
     shortName: 'Fitness',
     description: 'Personal fitness tracking application',
-    themeColor: '#34C759',
+    themeColor: '#007AFF',
+    backgroundColor: '#F2F2F7',
   })
 }
 

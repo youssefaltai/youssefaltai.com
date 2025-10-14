@@ -6,6 +6,7 @@ export default function manifest() {
     shortName: 'Dashboard',
     description: 'Unified dashboard for all applications',
     themeColor: '#007AFF',
+    backgroundColor: '#F2F2F7',
   })
 }
 

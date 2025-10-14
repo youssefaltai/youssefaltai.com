@@ -1,4 +1,6 @@
-import type { Metadata } from "next";
+import { createViewport } from "@repo/utils";
+import { MantineProvider, ColorSchemeScript, mantineHtmlProps } from "@mantine/core";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -12,12 +14,7 @@ export const metadata: Metadata = {
   },
 };
 
-export const viewport = {
-  width: "device-width",
-  initialScale: 1,
-  maximumScale: 1,
-  themeColor: "#007AFF",
-};
+export const viewport: Viewport = createViewport();
 
 export default function RootLayout({
   children,
@@ -25,12 +22,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" {...mantineHtmlProps}>
       <head>
+        <ColorSchemeScript />
         <link rel="manifest" href="/manifest.webmanifest" />
       </head>
-      <body className="bg-ios-gray-6 antialiased">
-        {children}
+      <body>
+        <MantineProvider>
+          {children}
+        </MantineProvider>
       </body>
     </html>
   );

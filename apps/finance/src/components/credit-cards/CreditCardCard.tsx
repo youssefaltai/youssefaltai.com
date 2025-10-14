@@ -1,8 +1,9 @@
 'use client'
 
-import { CreditCard, Money } from '@repo/ui'
+import { CreditCard } from 'lucide-react'
+import { UnstyledButton, Group, Text } from '@mantine/core'
+import { Money } from '../shared/Money'
 import type { Account } from '@repo/db'
-import { EntityListItem } from '@repo/ui'
 
 interface CreditCardCardProps {
   creditCard: Account
@@ -14,25 +15,31 @@ interface CreditCardCardProps {
 /**
  * Display item for a credit card in a grouped list
  */
-export function CreditCardCard({ creditCard, onClick, isFirst, isLast }: CreditCardCardProps) {
+export function CreditCardCard({ creditCard, onClick, isFirst: _isFirst, isLast }: CreditCardCardProps) {
   const balance = Number(creditCard.balance)
 
   return (
-    <EntityListItem
-      icon={CreditCard}
-      iconColor="neutral"
-      title={creditCard.name}
-      subtitle={creditCard.description || undefined}
-      rightContent={
-        <div className="text-right">
-          <p className="text-ios-callout sm:text-ios-headline font-semibold text-ios-label-primary">
-            <Money amount={balance} currency={creditCard.currency} />
-          </p>
-        </div>
-      }
-      onClick={onClick}
-      isFirst={isFirst}
-      isLast={isLast}
-    />
+    <UnstyledButton onClick={onClick} style={{ width: '100%' }}>
+      <Group
+        p="md"
+        justify="space-between"
+        style={{
+          borderBottom: !isLast ? '1px solid var(--mantine-color-gray-3)' : 'none',
+        }}
+      >
+        <Group gap="sm" style={{ flex: 1 }}>
+          <CreditCard size={20} style={{ opacity: 0.6 }} />
+          <div>
+            <Text fw={500}>{creditCard.name}</Text>
+            {creditCard.description && (
+              <Text size="xs" c="dimmed">{creditCard.description}</Text>
+            )}
+          </div>
+        </Group>
+        <Text fw={600}>
+          <Money amount={balance} currency={creditCard.currency} />
+        </Text>
+      </Group>
+    </UnstyledButton>
   )
 }

@@ -1,9 +1,8 @@
 'use client'
 
-import { DashboardWidget } from './DashboardWidget'
+import { Heart } from 'lucide-react'
+import { RingProgress, Stack, Group, Text, Title, Paper, List, Skeleton } from '@mantine/core'
 import { useFinancialHealthScore } from '../../hooks/use-dashboard-insights'
-import { Heart } from '@repo/ui'
-import { cn } from '@repo/utils'
 
 /**
  * Financial health widget
@@ -13,71 +12,72 @@ import { cn } from '@repo/utils'
 export function FinancialHealthWidget() {
   const { data: healthData, isLoading, error } = useFinancialHealthScore()
 
+  // Map color class to Mantine color
+  const getColor = (colorClass: string) => {
+    if (colorClass.includes('green')) return 'green'
+    if (colorClass.includes('yellow')) return 'yellow'
+    if (colorClass.includes('orange')) return 'orange'
+    if (colorClass.includes('red')) return 'red'
+    return 'blue'
+  }
+
+  const color = healthData ? getColor(healthData.color) : 'blue'
+
   return (
-    <DashboardWidget
-      title="Financial Health"
-      subtitle="Your overall financial health score"
-      loading={isLoading}
-      error={error instanceof Error ? error.message : null}
-      isEmpty={false}
-    >
-      <div className="flex flex-col items-center">
-        {/* Circular progress indicator */}
-        <div className="relative w-40 h-40 mb-4">
-          {/* Background circle */}
-          <svg className="w-40 h-40 transform -rotate-90">
-            <circle
-              cx="80"
-              cy="80"
-              r="70"
-              strokeWidth="12"
-              fill="none"
-              className="stroke-ios-gray-5"
+    <Paper withBorder shadow="sm">
+      <Group justify="space-between" p="md" style={{ borderBottom: '1px solid var(--mantine-color-gray-3)' }}>
+        <div>
+          <Title order={3} size="h4">Financial Health</Title>
+          <Text size="xs" c="dimmed" mt={2}>Your overall financial health score</Text>
+        </div>
+      </Group>
+
+      <div style={{ padding: '1rem' }}>
+        {error ? (
+          <Text c="red" ta="center" py="xl">
+            {error instanceof Error ? error.message : 'Failed to load health score'}
+          </Text>
+        ) : isLoading ? (
+          <Stack gap="sm">
+            <Skeleton height={16} />
+            <Skeleton height={16} width="75%" />
+            <Skeleton height={16} width="50%" />
+          </Stack>
+        ) : (
+          <Stack align="center" gap="lg">
+            {/* Ring Progress */}
+            <RingProgress
+              size={160}
+              thickness={12}
+              sections={[{ value: healthData?.score || 0, color: color }]}
+              label={
+                <Stack align="center" gap={0}>
+                  <Title order={1} size={48}>{healthData?.score || 0}</Title>
+                  <Text size="sm" c="dimmed">out of 100</Text>
+                </Stack>
+              }
             />
-            {/* Progress circle */}
-            <circle
-              cx="80"
-              cy="80"
-              r="70"
-              strokeWidth="12"
-              fill="none"
-              strokeLinecap="round"
-              strokeDasharray={`${(healthData.score / 100) * 439.6} 439.6`}
-              className={cn('transition-all duration-1000', healthData.color)}
-            />
-          </svg>
 
-          {/* Score text */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <p className={cn('text-5xl font-bold', healthData.color)}>
-              {healthData.score}
-            </p>
-            <p className="text-ios-callout text-ios-gray-2">out of 100</p>
-          </div>
-        </div>
+            {/* Status label */}
+            <Group gap="xs">
+              <Heart size={20} fill="currentColor" color={`var(--mantine-color-${color}-6)`} />
+              <Title order={3} size="h4" c={color}>
+                {healthData?.label}
+              </Title>
+            </Group>
 
-        {/* Status label */}
-        <div className="flex items-center gap-2 mb-4">
-          <Heart className={cn('w-5 h-5', healthData.color)} fill="currentColor" />
-          <p className={cn('text-ios-title-3 font-semibold', healthData.color)}>
-            {healthData.label}
-          </p>
-        </div>
-
-        {/* Tips */}
-        <div className="w-full bg-ios-gray-6 rounded-ios p-4">
-          <p className="text-ios-caption font-semibold text-ios-gray-2 mb-2">Tips to improve:</p>
-          <ul className="space-y-2">
-            {healthData.tips.map((tip, index) => (
-              <li key={index} className="flex items-start gap-2">
-                <span className="text-ios-blue mt-0.5">•</span>
-                <span className="text-ios-callout text-ios-label-primary flex-1">{tip}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
+            {/* Tips */}
+            <Paper p="md" style={{ width: '100%', backgroundColor: 'var(--mantine-color-gray-0)' }}>
+              <Text size="xs" fw={600} c="dimmed" mb="xs">Tips to improve:</Text>
+              <List size="sm" spacing="xs">
+                {healthData?.tips.map((tip, index) => (
+                  <List.Item key={index}>{tip}</List.Item>
+                ))}
+              </List>
+            </Paper>
+          </Stack>
+        )}
       </div>
-    </DashboardWidget>
+    </Paper>
   )
 }
-

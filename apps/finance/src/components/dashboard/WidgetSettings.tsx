@@ -1,8 +1,9 @@
 'use client'
 
-import { useWidgetPreferences, useUpdateWidgetPreferences } from '../../hooks/use-widget-preferences'
 import { useState } from 'react'
-import { Eye, EyeOff, RotateCcw, Switch } from '@repo/ui'
+import { Eye, EyeOff, RotateCcw } from 'lucide-react'
+import { Switch, Text, Stack, Group, Button } from '@mantine/core'
+import { useWidgetPreferences, useUpdateWidgetPreferences } from '../../hooks/use-widget-preferences'
 
 interface WidgetSettingsProps {
   onClose: () => void
@@ -71,55 +72,56 @@ export function WidgetSettings({ onClose }: WidgetSettingsProps) {
   }
 
   return (
-    <div>
-      <p className="text-ios-body text-ios-gray-1 mb-4">
+    <Stack gap="lg">
+      <Text c="dimmed">
         Choose which widgets to display on your dashboard
-      </p>
+      </Text>
 
       {/* Widget list */}
-      <div className="space-y-2 mb-6">
+      <Stack gap="xs">
         {preferences?.map((pref) => (
-          <div
+          <Group
             key={pref.widgetId}
-            className="w-full flex items-center justify-between p-3 bg-ios-gray-6 rounded-ios"
+            p="md"
+            justify="space-between"
+            style={{ backgroundColor: 'var(--mantine-color-gray-0)', borderRadius: 'var(--mantine-radius-md)' }}
           >
-            <div className="flex items-center gap-3">
+            <Group gap="sm">
               {localPreferences[pref.widgetId] !== false ? (
-                <Eye className="w-5 h-5 text-ios-blue" />
+                <Eye size={20} color="var(--mantine-color-blue-6)" />
               ) : (
-                <EyeOff className="w-5 h-5 text-ios-gray-2" />
+                <EyeOff size={20} style={{ opacity: 0.5 }} />
               )}
-              <span className="text-ios-body text-ios-label-primary">
+              <Text>
                 {WIDGET_LABELS[pref.widgetId] || pref.widgetId}
-              </span>
-            </div>
+              </Text>
+            </Group>
 
             <Switch
               checked={localPreferences[pref.widgetId] !== false}
               onChange={() => toggleWidget(pref.widgetId)}
             />
-          </div>
+          </Group>
         ))}
-      </div>
+      </Stack>
 
       {/* Actions */}
-      <div className="flex gap-3">
-        <button
+      <Group grow>
+        <Button
           onClick={handleReset}
-          className="flex-1 flex items-center justify-center gap-2 py-3 px-4 bg-ios-gray-6 hover:bg-ios-gray-5 text-ios-label-primary rounded-ios font-medium transition-colors"
+          variant="default"
+          leftSection={<RotateCcw size={16} />}
         >
-          <RotateCcw className="w-4 h-4" />
           Reset to Default
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={handleSave}
-          disabled={updatePreferences.isPending}
-          className="flex-1 py-3 px-4 bg-ios-blue hover:bg-blue-600 text-white rounded-ios font-medium transition-colors disabled:opacity-50"
+          loading={updatePreferences.isPending}
         >
-          {updatePreferences.isPending ? 'Saving...' : 'Save Changes'}
-        </button>
-      </div>
-    </div>
+          Save Changes
+        </Button>
+      </Group>
+    </Stack>
   )
 }
 

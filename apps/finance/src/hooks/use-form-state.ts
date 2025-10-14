@@ -11,15 +11,19 @@ interface UseFormStateOptions<T> {
 
 export function useFormState<T>({ onSubmit, onSuccess }: UseFormStateOptions<T>) {
   const [submitError, setSubmitError] = useState<string | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleSubmit = async (data: T, defaultErrorMessage = 'Failed to save') => {
     setSubmitError(null)
+    setIsSubmitting(true)
     try {
       await onSubmit(data)
       onSuccess?.()
     } catch (error) {
       setSubmitError(error instanceof Error ? error.message : defaultErrorMessage)
       throw error
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -27,6 +31,7 @@ export function useFormState<T>({ onSubmit, onSuccess }: UseFormStateOptions<T>)
     submitError,
     setSubmitError,
     handleSubmit,
+    isSubmitting,
   }
 }
 

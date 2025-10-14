@@ -1,8 +1,8 @@
 'use client'
 
-import { TrendingUp } from '@repo/ui'
+import { TrendingUp } from 'lucide-react'
+import { UnstyledButton, Group, Text } from '@mantine/core'
 import type { Account } from '@repo/db'
-import { EntityListItem } from '@repo/ui'
 
 interface IncomeSourceCardProps {
   incomeSource: Account
@@ -14,17 +14,26 @@ interface IncomeSourceCardProps {
 /**
  * Display item for an income source in a grouped list
  */
-export function IncomeSourceCard({ incomeSource, onClick, isFirst, isLast }: IncomeSourceCardProps) {
+export function IncomeSourceCard({ incomeSource, onClick, isFirst: _isFirst, isLast }: IncomeSourceCardProps) {
   return (
-    <EntityListItem
-      icon={TrendingUp}
-      iconColor="neutral"
-      title={incomeSource.name}
-      subtitle={incomeSource.description || undefined}
-      rightContent={null}
-      onClick={onClick}
-      isFirst={isFirst}
-      isLast={isLast}
-    />
+    <UnstyledButton onClick={onClick} style={{ width: '100%' }}>
+      <Group
+        p="md"
+        justify="space-between"
+        style={{
+          borderBottom: !isLast ? '1px solid var(--mantine-color-gray-3)' : 'none',
+        }}
+      >
+        <Group gap="sm" style={{ flex: 1 }}>
+          <TrendingUp size={20} style={{ opacity: 0.6 }} />
+          <div>
+            <Text fw={500}>{incomeSource.name}</Text>
+            {incomeSource.description && (
+              <Text size="xs" c="dimmed">{incomeSource.description}</Text>
+            )}
+          </div>
+        </Group>
+      </Group>
+    </UnstyledButton>
   )
 }

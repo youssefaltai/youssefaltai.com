@@ -22,7 +22,7 @@ export interface Insight {
 export interface HealthScoreMetadata {
   score: number
   label: string
-  color: string // Tailwind color class (e.g., 'text-ios-green')
+  color: string // Mantine color class (e.g., 'green', 'red', 'orange')
   tips: string[]
 }
 

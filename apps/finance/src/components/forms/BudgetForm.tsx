@@ -1,15 +1,15 @@
 'use client'
 
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { Input, CurrencySelect, Select, FormActions, ChipSelect } from '@repo/ui'
-import type { ChipSelectOption } from '@repo/ui'
+import { useState, useEffect } from 'react'
+import { useForm } from '@mantine/form'
+import { zodResolver } from 'mantine-form-zod-resolver'
+import { TextInput, Select, NumberInput, Group, Button, Alert, Stack, Text, Chip } from '@mantine/core'
+import { DateInput } from '@mantine/dates'
 import { CURRENCY_OPTIONS } from '../../utils/currencies'
 import { useFormState } from '../../hooks/use-form-state'
 import { createBudgetSchema, type CreateBudgetSchema } from '../../features/budgets/validation'
 import { useExpenseCategories } from '../../hooks/use-expense-categories'
-import { parseISO, format, startOfMonth, endOfMonth, addMonths, startOfQuarter, endOfQuarter } from '@repo/utils'
-import { useState, useEffect } from 'react'
+import { startOfMonth, endOfMonth, addMonths, startOfQuarter, endOfQuarter } from '@repo/utils'
 
 interface BudgetFormProps {
   initialData?: Partial<CreateBudgetSchema> & { id?: string }
@@ -23,7 +23,7 @@ type DatePreset = 'this-month' | 'next-month' | 'this-quarter' | 'custom'
  * Form for creating/editing budgets
  */
 export function BudgetForm({ initialData, onSubmit, onCancel }: BudgetFormProps) {
-  const { submitError, handleSubmit: handleFormSubmit } = useFormState({
+  const { submitError, handleSubmit: handleFormSubmit, isSubmitting } = useFormState({
     onSubmit,
   })
 
@@ -31,15 +31,9 @@ export function BudgetForm({ initialData, onSubmit, onCancel }: BudgetFormProps)
 
   const [datePreset, setDatePreset] = useState<DatePreset>('this-month')
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-    setValue,
-    watch,
-  } = useForm<CreateBudgetSchema>({
-    resolver: zodResolver(createBudgetSchema),
-    defaultValues: {
+  const form = useForm<CreateBudgetSchema>({
+    validate: zodResolver(createBudgetSchema),
+    initialValues: {
       name: initialData?.name || '',
       amount: initialData?.amount || 0,
       currency: initialData?.currency || 'EGP',
@@ -48,10 +42,6 @@ export function BudgetForm({ initialData, onSubmit, onCancel }: BudgetFormProps)
       accountIds: initialData?.accountIds || [],
     },
   })
-
-  const accountIds = watch('accountIds')
-  const watchedStartDate = watch('startDate')
-  const watchedEndDate = watch('endDate')
 
   // Apply date preset when changed
   useEffect(() => {
@@ -78,132 +68,113 @@ export function BudgetForm({ initialData, onSubmit, onCancel }: BudgetFormProps)
         return
     }
 
-    setValue('startDate', start.toISOString())
-    setValue('endDate', end.toISOString())
-  }, [datePreset, setValue])
+    form.setFieldValue('startDate', start.toISOString())
+    form.setFieldValue('endDate', end.toISOString())
+  }, [datePreset])
 
   const onFormSubmit = async (data: CreateBudgetSchema) => {
     await handleFormSubmit(data, 'Failed to save budget')
   }
 
-  const toggleAccount = (accountId: string) => {
-    const currentIds = accountIds || []
-    if (currentIds.includes(accountId)) {
-      setValue('accountIds', currentIds.filter(id => id !== accountId))
-    } else {
-      setValue('accountIds', [...currentIds, accountId])
-    }
-  }
-
   return (
-    <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
-      <Input
-        label="Budget Name"
-        {...register('name')}
-        placeholder="e.g., Monthly Groceries, Entertainment"
-        error={errors.name?.message}
-        required
-      />
+    <form onSubmit={form.onSubmit(onFormSubmit)}>
+      <Stack gap="md">
+        <TextInput
+          label="Budget Name"
+          placeholder="e.g., Monthly Groceries, Entertainment"
+          required
+          {...form.getInputProps('name')}
+        />
 
-      <Input
-        type="number"
-        label="Budget Amount"
-        {...register('amount', { valueAsNumber: true })}
-        error={errors.amount?.message}
-        placeholder="0.00"
-        step="0.01"
-        min="0"
-        required
-      />
+        <NumberInput
+          label="Budget Amount"
+          placeholder="0.00"
+          required
+          decimalScale={2}
+          min={0}
+          {...form.getInputProps('amount')}
+        />
 
-      <CurrencySelect
-        {...register('currency')}
-        currencies={CURRENCY_OPTIONS}
-        error={errors.currency?.message}
-        required
-      />
+        <Select
+          label="Currency"
+          data={CURRENCY_OPTIONS}
+          required
+          {...form.getInputProps('currency')}
+        />
 
-      {/* Date Preset Selector */}
-      <Select
-        label="Budget Period"
-        value={datePreset}
-        onChange={(e) => setDatePreset(e.target.value as DatePreset)}
-      >
-        <option value="this-month">This Month</option>
-        <option value="next-month">Next Month</option>
-        <option value="this-quarter">This Quarter</option>
-        <option value="custom">Custom</option>
-      </Select>
+        {/* Date Preset Selector */}
+        <Select
+          label="Budget Period"
+          value={datePreset}
+          onChange={(value) => setDatePreset(value as DatePreset)}
+          data={[
+            { value: 'this-month', label: 'This Month' },
+            { value: 'next-month', label: 'Next Month' },
+            { value: 'this-quarter', label: 'This Quarter' },
+            { value: 'custom', label: 'Custom' },
+          ]}
+        />
 
-      {/* Custom Date Inputs (only visible when custom is selected) */}
-      {datePreset === 'custom' && (
-        <>
-          <Input
-            type="date"
-            label="Start Date"
-            value={format(parseISO(watchedStartDate), 'yyyy-MM-dd')}
-            onChange={(e) => {
-              const dateValue = e.target.value
-              const newDate = parseISO(dateValue + 'T00:00:00')
-              setValue('startDate', newDate.toISOString(), { shouldValidate: true })
-            }}
-            error={errors.startDate?.message}
-            required
-          />
+        {/* Custom Date Inputs (only visible when custom is selected) */}
+        {datePreset === 'custom' && (
+          <>
+            <DateInput
+              label="Start Date"
+              required
+              value={form.values.startDate ? new Date(form.values.startDate) : new Date()}
+              onChange={(value) => form.setFieldValue('startDate', value ? new Date(value).toISOString() : new Date().toISOString())}
+            />
 
-          <Input
-            type="date"
-            label="End Date"
-            value={format(parseISO(watchedEndDate), 'yyyy-MM-dd')}
-            onChange={(e) => {
-              const dateValue = e.target.value
-              const newDate = parseISO(dateValue + 'T23:59:59.999')
-              setValue('endDate', newDate.toISOString(), { shouldValidate: true })
-            }}
-            error={errors.endDate?.message}
-            required
-          />
-        </>
-      )}
+            <DateInput
+              label="End Date"
+              required
+              value={form.values.endDate ? new Date(form.values.endDate) : new Date()}
+              onChange={(value) => form.setFieldValue('endDate', value ? new Date(value).toISOString() : new Date().toISOString())}
+            />
+          </>
+        )}
 
-      {/* Expense Categories Multi-Select */}
-      {isLoadingCategories ? (
-        <div>
-          <label className="block text-ios-body font-medium text-ios-label-primary mb-2">
-            Expense Categories *
-          </label>
-          <p className="text-ios-footnote text-ios-gray-1">Loading categories...</p>
-        </div>
-      ) : (
-        <div>
-          <ChipSelect
-            label="Expense Categories *"
-            options={expenseCategories.map(
-              (category): ChipSelectOption => ({
-                id: category.id,
-                label: category.name,
-              })
+        {/* Expense Categories Multi-Select */}
+        {isLoadingCategories ? (
+          <div>
+            <Text fw={500} size="sm" mb="xs">Expense Categories *</Text>
+            <Text size="xs" c="dimmed">Loading categories...</Text>
+          </div>
+        ) : (
+          <div>
+            <Text fw={500} size="sm" mb="xs">Expense Categories *</Text>
+            {expenseCategories.length === 0 ? (
+              <Text size="sm" c="dimmed">No expense categories found. Create some first.</Text>
+            ) : (
+              <Chip.Group multiple value={form.values.accountIds || []} onChange={(value) => form.setFieldValue('accountIds', value)}>
+                <Group gap="xs">
+                  {expenseCategories.map((category) => (
+                    <Chip key={category.id} value={category.id}>{category.name}</Chip>
+                  ))}
+                </Group>
+              </Chip.Group>
             )}
-            selectedIds={accountIds || []}
-            onToggle={toggleAccount}
-            emptyMessage="No expense categories found. Create some first."
-          />
-          {errors.accountIds && (
-            <p className="text-ios-footnote text-ios-red mt-1">{errors.accountIds.message}</p>
-          )}
-        </div>
-      )}
+            {form.errors.accountIds && (
+              <Text size="xs" c="red" mt={4}>{form.errors.accountIds as string}</Text>
+            )}
+          </div>
+        )}
 
-      {submitError && (
-        <p className="text-ios-footnote text-ios-red">{submitError}</p>
-      )}
+        {submitError && (
+          <Alert color="red" title="Error">
+            {submitError}
+          </Alert>
+        )}
 
-      <FormActions
-        onCancel={onCancel}
-        isSubmitting={isSubmitting}
-        submitLabel={initialData?.id ? 'Update' : 'Create'}
-      />
+        <Group justify="flex-end">
+          <Button variant="default" onClick={onCancel}>
+            Cancel
+          </Button>
+          <Button type="submit" loading={isSubmitting}>
+            {initialData?.id ? 'Update' : 'Create'}
+          </Button>
+        </Group>
+      </Stack>
     </form>
   )
 }
-

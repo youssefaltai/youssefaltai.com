@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { FloatingActionButton, Modal, Plus, Wallet, PageLayout, EntityList, LoadingSkeleton } from '@repo/ui'
+import { Plus, Wallet } from 'lucide-react'
+import { Container, Stack, ActionIcon, Modal, Title, Text, Group, Paper, Skeleton, Button } from '@mantine/core'
 import { useAssets, useCreateAsset, useUpdateAsset, useDeleteAsset } from '../../../hooks/use-assets'
 import { AssetCard } from '../../../components/assets/AssetCard'
 import { AssetForm } from '../../../components/forms/AssetForm'
@@ -36,39 +37,81 @@ export default function AssetsPage() {
   }
 
   if (isLoading) {
-    return <LoadingSkeleton title="Assets" subtitle="Manage your assets and accounts" />
+    return (
+      <Container size="lg" py="md" px="md" pb={96}>
+        <Stack gap="md">
+          <Skeleton height={80} radius="md" />
+          <Skeleton height={80} radius="md" />
+          <Skeleton height={80} radius="md" />
+          <Skeleton height={80} radius="md" />
+        </Stack>
+      </Container>
+    )
   }
 
   return (
-    <PageLayout title="Assets" subtitle="Manage your assets and accounts">
-      <EntityList
-        items={assets}
-        emptyIcon={Wallet}
-        emptyTitle="No Assets Yet"
-        emptyDescription="Add your first asset to get started!"
-        renderItem={(asset, index) => (
-          <AssetCard
-            key={asset.id}
-            asset={asset}
-            onClick={() => setEditingAsset(asset)}
-            isFirst={index === 0}
-            isLast={index === assets.length - 1}
-          />
-        )}
-      />
+    <Container size="lg" py="md" px="md" pb={96}>
+      <Stack gap="md">
+        {/* Header */}
+        <Group justify="space-between" align="flex-start">
+          <div>
+            <Title order={1} size="h2">Assets</Title>
+            <Text c="dimmed" size="sm">Manage your assets and accounts</Text>
+          </div>
+        </Group>
 
-      <FloatingActionButton 
-        icon={Plus} 
-        label="Add Asset"
+        {/* Content */}
+        {assets.length === 0 ? (
+          <Stack align="center" gap="md" py="xl" style={{ textAlign: 'center' }}>
+            <Wallet size={64} style={{ opacity: 0.3 }} />
+            <Title order={3} size="h4">No Assets Yet</Title>
+            <Text c="dimmed">Add your first asset to get started!</Text>
+          </Stack>
+        ) : (
+          <Paper withBorder radius="md">
+            <Stack gap={0}>
+              {assets.map((asset, index) => (
+                <AssetCard
+                  key={asset.id}
+                  asset={asset}
+                  onClick={() => setEditingAsset(asset)}
+                  isFirst={index === 0}
+                  isLast={index === assets.length - 1}
+                />
+              ))}
+            </Stack>
+          </Paper>
+        )}
+      </Stack>
+
+      {/* Floating Action Button */}
+      <ActionIcon
         onClick={() => setIsCreateModalOpen(true)}
-        className="fixed bottom-20 right-4"
-      />
+        size="xl"
+        radius="xl"
+        variant="filled"
+        color="blue"
+        aria-label="Add Asset"
+        style={{
+          position: 'fixed',
+          bottom: '5rem',
+          right: '1rem',
+          width: '56px',
+          height: '56px',
+          zIndex: 100,
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+        }}
+      >
+        <Plus size={24} />
+      </ActionIcon>
 
       {/* Create Modal */}
       <Modal
-        isOpen={isCreateModalOpen}
+        opened={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         title="Add Asset"
+        centered
+        size="md"
       >
         <AssetForm
           onSubmit={handleCreate}
@@ -78,12 +121,14 @@ export default function AssetsPage() {
 
       {/* Edit Modal */}
       <Modal
-        isOpen={!!editingAsset}
+        opened={!!editingAsset}
         onClose={() => setEditingAsset(null)}
         title="Edit Asset"
+        centered
+        size="md"
       >
         {editingAsset && (
-          <div className="space-y-4">
+          <Stack gap="md">
             <AssetForm
               initialData={{
                 ...editingAsset,
@@ -93,15 +138,17 @@ export default function AssetsPage() {
               onSubmit={handleUpdate}
               onCancel={() => setEditingAsset(null)}
             />
-            <button
+            <Button
               onClick={handleDelete}
-              className="w-full py-3 text-ios-red font-semibold hover:bg-ios-red/10 rounded-ios transition-colors"
+              color="red"
+              variant="light"
+              fullWidth
             >
               Delete Asset
-            </button>
-          </div>
+            </Button>
+          </Stack>
         )}
       </Modal>
-    </PageLayout>
+    </Container>
   )
 }

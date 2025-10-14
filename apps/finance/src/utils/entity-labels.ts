@@ -1,5 +1,5 @@
 import { AccountType } from '@repo/db'
-import type { LucideIcon } from '@repo/ui'
+import type { LucideIcon } from 'lucide-react'
 import {
   Wallet,
   CreditCard,
@@ -7,7 +7,7 @@ import {
   Target,
   TrendingUp,
   TrendingDown,
-} from '@repo/ui'
+} from 'lucide-react'
 
 /**
  * Get user-friendly label for entity type

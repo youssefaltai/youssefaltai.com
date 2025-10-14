@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { FloatingActionButton, Modal, Plus, CreditCard, PageLayout, EntityList, LoadingSkeleton } from '@repo/ui'
+import { Plus, CreditCard } from 'lucide-react'
+import { Container, Stack, ActionIcon, Modal, Title, Text, Group, Paper, Skeleton, Button } from '@mantine/core'
 import { useCreditCards, useCreateCreditCard, useUpdateCreditCard, useDeleteCreditCard } from '../../../hooks/use-credit-cards'
 import { CreditCardCard } from '../../../components/credit-cards/CreditCardCard'
 import { CreditCardForm } from '../../../components/forms/CreditCardForm'
@@ -36,39 +37,76 @@ export default function CreditCardsPage() {
   }
 
   if (isLoading) {
-    return <LoadingSkeleton title="Credit Cards" subtitle="Manage your credit cards" />
+    return (
+      <Container size="lg" py="md" px="md" pb={96}>
+        <Stack gap="md">
+          <Skeleton height={80} radius="md" />
+          <Skeleton height={80} radius="md" />
+          <Skeleton height={80} radius="md" />
+        </Stack>
+      </Container>
+    )
   }
 
   return (
-    <PageLayout title="Credit Cards" subtitle="Manage your credit cards">
-      <EntityList
-        items={creditCards}
-        emptyIcon={CreditCard}
-        emptyTitle="No Credit Cards Added"
-        emptyDescription="Add your first credit card"
-        renderItem={(card, index) => (
-          <CreditCardCard
-            key={card.id}
-            creditCard={card}
-            onClick={() => setEditingCard(card)}
-            isFirst={index === 0}
-            isLast={index === creditCards.length - 1}
-          />
+    <Container size="lg" py="md" px="md" pb={96}>
+      <Stack gap="md">
+        <Group justify="space-between" align="flex-start">
+          <div>
+            <Title order={1} size="h2">Credit Cards</Title>
+            <Text c="dimmed" size="sm">Manage your credit cards</Text>
+          </div>
+        </Group>
+
+        {creditCards.length === 0 ? (
+          <Stack align="center" gap="md" py="xl" style={{ textAlign: 'center' }}>
+            <CreditCard size={64} style={{ opacity: 0.3 }} />
+            <Title order={3} size="h4">No Credit Cards Added</Title>
+            <Text c="dimmed">Add your first credit card</Text>
+          </Stack>
+        ) : (
+          <Paper withBorder radius="md">
+            <Stack gap={0}>
+              {creditCards.map((card, index) => (
+                <CreditCardCard
+                  key={card.id}
+                  creditCard={card}
+                  onClick={() => setEditingCard(card)}
+                  isFirst={index === 0}
+                  isLast={index === creditCards.length - 1}
+                />
+              ))}
+            </Stack>
+          </Paper>
         )}
-      />
+      </Stack>
 
-      <FloatingActionButton 
-        icon={Plus} 
-        label="Add Credit Card"
+      <ActionIcon
         onClick={() => setIsCreateModalOpen(true)}
-        className="fixed bottom-20 right-4"
-      />
+        size="xl"
+        radius="xl"
+        variant="filled"
+        color="blue"
+        aria-label="Add Credit Card"
+        style={{
+          position: 'fixed',
+          bottom: '5rem',
+          right: '1rem',
+          width: '56px',
+          height: '56px',
+          zIndex: 100,
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+        }}
+      >
+        <Plus size={24} />
+      </ActionIcon>
 
-      {/* Create Modal */}
       <Modal
-        isOpen={isCreateModalOpen}
+        opened={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         title="Add Credit Card"
+        centered
+        size="md"
       >
         <CreditCardForm
           onSubmit={handleCreate}
@@ -76,14 +114,15 @@ export default function CreditCardsPage() {
         />
       </Modal>
 
-      {/* Edit Modal */}
       <Modal
-        isOpen={!!editingCard}
+        opened={!!editingCard}
         onClose={() => setEditingCard(null)}
         title="Edit Credit Card"
+        centered
+        size="md"
       >
         {editingCard && (
-          <div className="space-y-4">
+          <Stack gap="md">
             <CreditCardForm
               initialData={{
                 ...editingCard,
@@ -93,15 +132,17 @@ export default function CreditCardsPage() {
               onSubmit={handleUpdate}
               onCancel={() => setEditingCard(null)}
             />
-            <button
+            <Button
               onClick={handleDelete}
-              className="w-full py-3 text-ios-red font-semibold hover:bg-ios-red/10 rounded-ios transition-colors"
+              color="red"
+              variant="light"
+              fullWidth
             >
               Delete Credit Card
-            </button>
-          </div>
+            </Button>
+          </Stack>
         )}
       </Modal>
-    </PageLayout>
+    </Container>
   )
 }

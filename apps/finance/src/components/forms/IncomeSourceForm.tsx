@@ -1,14 +1,11 @@
 'use client'
 
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { Input, CurrencySelect, Textarea } from '@repo/ui'
-import { FormActions } from '@repo/ui'
-
+import { useForm } from '@mantine/form'
+import { zodResolver } from 'mantine-form-zod-resolver'
+import { TextInput, Textarea, Select, Group, Button, Alert, Stack } from '@mantine/core'
 import { CURRENCY_OPTIONS } from '../../utils/currencies'
 import { useFormState } from '../../hooks/use-form-state'
 import { createIncomeSourceSchema, type CreateIncomeSourceSchema } from '../../features/accounts/income/validation'
-import { emptyStringToUndefined } from '@/utils/form'
 
 interface IncomeSourceFormProps {
   initialData?: Partial<CreateIncomeSourceSchema>
@@ -20,17 +17,13 @@ interface IncomeSourceFormProps {
  * Form for creating/editing income sources
  */
 export function IncomeSourceForm({ initialData, onSubmit, onCancel }: IncomeSourceFormProps) {
-  const { submitError, handleSubmit: handleFormSubmit } = useFormState({
+  const { submitError, handleSubmit: handleFormSubmit, isSubmitting } = useFormState({
     onSubmit,
   })
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm<CreateIncomeSourceSchema>({
-    resolver: zodResolver(createIncomeSourceSchema),
-    defaultValues: {
+  const form = useForm<CreateIncomeSourceSchema>({
+    validate: zodResolver(createIncomeSourceSchema),
+    initialValues: {
       name: initialData?.name || '',
       description: initialData?.description || '',
       currency: initialData?.currency || 'EGP',
@@ -44,39 +37,44 @@ export function IncomeSourceForm({ initialData, onSubmit, onCancel }: IncomeSour
   }
 
   return (
-    <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
-      <Input
-        label="Name"
-        {...register('name')}
-        placeholder="e.g., Salary, Freelance"
-        error={errors.name?.message}
-        required
-      />
+    <form onSubmit={form.onSubmit(onFormSubmit)}>
+      <Stack gap="md">
+        <TextInput
+          label="Name"
+          placeholder="e.g., Salary, Freelance"
+          required
+          {...form.getInputProps('name')}
+        />
 
-      <Textarea
-        label="Description (Optional)"
-        {...register('description')}
-        placeholder="Add notes about this income source..."
-        rows={3}
-      />
+        <Textarea
+          label="Description (Optional)"
+          placeholder="Add notes about this income source..."
+          rows={3}
+          {...form.getInputProps('description')}
+        />
 
-      <CurrencySelect
-        {...register('currency', { setValueAs: emptyStringToUndefined })}
-        currencies={CURRENCY_OPTIONS}
-        error={errors.currency?.message}
-        required
-      />
+        <Select
+          label="Currency"
+          data={CURRENCY_OPTIONS}
+          required
+          {...form.getInputProps('currency')}
+        />
 
-      {submitError && (
-        <p className="text-ios-footnote text-ios-red">{submitError}</p>
-      )}
+        {submitError && (
+          <Alert color="red" title="Error">
+            {submitError}
+          </Alert>
+        )}
 
-      <FormActions
-        onCancel={onCancel}
-        isSubmitting={isSubmitting}
-        submitLabel={initialData ? 'Update' : 'Create'}
-      />
+        <Group justify="flex-end">
+          <Button variant="default" onClick={onCancel}>
+            Cancel
+          </Button>
+          <Button type="submit" loading={isSubmitting}>
+            {initialData ? 'Update' : 'Create'}
+          </Button>
+        </Group>
+      </Stack>
     </form>
   )
 }
-

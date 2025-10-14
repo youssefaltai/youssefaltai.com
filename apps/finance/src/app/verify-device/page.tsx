@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useRegisterPasskey } from 'next-passkey-webauthn/client'
-import { Button, Card } from '@repo/ui'
+import { Button, Paper, Container, Title, Text, Alert, Stack } from '@mantine/core'
 
 const endpoints = {
   registerStart: '/api/passkey/register/start',
@@ -76,73 +76,68 @@ function VerifyDeviceContent() {
 
   if (status === 'loading') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-ios-gray-6 px-4">
-        <Card padding="lg">
-          <p className="text-ios-body text-ios-gray-1">Verifying...</p>
-        </Card>
-      </div>
+      <Container size="xs" py="xl" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center' }}>
+        <Paper p="xl" withBorder style={{ width: '100%' }}>
+          <Text c="dimmed">Verifying...</Text>
+        </Paper>
+      </Container>
     )
   }
 
   if (status === 'error') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-ios-gray-6 px-4">
-        <div className="max-w-md w-full">
-          <Card padding="lg">
-            <h2 className="text-ios-title-3 font-bold text-ios-label-primary mb-4">
-              Verification Failed
-            </h2>
-            <p className="text-ios-body text-ios-red mb-4">{error}</p>
-            <Button onClick={() => router.push('/login')} className="w-full">
+      <Container size="xs" py="xl" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center' }}>
+        <Paper p="xl" withBorder style={{ width: '100%' }}>
+          <Stack gap="md">
+            <Title order={3}>Verification Failed</Title>
+            <Text c="red">{error}</Text>
+            <Button onClick={() => router.push('/login')} fullWidth>
               Back to Login
             </Button>
-          </Card>
-        </div>
-      </div>
+          </Stack>
+        </Paper>
+      </Container>
     )
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-ios-gray-6 px-4">
-      <div className="max-w-md w-full">
-        <Card padding="lg">
-          <h2 className="text-ios-title-3 font-bold text-ios-label-primary mb-4">
-            Register This Device
-          </h2>
-          <p className="text-ios-body text-ios-gray-1 mb-6">
+    <Container size="xs" py="xl" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center' }}>
+      <Paper p="xl" withBorder style={{ width: '100%' }}>
+        <Stack gap="md">
+          <Title order={3}>Register This Device</Title>
+          <Text c="dimmed">
             Your email has been verified. Now register this device with biometrics.
-          </p>
+          </Text>
           
           {error && (
-            <div className="bg-ios-red/10 border border-ios-red text-ios-red px-4 py-3 rounded-ios text-ios-callout mb-4">
+            <Alert color="red" title="Error">
               {error}
-            </div>
+            </Alert>
           )}
           
           <Button 
             onClick={handleRegisterDevice} 
-            disabled={registerLoading}
-            className="w-full"
+            loading={registerLoading}
+            fullWidth
           >
-            {registerLoading ? '...' : '🔒 Register with Face ID / Touch ID'}
+            🔒 Register with Face ID / Touch ID
           </Button>
-        </Card>
-      </div>
-    </div>
+        </Stack>
+      </Paper>
+    </Container>
   )
 }
 
 export default function VerifyDevicePage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-ios-gray-6 px-4">
-        <Card padding="lg">
-          <p className="text-ios-body text-ios-gray-1">Loading...</p>
-        </Card>
-      </div>
+      <Container size="xs" py="xl" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center' }}>
+        <Paper p="xl" withBorder style={{ width: '100%' }}>
+          <Text c="dimmed">Loading...</Text>
+        </Paper>
+      </Container>
     }>
       <VerifyDeviceContent />
     </Suspense>
   )
 }
-

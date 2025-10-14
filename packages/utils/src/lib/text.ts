@@ -16,7 +16,7 @@ export function getGreeting(): 'Morning' | 'Afternoon' | 'Evening' {
 /**
  * Get CSS color class for transaction type
  * @param type - Transaction type (income or expense)
- * @returns Tailwind color class
+ * @returns Mantine color class
  */
 export function getTransactionColorClass(type: 'income' | 'expense'): string {
   return type === 'income' ? 'text-ios-green' : 'text-ios-red'

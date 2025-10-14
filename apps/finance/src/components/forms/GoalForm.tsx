@@ -1,14 +1,12 @@
 'use client'
 
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { Input, CurrencySelect, Textarea } from '@repo/ui'
-import { FormActions } from '@repo/ui'
+import { useForm } from '@mantine/form'
+import { zodResolver } from 'mantine-form-zod-resolver'
+import { TextInput, Textarea, Select, NumberInput, Group, Button, Alert, Stack } from '@mantine/core'
+import { DateInput } from '@mantine/dates'
 import { CURRENCY_OPTIONS } from '../../utils/currencies'
 import { useFormState } from '../../hooks/use-form-state'
 import { createGoalSchema, type CreateGoalSchema } from '../../features/accounts/goal/validation'
-import { emptyNumberToUndefined, emptyStringToUndefined } from '../../utils/form'
-import { parseISO, format } from '@repo/utils'
 
 interface GoalFormProps {
   initialData?: Partial<CreateGoalSchema>
@@ -20,22 +18,18 @@ interface GoalFormProps {
  * Form for creating/editing goals
  */
 export function GoalForm({ initialData, onSubmit, onCancel }: GoalFormProps) {
-  const { submitError, handleSubmit: handleFormSubmit } = useFormState({
+  const { submitError, handleSubmit: handleFormSubmit, isSubmitting } = useFormState({
     onSubmit,
   })
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm<CreateGoalSchema>({
-    resolver: zodResolver(createGoalSchema),
-    defaultValues: {
+  const form = useForm<CreateGoalSchema>({
+    validate: zodResolver(createGoalSchema),
+    initialValues: {
       name: initialData?.name || '',
       description: initialData?.description || '',
       currency: initialData?.currency || 'EGP',
       target: initialData?.target || 0,
-      dueDate: initialData?.dueDate ? format(parseISO(initialData.dueDate), 'yyyy-MM-dd') : format(new Date(), 'yyyy-MM-dd'),
+      dueDate: initialData?.dueDate || new Date().toISOString(),
       openingBalance: initialData?.openingBalance || 0,
       openingBalanceExchangeRate: initialData?.openingBalanceExchangeRate,
     },
@@ -46,70 +40,71 @@ export function GoalForm({ initialData, onSubmit, onCancel }: GoalFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
-      <Input
-        label="Goal Name"
-        {...register('name')}
-        placeholder="e.g., Emergency Fund, Vacation"
-        error={errors.name?.message}
-        required
-      />
-
-      <Textarea
-        label="Description (Optional)"
-        {...register('description')}
-        placeholder="What is this goal for?"
-        rows={3}
-      />
-
-      <CurrencySelect
-        {...register('currency', { setValueAs: emptyStringToUndefined })}
-        currencies={CURRENCY_OPTIONS}
-        error={errors.currency?.message}
-        required
-      />
-
-      {!initialData && (
-        <Input
-          type="number"
-          label="Current Amount (Optional)"
-          {...register('openingBalance', { setValueAs: emptyNumberToUndefined })}
-          error={errors.openingBalance?.message}
-          placeholder="0.00"
-          step="0.01"
-          min="0"
+    <form onSubmit={form.onSubmit(onFormSubmit)}>
+      <Stack gap="md">
+        <TextInput
+          label="Goal Name"
+          placeholder="e.g., Emergency Fund, Vacation"
+          required
+          {...form.getInputProps('name')}
         />
-      )}
 
-      <Input
-        type="number"
-        label="Target Amount"
-        {...register('target', { setValueAs: emptyNumberToUndefined })}
-        error={errors.target?.message}
-        placeholder="0.00"
-        step="0.01"
-        min="0"
-        required
-      />
+        <Textarea
+          label="Description (Optional)"
+          placeholder="What is this goal for?"
+          rows={3}
+          {...form.getInputProps('description')}
+        />
 
-      <Input
-        type="date"
-        label="Due Date"
-        {...register('dueDate', { setValueAs: (v) => v ? parseISO(v + 'T12:00:00').toISOString() : new Date().toISOString() })}
-        error={errors.dueDate?.message}
-        required
-      />
+        <Select
+          label="Currency"
+          data={CURRENCY_OPTIONS}
+          required
+          {...form.getInputProps('currency')}
+        />
 
-      {submitError && (
-        <p className="text-ios-footnote text-ios-red">{submitError}</p>
-      )}
+        {!initialData && (
+          <NumberInput
+            label="Current Amount (Optional)"
+            placeholder="0.00"
+            decimalScale={2}
+            min={0}
+            {...form.getInputProps('openingBalance')}
+          />
+        )}
 
-      <FormActions
-        onCancel={onCancel}
-        isSubmitting={isSubmitting}
-        submitLabel={initialData ? 'Update' : 'Create'}
-      />
+        <NumberInput
+          label="Target Amount"
+          placeholder="0.00"
+          required
+          decimalScale={2}
+          min={0}
+          {...form.getInputProps('target')}
+        />
+
+        <DateInput
+          label="Due Date"
+          placeholder="Select date"
+          required
+          value={form.values.dueDate ? new Date(form.values.dueDate) : new Date()}
+          onChange={(value) => form.setFieldValue('dueDate', value ? new Date(value).toISOString() : new Date().toISOString())}
+        />
+
+        {submitError && (
+          <Alert color="red" title="Error">
+            {submitError}
+          </Alert>
+        )}
+
+        <Group justify="flex-end">
+          <Button variant="default" onClick={onCancel}>
+            Cancel
+          </Button>
+          <Button type="submit" loading={isSubmitting}>
+            {initialData ? 'Update' : 'Create'}
+          </Button>
+        </Group>
+      </Stack>
     </form>
   )
 }
-

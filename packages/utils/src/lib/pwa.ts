@@ -5,8 +5,8 @@ export interface PWAManifestConfig {
   name: string
   shortName: string
   description: string
-  themeColor?: string
-  backgroundColor?: string
+  themeColor: string
+  backgroundColor: string
 }
 
 /**
@@ -30,6 +30,18 @@ export interface PWAManifest {
 }
 
 /**
+ * PWA Viewport structure
+ * Compatible with Next.js Viewport
+ */
+export interface PWAViewport {
+  viewportFit: "cover" | "contain" | "auto" | undefined;
+  width: string
+  initialScale: number
+  maximumScale: number
+  themeColor: string
+}
+
+/**
  * Create a PWA manifest with consistent defaults
  * Follows Apple HIG and PWA best practices
  * 
@@ -42,9 +54,9 @@ export function createManifest(config: PWAManifestConfig): PWAManifest {
     short_name: config.shortName,
     description: config.description,
     start_url: '/',
-    display: 'fullscreen',
-    background_color: config.backgroundColor || '#ffffff',
-    theme_color: config.themeColor || '#007AFF',
+    display: 'standalone',
+    background_color: config.backgroundColor,
+    theme_color: config.themeColor,
     icons: [
       {
         src: '/icon-192.png',
@@ -62,3 +74,12 @@ export function createManifest(config: PWAManifestConfig): PWAManifest {
   }
 }
 
+export function createViewport(): PWAViewport {
+  return {
+    viewportFit: "cover",
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
+    themeColor: "#F2F2F7",
+  }
+}

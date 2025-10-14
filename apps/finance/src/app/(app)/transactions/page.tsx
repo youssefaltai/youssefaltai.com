@@ -1,18 +1,18 @@
 'use client'
 
 import { useState } from 'react'
-import { FloatingActionButton, EmptyState, Modal, Plus, CreditCard, SlidersHorizontal, PageLayout, GroupedList, LoadingSkeleton } from '@repo/ui'
+import { Plus, CreditCard, SlidersHorizontal } from 'lucide-react'
+import { Container, Stack, ActionIcon, Modal, Title, Text, Group, Paper, Skeleton, Button } from '@mantine/core'
 import { useTransactions, useCreateTransaction, useUpdateTransaction, useDeleteTransaction } from '../../../hooks/use-transactions'
 import { TransactionFilters } from '../../../components/transactions/TransactionFilters'
 import { TransactionItem } from '../../../components/transactions/TransactionItem'
 import { TransactionForm } from '../../../components/forms/TransactionForm'
-import { cn } from '@repo/utils'
 import { formatDistanceToNow, isToday, isYesterday, startOfMonth, endOfMonth, isSameMonth, parseISO } from '@repo/utils'
 import { ensureDate } from '@repo/utils'
 import type { TTransaction } from '@repo/db'
 import type { CreateTransactionSchema, UpdateTransactionSchema } from '../../../features/transactions/validation'
 
-interface TransactionFilters {
+interface TransactionFiltersType {
   dateFrom?: string
   dateTo?: string
   fromAccountIds?: string[]
@@ -33,7 +33,7 @@ export default function TransactionsPage() {
   const defaultStart = startOfMonth(now).toISOString()
   const defaultEnd = endOfMonth(now).toISOString()
 
-  const [filters, setFilters] = useState<TransactionFilters>({
+  const [filters, setFilters] = useState<TransactionFiltersType>({
     dateFrom: defaultStart,
     dateTo: defaultEnd,
   })
@@ -97,100 +97,124 @@ export default function TransactionsPage() {
       !isSameMonth(parseISO(filters.dateFrom), now))
 
   if (isLoading) {
-    return <LoadingSkeleton title="Transactions" subtitle="View and manage your transactions" itemHeight={24} />
+    return (
+      <Container size="lg" py="md" px="md" pb={96}>
+        <Stack gap="md">
+          <Skeleton height={80} radius="md" />
+          <Skeleton height={80} radius="md" />
+          <Skeleton height={80} radius="md" />
+        </Stack>
+      </Container>
+    )
   }
 
   return (
-    <PageLayout
-      title="Transactions"
-      subtitle="View and manage your transactions"
-      headerAction={
-        <button
-          onClick={() => setIsFiltersModalOpen(true)}
-          className={cn(
-            'flex items-center gap-2 px-4 py-2 rounded-ios font-semibold text-ios-callout transition-all active:scale-95',
-            hasActiveFilters
-              ? 'bg-ios-blue text-white shadow-ios'
-              : 'bg-white text-ios-label-primary border border-ios-gray-5'
-          )}
-        >
-          <SlidersHorizontal className="w-4 h-4" />
-          {hasActiveFilters ? `${transactions.length}` : 'Filter'}
-        </button>
-      }
-    >
-      {/* Transaction List */}
-      {transactions.length === 0 ? (
-        <div className="pt-16">
-          <EmptyState
-            icon={CreditCard}
-            title="No Transactions Yet"
-            description="Add your first transaction!"
-          />
-        </div>
-      ) : (
-        <div className="space-y-6">
-          {Object.entries(groupedTransactions).map(([date, groupTransactions]) => (
-            <div key={date}>
-              {/* Date Header */}
-              <h3 className="text-ios-footnote text-ios-gray-1 uppercase tracking-wide mb-2 px-2">
-                {date}
-              </h3>
-
-              {/* Transactions for this date */}
-              <GroupedList>
-                {groupTransactions.map((transaction, index) => (
-                  <TransactionItem
-                    key={transaction.id}
-                    transaction={transaction}
-                    onClick={() => setEditingTransaction(transaction)}
-                    isFirst={index === 0}
-                    isLast={index === groupTransactions.length - 1}
-                  />
-                ))}
-              </GroupedList>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Pagination Controls */}
-      {pagination && pagination.pages > 1 && (
-        <div className="flex items-center justify-between mt-6 px-2">
-          <button
-            onClick={() => setFilters({ ...filters, page: Math.max(1, (filters.page || 1) - 1) })}
-            disabled={!pagination.hasMore || (filters.page || 1) === 1}
-            className="px-4 py-2 text-ios-blue font-semibold disabled:text-ios-gray-2 disabled:cursor-not-allowed"
+    <Container size="lg" py="md" px="md" pb={96}>
+      <Stack gap="md">
+        <Group justify="space-between" align="flex-start">
+          <div>
+            <Title order={1} size="h2">Transactions</Title>
+            <Text c="dimmed" size="sm">View and manage your transactions</Text>
+          </div>
+          <Button
+            onClick={() => setIsFiltersModalOpen(true)}
+            variant={hasActiveFilters ? 'filled' : 'default'}
+            leftSection={<SlidersHorizontal size={16} />}
           >
-            Previous
-          </button>
-          
-          <span className="text-ios-body text-ios-gray-1">
-            Page {pagination.page} of {pagination.pages}
-          </span>
-          
-          <button
-            onClick={() => setFilters({ ...filters, page: (filters.page || 1) + 1 })}
-            disabled={!pagination.hasMore}
-            className="px-4 py-2 text-ios-blue font-semibold disabled:text-ios-gray-2 disabled:cursor-not-allowed"
-          >
-            Next
-          </button>
-        </div>
-      )}
+            {hasActiveFilters ? `${transactions.length}` : 'Filter'}
+          </Button>
+        </Group>
 
-      <FloatingActionButton
-        icon={Plus}
-        label="Add Transaction"
+        {transactions.length === 0 ? (
+          <Stack align="center" gap="md" py="xl" style={{ textAlign: 'center', paddingTop: '4rem' }}>
+            <CreditCard size={64} style={{ opacity: 0.3 }} />
+            <Title order={3} size="h4">No Transactions Yet</Title>
+            <Text c="dimmed">Add your first transaction!</Text>
+          </Stack>
+        ) : (
+          <Stack gap="xl">
+            {Object.entries(groupedTransactions).map(([date, groupTransactions]) => (
+              <div key={date}>
+                <Text
+                  size="xs"
+                  c="dimmed"
+                  tt="uppercase"
+                  fw={600}
+                  mb="xs"
+                  px="xs"
+                >
+                  {date}
+                </Text>
+                <Paper withBorder radius="md">
+                  <Stack gap={0}>
+                    {groupTransactions.map((transaction, index) => (
+                      <TransactionItem
+                        key={transaction.id}
+                        transaction={transaction}
+                        onClick={() => setEditingTransaction(transaction)}
+                        isFirst={index === 0}
+                        isLast={index === groupTransactions.length - 1}
+                      />
+                    ))}
+                  </Stack>
+                </Paper>
+              </div>
+            ))}
+          </Stack>
+        )}
+
+        {/* Pagination Controls */}
+        {pagination && pagination.pages > 1 && (
+          <Group justify="space-between" mt="lg" px="xs">
+            <Button
+              onClick={() => setFilters({ ...filters, page: Math.max(1, (filters.page || 1) - 1) })}
+              disabled={!pagination.hasMore || (filters.page || 1) === 1}
+              variant="default"
+            >
+              Previous
+            </Button>
+            
+            <Text size="sm" c="dimmed">
+              Page {pagination.page} of {pagination.pages}
+            </Text>
+            
+            <Button
+              onClick={() => setFilters({ ...filters, page: (filters.page || 1) + 1 })}
+              disabled={!pagination.hasMore}
+              variant="default"
+            >
+              Next
+            </Button>
+          </Group>
+        )}
+      </Stack>
+
+      <ActionIcon
         onClick={() => setIsCreateModalOpen(true)}
-        className="fixed bottom-20 right-4"
-      />
+        size="xl"
+        radius="xl"
+        variant="filled"
+        color="blue"
+        aria-label="Add Transaction"
+        style={{
+          position: 'fixed',
+          bottom: '5rem',
+          right: '1rem',
+          width: '56px',
+          height: '56px',
+          zIndex: 100,
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+        }}
+      >
+        <Plus size={24} />
+      </ActionIcon>
 
-      {/* Filters Modal */}
       <Modal
-        isOpen={isFiltersModalOpen}
+        opened={isFiltersModalOpen}
         onClose={() => setIsFiltersModalOpen(false)}
         title="Filter Transactions"
+        centered
+        size="md"
       >
         <TransactionFilters
           filters={filters}
@@ -202,11 +226,12 @@ export default function TransactionsPage() {
         />
       </Modal>
 
-      {/* Create Modal */}
       <Modal
-        isOpen={isCreateModalOpen}
+        opened={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         title="Add Transaction"
+        centered
+        size="md"
       >
         <TransactionForm
           onSubmit={handleCreate}
@@ -214,14 +239,15 @@ export default function TransactionsPage() {
         />
       </Modal>
 
-      {/* Edit Modal */}
       <Modal
-        isOpen={!!editingTransaction}
+        opened={!!editingTransaction}
         onClose={() => setEditingTransaction(null)}
         title="Edit Transaction"
+        centered
+        size="md"
       >
         {editingTransaction && (
-          <div className="space-y-4">
+          <Stack gap="md">
             <TransactionForm
               initialData={{
                 description: editingTransaction.description || undefined,
@@ -235,15 +261,17 @@ export default function TransactionsPage() {
               onSubmit={handleUpdate}
               onCancel={() => setEditingTransaction(null)}
             />
-            <button
+            <Button
               onClick={handleDelete}
-              className="w-full py-3 text-ios-red font-semibold hover:bg-ios-red/10 rounded-ios transition-colors"
+              color="red"
+              variant="light"
+              fullWidth
             >
               Delete Transaction
-            </button>
-          </div>
+            </Button>
+          </Stack>
         )}
       </Modal>
-    </PageLayout>
+    </Container>
   )
 }

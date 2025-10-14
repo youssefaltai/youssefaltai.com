@@ -1,13 +1,11 @@
 'use client'
 
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { Input, CurrencySelect, Textarea } from '@repo/ui'
-import { FormActions } from '@repo/ui'
+import { useForm } from '@mantine/form'
+import { zodResolver } from 'mantine-form-zod-resolver'
+import { TextInput, Textarea, Select, NumberInput, Group, Button, Alert, Stack } from '@mantine/core'
 import { CURRENCY_OPTIONS } from '../../utils/currencies'
 import { useFormState } from '../../hooks/use-form-state'
 import { createCreditCardSchema, type CreateCreditCardSchema } from '../../features/accounts/credit-card/validation'
-import { emptyNumberToUndefined, emptyStringToUndefined } from '../../utils/form'
 
 interface CreditCardFormProps {
   initialData?: Partial<CreateCreditCardSchema>
@@ -19,17 +17,13 @@ interface CreditCardFormProps {
  * Form for creating/editing credit cards
  */
 export function CreditCardForm({ initialData, onSubmit, onCancel }: CreditCardFormProps) {
-  const { submitError, handleSubmit: handleFormSubmit } = useFormState({
+  const { submitError, handleSubmit: handleFormSubmit, isSubmitting } = useFormState({
     onSubmit,
   })
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm<CreateCreditCardSchema>({
-    resolver: zodResolver(createCreditCardSchema),
-    defaultValues: {
+  const form = useForm<CreateCreditCardSchema>({
+    validate: zodResolver(createCreditCardSchema),
+    initialValues: {
       name: initialData?.name || '',
       description: initialData?.description || '',
       currency: initialData?.currency || 'EGP',
@@ -38,54 +32,57 @@ export function CreditCardForm({ initialData, onSubmit, onCancel }: CreditCardFo
     },
   })
 
-
   const onFormSubmit = async (data: CreateCreditCardSchema) => {
     await handleFormSubmit(data, 'Failed to save credit card')
   }
 
   return (
-    <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
-      <Input
-        label="Card Name"
-        {...register('name')}
-        placeholder="e.g., Visa Gold, Mastercard"
-        error={errors.name?.message}
-        required
-      />
+    <form onSubmit={form.onSubmit(onFormSubmit)}>
+      <Stack gap="md">
+        <TextInput
+          label="Card Name"
+          placeholder="e.g., Visa Gold, Mastercard"
+          required
+          {...form.getInputProps('name')}
+        />
 
-      <Textarea
-        label="Description (Optional)"
-        {...register('description')}
-        placeholder="Add notes about this card..."
-        rows={3}
-      />
+        <Textarea
+          label="Description (Optional)"
+          placeholder="Add notes about this card..."
+          rows={3}
+          {...form.getInputProps('description')}
+        />
 
-      <CurrencySelect
-        {...register('currency', { setValueAs: emptyStringToUndefined })}
-        currencies={CURRENCY_OPTIONS}
-        error={errors.currency?.message}
-        required
-      />
+        <Select
+          label="Currency"
+          data={CURRENCY_OPTIONS}
+          required
+          {...form.getInputProps('currency')}
+        />
 
-      <Input
-        type="number"
-        label="Opening Balance"
-        {...register('openingBalance', { setValueAs: emptyNumberToUndefined })}
-        placeholder="0.00"
-        error={errors.openingBalance?.message}
-        required
-      />
+        <NumberInput
+          label="Opening Balance"
+          placeholder="0.00"
+          required
+          decimalScale={2}
+          {...form.getInputProps('openingBalance')}
+        />
 
-      {submitError && (
-        <p className="text-ios-footnote text-ios-red">{submitError}</p>
-      )}
+        {submitError && (
+          <Alert color="red" title="Error">
+            {submitError}
+          </Alert>
+        )}
 
-      <FormActions
-        onCancel={onCancel}
-        isSubmitting={isSubmitting}
-        submitLabel={initialData ? 'Update' : 'Create'}
-      />
+        <Group justify="flex-end">
+          <Button variant="default" onClick={onCancel}>
+            Cancel
+          </Button>
+          <Button type="submit" loading={isSubmitting}>
+            {initialData ? 'Update' : 'Create'}
+          </Button>
+        </Group>
+      </Stack>
     </form>
   )
 }
-

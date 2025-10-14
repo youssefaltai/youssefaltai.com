@@ -1,14 +1,12 @@
 'use client'
 
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { Input, CurrencySelect, Textarea } from '@repo/ui'
-import { FormActions } from '@repo/ui'
+import { useForm } from '@mantine/form'
+import { zodResolver } from 'mantine-form-zod-resolver'
+import { TextInput, Textarea, Select, NumberInput, Group, Button, Alert, Stack } from '@mantine/core'
+import { DateInput } from '@mantine/dates'
 import { CURRENCY_OPTIONS } from '../../utils/currencies'
 import { useFormState } from '../../hooks/use-form-state'
 import { createLoanSchema, type CreateLoanSchema } from '../../features/accounts/loan/validation'
-import { emptyNumberToUndefined, emptyStringToUndefined } from '../../utils/form'
-import { parseISO, format } from '@repo/utils'
 
 interface LoanFormProps {
   initialData?: Partial<CreateLoanSchema>
@@ -20,21 +18,17 @@ interface LoanFormProps {
  * Form for creating/editing loans
  */
 export function LoanForm({ initialData, onSubmit, onCancel }: LoanFormProps) {
-  const { submitError, handleSubmit: handleFormSubmit } = useFormState({
+  const { submitError, handleSubmit: handleFormSubmit, isSubmitting } = useFormState({
     onSubmit,
   })
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm<CreateLoanSchema>({
-    resolver: zodResolver(createLoanSchema),
-    defaultValues: {
+  const form = useForm<CreateLoanSchema>({
+    validate: zodResolver(createLoanSchema),
+    initialValues: {
       name: initialData?.name || '',
       description: initialData?.description || '',
       currency: initialData?.currency || 'EGP',
-      dueDate: initialData?.dueDate ? format(parseISO(initialData.dueDate), 'yyyy-MM-dd') : format(new Date(), 'yyyy-MM-dd'),
+      dueDate: initialData?.dueDate || new Date().toISOString(),
       openingBalance: initialData?.openingBalance || 0,
       openingBalanceExchangeRate: initialData?.openingBalanceExchangeRate,
     },
@@ -45,58 +39,61 @@ export function LoanForm({ initialData, onSubmit, onCancel }: LoanFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
-      <Input
-        label="Loan Name"
-        {...register('name')}
-        placeholder="e.g., Car Loan, Personal Loan"
-        error={errors.name?.message}
-        required
-      />
+    <form onSubmit={form.onSubmit(onFormSubmit)}>
+      <Stack gap="md">
+        <TextInput
+          label="Loan Name"
+          placeholder="e.g., Car Loan, Personal Loan"
+          required
+          {...form.getInputProps('name')}
+        />
 
-      <Textarea
-        label="Description (Optional)"
-        {...register('description')}
-        placeholder="Add notes about this loan..."
-        rows={3}
-      />
+        <Textarea
+          label="Description (Optional)"
+          placeholder="Add notes about this loan..."
+          rows={3}
+          {...form.getInputProps('description')}
+        />
 
-      <CurrencySelect
-        {...register('currency', { setValueAs: emptyStringToUndefined })}
-        currencies={CURRENCY_OPTIONS}
-        error={errors.currency?.message}
-        required
-      />
+        <Select
+          label="Currency"
+          data={CURRENCY_OPTIONS}
+          required
+          {...form.getInputProps('currency')}
+        />
 
-      <Input
-        type="number"
-        label="Amount Owed"
-        {...register('openingBalance', { setValueAs: emptyNumberToUndefined })}
-        error={errors.openingBalance?.message}
-        placeholder="0.00"
-        step="0.01"
-        min="0"
-        required
-      />
+        <NumberInput
+          label="Amount Owed"
+          placeholder="0.00"
+          required
+          decimalScale={2}
+          min={0}
+          {...form.getInputProps('openingBalance')}
+        />
 
-      <Input
-        type="date"
-        label="Due Date"
-        {...register('dueDate', { setValueAs: (v) => v ? parseISO(v + 'T12:00:00').toISOString() : new Date().toISOString() })}
-        error={errors.dueDate?.message}
-        required
-      />
+        <DateInput
+          label="Due Date"
+          placeholder="Select date"
+          required
+          value={form.values.dueDate ? new Date(form.values.dueDate) : new Date()}
+          onChange={(value) => form.setFieldValue('dueDate', value ? new Date(value).toISOString() : new Date().toISOString())}
+        />
 
-      {submitError && (
-        <p className="text-ios-footnote text-ios-red">{submitError}</p>
-      )}
+        {submitError && (
+          <Alert color="red" title="Error">
+            {submitError}
+          </Alert>
+        )}
 
-      <FormActions
-        onCancel={onCancel}
-        isSubmitting={isSubmitting}
-        submitLabel={initialData ? 'Update' : 'Create'}
-      />
+        <Group justify="flex-end">
+          <Button variant="default" onClick={onCancel}>
+            Cancel
+          </Button>
+          <Button type="submit" loading={isSubmitting}>
+            {initialData ? 'Update' : 'Create'}
+          </Button>
+        </Group>
+      </Stack>
     </form>
   )
 }
-

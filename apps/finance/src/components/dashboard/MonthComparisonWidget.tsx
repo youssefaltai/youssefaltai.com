@@ -1,10 +1,11 @@
 'use client'
 
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
-import { DashboardWidget, WidgetStat } from './DashboardWidget'
+import { BarChart } from '@mantine/charts'
+import { TrendingUp, TrendingDown } from 'lucide-react'
+import { SimpleGrid, Stack, Paper, Title, Text, Group, Skeleton } from '@mantine/core'
+import { WidgetStat } from './WidgetStat'
 import { useMonthComparison } from '../../hooks/use-dashboard-analytics'
 import { formatNumberCompact } from '@repo/utils'
-import { TrendingUp, TrendingDown, Money } from '@repo/ui'
 
 interface MonthComparisonWidgetProps {
   selectedMonth?: string
@@ -19,34 +20,11 @@ export function MonthComparisonWidget({ selectedMonth }: MonthComparisonWidgetPr
 
   // Format data for chart - use the 6 months data
   const chartData = comparison?.months.map((month) => ({
-    name: month.month,
+    month: month.month,
     Income: month.income,
     Expenses: month.expenses,
     Savings: month.savings,
   })) || []
-
-  // Custom tooltip
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const CustomTooltip = ({ active, payload }: any) => {
-    if (!active || !payload || !payload.length) return null
-
-    return (
-      <div className="bg-white border border-ios-gray-5 rounded-ios shadow-ios-lg p-3">
-        <p className="text-ios-body font-semibold text-ios-label-primary mb-2">
-          {payload[0].payload.name}
-        </p>
-        {payload.map((entry: { name: string; value: number; color: string }, index: number) => (
-          <p
-            key={`tooltip-${index}`}
-            className="text-ios-callout text-ios-gray-1"
-            style={{ color: entry.color }}
-          >
-            {entry.name}: {<Money amount={entry.value} currency='EGP' />}
-          </p>
-        ))}
-      </div>
-    )
-  }
 
   const formatChange = (change: number) => {
     const sign = change >= 0 ? '+' : ''
@@ -54,75 +32,75 @@ export function MonthComparisonWidget({ selectedMonth }: MonthComparisonWidgetPr
   }
 
   return (
-    <DashboardWidget
-      title="Month Comparison"
-      subtitle="Income, expenses, and savings over time"
-      loading={isLoading}
-      error={error instanceof Error ? error.message : null}
-      isEmpty={!comparison}
-      emptyMessage="Not enough data to display"
-    >
-      {comparison && (
-        <div className="space-y-4">
-          {/* Chart - Always visible */}
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#E5E5EA" />
-              <XAxis
-                dataKey="name"
-                stroke="#8E8E93"
-                style={{ fontSize: '11px' }}
-                tickLine={false}
-                axisLine={{ stroke: '#E5E5EA' }}
-              />
-              <YAxis
-                stroke="#8E8E93"
-                style={{ fontSize: '12px' }}
-                tickLine={false}
-                axisLine={{ stroke: '#E5E5EA' }}
-                tickFormatter={formatNumberCompact}
-              />
-              <Tooltip content={<CustomTooltip />} />
-              <Legend
-                wrapperStyle={{ fontSize: '12px' }}
-                iconType="circle"
-              />
-              <Bar dataKey="Income" fill="#34C759" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="Expenses" fill="#FF3B30" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="Savings" fill="#007AFF" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-
-          {/* Change indicators */}
-          <div className="grid grid-cols-1 gap-4 pt-4 border-t border-ios-gray-5">
-            <WidgetStat
-              label="Income"
-              value={comparison.thisMonth.income}
-              currency='EGP'
-              change={formatChange(comparison.change.income)}
-              changeType={comparison.change.income >= 0 ? 'positive' : 'negative'}
-              icon={comparison.change.income >= 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
-            />
-            <WidgetStat
-              label="Expenses"
-              value={comparison.thisMonth.expenses}
-              currency='EGP'
-              change={formatChange(comparison.change.expenses)}
-              changeType={comparison.change.expenses >= 0 ? 'negative' : 'positive'}
-              icon={comparison.change.expenses >= 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
-            />
-            <WidgetStat
-              label="Savings"
-              value={comparison.thisMonth.savings}
-              currency='EGP'
-              change={formatChange(comparison.change.savings)}
-              changeType={comparison.change.savings >= 0 ? 'positive' : 'negative'}
-              icon={comparison.change.savings >= 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
-            />
-          </div>
+    <Paper withBorder shadow="sm">
+      <Group justify="space-between" p="md" style={{ borderBottom: '1px solid var(--mantine-color-gray-3)' }}>
+        <div>
+          <Title order={3} size="h4">Month Comparison</Title>
+          <Text size="xs" c="dimmed" mt={2}>Income, expenses, and savings over time</Text>
         </div>
-      )}
-    </DashboardWidget>
+      </Group>
+
+      <div style={{ padding: '1rem' }}>
+        {error ? (
+          <Text c="red" ta="center" py="xl">
+            {error instanceof Error ? error.message : 'Failed to load comparison'}
+          </Text>
+        ) : isLoading ? (
+          <Stack gap="sm">
+            <Skeleton height={16} />
+            <Skeleton height={16} width="75%" />
+            <Skeleton height={16} width="50%" />
+          </Stack>
+        ) : !comparison ? (
+          <Stack align="center" gap="sm" py="xl">
+            <Text c="dimmed">Not enough data to display</Text>
+          </Stack>
+        ) : (
+          <Stack gap="md">
+            {/* Chart */}
+            <BarChart
+              h={250}
+              data={chartData}
+              dataKey="month"
+              series={[
+                { name: 'Income', color: 'green.6' },
+                { name: 'Expenses', color: 'red.6' },
+                { name: 'Savings', color: 'blue.6' },
+              ]}
+              withLegend
+              valueFormatter={(value) => formatNumberCompact(value)}
+            />
+
+            {/* Change indicators */}
+            <SimpleGrid cols={1} spacing="md" style={{ paddingTop: '1rem', borderTop: '1px solid var(--mantine-color-gray-3)' }}>
+              <WidgetStat
+                label="Income"
+                value={comparison.thisMonth.income}
+                currency='EGP'
+                change={formatChange(comparison.change.income)}
+                changeType={comparison.change.income >= 0 ? 'positive' : 'negative'}
+                icon={comparison.change.income >= 0 ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
+              />
+              <WidgetStat
+                label="Expenses"
+                value={comparison.thisMonth.expenses}
+                currency='EGP'
+                change={formatChange(comparison.change.expenses)}
+                changeType={comparison.change.expenses >= 0 ? 'negative' : 'positive'}
+                icon={comparison.change.expenses >= 0 ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
+              />
+              <WidgetStat
+                label="Savings"
+                value={comparison.thisMonth.savings}
+                currency='EGP'
+                change={formatChange(comparison.change.savings)}
+                changeType={comparison.change.savings >= 0 ? 'positive' : 'negative'}
+                icon={comparison.change.savings >= 0 ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
+              />
+            </SimpleGrid>
+          </Stack>
+        )}
+      </div>
+    </Paper>
   )
 }
-

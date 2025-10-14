@@ -1,9 +1,6 @@
-// Shared utilities and helper functions
-export { cn } from './lib/cn'
-
 // PWA utilities
-export { createManifest } from './lib/pwa'
-export type { PWAManifestConfig, PWAManifest } from './lib/pwa'
+export { createManifest, createViewport } from './lib/pwa'
+export type { PWAManifestConfig, PWAManifest, PWAViewport } from './lib/pwa'
 
 // Date utilities - re-exports from date-fns
 export * from './lib/date'

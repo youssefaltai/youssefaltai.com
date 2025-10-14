@@ -32,6 +32,7 @@ export {
   getDate,
   getDaysInMonth,
   isValid,
+  parse,
 } from 'date-fns'
 
 /**

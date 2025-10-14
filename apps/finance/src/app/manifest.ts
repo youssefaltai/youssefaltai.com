@@ -6,6 +6,7 @@ export default function manifest() {
     shortName: 'Finance',
     description: 'Personal finance management application',
     themeColor: '#007AFF',
+    backgroundColor: '#F2F2F7',
   })
 }
 

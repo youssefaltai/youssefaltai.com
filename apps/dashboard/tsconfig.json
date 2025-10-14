@@ -3,7 +3,6 @@
   "compilerOptions": {
     "paths": {
       "@/*": ["./*"],
-      "@repo/ui": ["../../packages/ui/src"],
       "@repo/utils": ["../../packages/utils/src"],
       "@repo/auth": ["../../packages/auth/src"],
       "@repo/auth/webauthn-handlers": ["../../packages/auth/src/webauthn-handlers.ts"]
